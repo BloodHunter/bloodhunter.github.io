@@ -3,13 +3,25 @@
   
     
     <entry>
-      <title>Hello World</title>
-      <link href="/2018/12/15/hello-world/"/>
-      <url>/2018/12/15/hello-world/</url>
+      <title>Kafka—-入门介绍(1)</title>
+      <link href="/2018/12/16/kafka-ru-men-jie-shao-1/"/>
+      <url>/2018/12/16/kafka-ru-men-jie-shao-1/</url>
       
-        <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p><h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p><h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p><h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p><h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>]]></content>
+        <content type="html"><![CDATA[<h2 id="Kafka介绍"><a href="#Kafka介绍" class="headerlink" title="Kafka介绍"></a>Kafka介绍</h2><p>kafka是一个分布式的，基于发布/订阅的消息系统。简单的可以理解kafka是一个消息队列，可以往队列里面写入数据，也可以从队列里面取出数据进行处理。</p><h2 id="kafka关键概念"><a href="#kafka关键概念" class="headerlink" title="kafka关键概念"></a>kafka关键概念</h2><p>我以自来水厂的例子来解释kafka的相关概念，可能不够严谨，只为方便大家理解。</p><p>从前有一家自来水厂(producer)负责把水运输到不同的地方，以供当地的居民(consumer)使用。冬天大家用水较少，但是水厂又一直在送水，导致水浪费了；到了夏天大家用水多，自来水来不及生产，导致居民无水可用。因此需要一个蓄水池(broker),自来水厂将水运输到蓄水池中，居民从蓄水池取水使用。蓄水池通过一个管道(topic)将水运输到不同的小区中</p><h3 id="Topic"><a href="#Topic" class="headerlink" title="Topic"></a>Topic</h3><p>topic可以理解数据标签，kafka通过topic对数据进行分门别类，就好比上述例子中的管道，使得自来水可以流向不同的地方，而不导致水混在一起。</p><h3 id="Producer"><a href="#Producer" class="headerlink" title="Producer"></a>Producer</h3><p>生产者，数据的来源，就好比上述例子中自来水厂，水都是从自来水来的。</p><h3 id="Consumer"><a href="#Consumer" class="headerlink" title="Consumer"></a>Consumer</h3><p>消费者，数据的处理者，就好比上述例子中的居民，居民需要取水喝。</p><h3 id="Broker"><a href="#Broker" class="headerlink" title="Broker"></a>Broker</h3><p>数据保存的地方，多个broker构成一个kafka集群。就好比上述例子中的蓄水池，生成者生成的数据都保存在broker中。</p><h2 id="Topic抽象"><a href="#Topic抽象" class="headerlink" title="Topic抽象"></a>Topic抽象</h2><p><img src="http://img.orchome.com:8888/group1/M00/00/01/KmCudlf7DsaAVF0WAABMe0J0lv4158.png" alt=""></p><p>topic是一个大的管道，但是为了提供吞吐量，在管道中有设置了许多小的通道(partition)，也就是分区。每一个分区都是一个<strong>顺序的</strong>，不可变的消息队列，并且可以持续添加。每个分区通过一个唯一的offset来标识消息处理的进度。</p><p>消费者可以控制offset，例如消费可以控制从最新的数据开始消费，即设置offset为new，也可以从最早的数据开始消费，即设置offset为early</p><h2 id="生成者"><a href="#生成者" class="headerlink" title="生成者"></a>生成者</h2><p>生产者负责往某个topic写入数据。由于topic有多个分区，数据可能会按照分区的顺序写入，也可以按照某种算法写入对应的分区，这个可以有开发者自己控制。</p><h2 id="消费者"><a href="#消费者" class="headerlink" title="消费者"></a>消费者</h2><p>消费者负责从topic中读取数据。kafka为消费者提供了一个抽象模型-消费组(consumer group)。消费组可以对应上述例子中小区，每一个居民都是消费者(consumer)，同一个小区的居民就是属于同一个消费组。</p><p>kafka之所以抽象消费组的概念，是为了兼容两种消费模型，队列模型和发布-订阅模型。对于队列来说，一组消费者从同一个服务器消费数据，一个消息只能由一个消费者消费。在发布-订阅模型中，一个消息被广播给所有的消费者。如果所有的消费者都在一个消费组中，则变成了队列模型；如果每一个消费者都在不同的消费组中，则变成了发布-订阅模型。</p><p><img src="http://img.orchome.com:8888/group1/M00/00/01/KmCudlf7D-OAEjy8AABoxGLnMI4173.png" alt=""></p><p>在kafka中，一个分区中的消息只能被同一个消费组中一个消费者消费。例如一个topic中有三个分区p1,p2,p3。消费组groupA，只有一个消费者A1；消费者groupB，有4个消费者，B1,B2,B3,B4。则消费情况可能如下所示，</p><p>对于消费组groupA，</p><table><thead><tr><th>partition</th><th>consumer</th></tr></thead><tbody><tr><td>p1</td><td>A1</td></tr><tr><td>p2</td><td>A1</td></tr><tr><td>p3</td><td>A1</td></tr></tbody></table><p>由于groupA只有一个consumer，所以所有的分区都由这个consumer消费</p><p>对于消费组groupB</p><table><thead><tr><th>partition</th><th>consumer</th></tr></thead><tbody><tr><td>p1</td><td>B1</td></tr><tr><td>p2</td><td>B2</td></tr><tr><td>p3</td><td>B3</td></tr></tbody></table><p>groupB有4个consumer，但是这个topic只有3个partition，所以有一个consumer将消费不到任何数据，除非其中一个consumer挂掉了，剩下空闲的这个consumer才会上位。</p><p><strong>一个partition的数据，只能由一个consumer group的一个consumer消费</strong></p>]]></content>
       
       
+      <categories>
+          
+          <category> 后端 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Kafka </tag>
+            
+        </tags>
       
     </entry>
     
