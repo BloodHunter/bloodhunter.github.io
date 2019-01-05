@@ -1,0 +1,931 @@
+<!DOCTYPE HTML>
+<html lang="">
+<head>
+    
+
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="utf-8">
+    <meta name="keywords" content="Kafka源码分析——Producer, wbl">
+    <meta name="description" content="Producer 使用示例kafka-console-producersh kafka-console-producer.sh --broker-list localhost:9092 --topic test
+producer clien">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Kafka源码分析——Producer | wbl</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/css/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+
+    <script src="/libs/jquery/jquery-2.2.0.min.js"></script>
+<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+
+</head>
+
+<body>
+
+<header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="container">
+            <div class="nav-wrapper">
+                <div class="brand-logo">
+                    <a href="/" class="waves-effect waves-light">
+                        
+                        <img src="/medias/logo.jpeg" class="logo-img hide-on-small-only circle">
+                        
+                        <span class="logo-span">wbl</span>
+                    </a>
+                </div>
+                <a href="#" data-activates="mobile-nav" class="button-collapse"><i class="fa fa-navicon"></i></a>
+<ul class="right">
+    
+    <li class="hide-on-med-and-down">
+        <a href="/" class="waves-effect waves-light">
+            
+            <i class="fa fa-home"></i>
+            
+            <span>首页</span>
+        </a>
+    </li>
+    
+    <li class="hide-on-med-and-down">
+        <a href="/tags" class="waves-effect waves-light">
+            
+            <i class="fa fa-tags"></i>
+            
+            <span>标签</span>
+        </a>
+    </li>
+    
+    <li class="hide-on-med-and-down">
+        <a href="/categories" class="waves-effect waves-light">
+            
+            <i class="fa fa-bookmark"></i>
+            
+            <span>分类</span>
+        </a>
+    </li>
+    
+    <li class="hide-on-med-and-down">
+        <a href="/archives" class="waves-effect waves-light">
+            
+            <i class="fa fa-archive"></i>
+            
+            <span>归档</span>
+        </a>
+    </li>
+    
+    <li class="hide-on-med-and-down">
+        <a href="/about" class="waves-effect waves-light">
+            
+            <i class="fa fa-user-circle-o"></i>
+            
+            <span>关于</span>
+        </a>
+    </li>
+    
+    <li>
+        <a id="toggleSearch" class="waves-effect waves-light">
+            <i id="searchIcon" class="mdi-action-search"></i>
+        </a>
+    </li>
+
+</ul>
+
+<div class="side-nav" id="mobile-nav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.jpeg" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">wbl</div>
+        <div class="logo-desc">
+            
+            每天进步一点点
+            
+        </div>
+    </div>
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li>
+            <a href="/" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-home"></i>
+                
+                首页
+            </a>
+        </li>
+        
+        <li>
+            <a href="/tags" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-tags"></i>
+                
+                标签
+            </a>
+        </li>
+        
+        <li>
+            <a href="/categories" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-bookmark"></i>
+                
+                分类
+            </a>
+        </li>
+        
+        <li>
+            <a href="/archives" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-archive"></i>
+                
+                归档
+            </a>
+        </li>
+        
+        <li>
+            <a href="/about" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-user-circle-o"></i>
+                
+                关于
+            </a>
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/BloodHunter" class="waves-effect waves-light" target="_blank">
+                <i class="fa fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+
+    <div class="social-link"><a href="https://github.com/BloodHunter" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+    <i class="fa fa-github"></i>
+</a>
+<a href="mailto:15201414128@163.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+    <i class="fa fa-envelope-open"></i>
+</a>
+<a href="#!" class="tooltipped" data-tooltip="QQ联系我: 765759638" data-position="top" data-delay="50">
+    <i class="fa fa-qq"></i>
+</a>
+</div>
+</div>
+
+            </div>
+        </div>
+
+        
+        <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/BloodHunter" class="github-corner tooltipped hide-on-med-and-down" target="_blank" data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewbox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/>
+    </svg>
+</a>
+        
+    </nav>
+</header>
+
+
+
+
+
+<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/13.jpg')">
+    <div class="container">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <div class="description center-align post-title">
+                        Kafka源码分析——Producer
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<main class="container content">
+
+    
+    <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            
+            <div class="article-tag">
+                
+                <a href="/tags/Kafka/" target="_blank">
+                    <span class="chip bg-color">Kafka</span>
+                </a>
+                
+            </div>
+            
+            <div class="post-info">
+                
+                <span class="post-cate">
+                    <i class="fa fa-bookmark fa-fw icon-category"></i>
+                    
+                    <a href="/categories/后端/" class="post-category" target="_blank">
+                        后端
+                    </a>
+                    
+                </span>
+                
+
+                <span class="post-date">
+                    <i class="fa fa-clock-o fa-fw"></i>2019-01-05
+                </span>
+            </div>
+        </div>
+        <hr>
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <h2 id="Producer-使用示例"><a href="#Producer-使用示例" class="headerlink" title="Producer 使用示例"></a>Producer 使用示例</h2><h3 id="kafka-console-producer"><a href="#kafka-console-producer" class="headerlink" title="kafka-console-producer"></a>kafka-console-producer</h3><pre><code>sh kafka-console-producer.sh --broker-list localhost:9092 --topic test
+</code></pre><h3 id="producer-client"><a href="#producer-client" class="headerlink" title="producer client"></a>producer client</h3><pre><code>Properties props = new Properties();
+ props.put(&quot;bootstrap.servers&quot;, &quot;localhost:9092&quot;);
+ props.put(&quot;acks&quot;, &quot;all&quot;);
+ props.put(&quot;retries&quot;, 0);
+ props.put(&quot;batch.size&quot;, 16384);
+ props.put(&quot;linger.ms&quot;, 1);
+ props.put(&quot;buffer.memory&quot;, 33554432);
+ props.put(&quot;key.serializer&quot;, &quot;org.apache.kafka.common.serialization.StringSerializer&quot;);
+ props.put(&quot;value.serializer&quot;, &quot;org.apache.kafka.common.serialization.StringSerializer&quot;);
+
+ Producer&lt;String, String&gt; producer = new KafkaProducer&lt;&gt;(props);
+ for(int i = 0; i &lt; 100; i++)
+     producer.send(new ProducerRecord&lt;String, String&gt;(&quot;my-topic&quot;, Integer.toString(i), Integer.toString(i)));
+ producer.close();
+</code></pre><p>上述调用kafka Producer相关API，可以看到非常简单</p>
+<pre><code>1. 生成Producer的配置，例如broker的地址，重试次数，key和value的序列化方式
+2. 调用KafkaProducer的send方法
+</code></pre><p>下面来看下Producer send的具体流程</p>
+<h2 id="Producer-数据发送流程"><a href="#Producer-数据发送流程" class="headerlink" title="Producer 数据发送流程"></a>Producer 数据发送流程</h2><h3 id="KafkaProducer-send方法"><a href="#KafkaProducer-send方法" class="headerlink" title="KafkaProducer send方法"></a>KafkaProducer send方法</h3><pre><code>/**
+ *
+ * @param record 需要发送的数据
+    * @param callback 当数据发送成功调用的回调函数
+ *
+    */
+public Future&lt;RecordMetadata&gt; send(ProducerRecord&lt;K, V&gt; record, Callback callback) {
+    // intercept the record, which can be potentially modified; this method does not throw exceptions
+    ProducerRecord&lt;K, V&gt; interceptedRecord = this.interceptors == null ? record : this.interceptors.onSend(record);
+    return doSend(interceptedRecord, callback);
+}    
+</code></pre><p>可以看到真正的发送逻辑是在doSend方法中</p>
+<h3 id="KafkaProducer-doSend方法"><a href="#KafkaProducer-doSend方法" class="headerlink" title="KafkaProducer doSend方法"></a>KafkaProducer doSend方法</h3><pre><code>private Future&lt;RecordMetadata&gt; doSend(ProducerRecord&lt;K, V&gt; record, Callback callback) {
+    TopicPartition tp = null;
+    try {
+        // 1. 检测topic的元数据是否可用
+        ClusterAndWaitTime clusterAndWaitTime = waitOnMetadata(record.topic(), record.partition(), maxBlockTimeMs);
+        long remainingWaitMs = Math.max(0, maxBlockTimeMs - clusterAndWaitTime.waitedOnMetadataMs);
+        Cluster cluster = clusterAndWaitTime.cluster;
+
+        // 2. 对record的key和value进行序列化
+        byte[] serializedKey;
+        try {
+            serializedKey = keySerializer.serialize(record.topic(), record.key());
+        } catch (ClassCastException cce) {
+            throw new SerializationException(&quot;Can&#39;t convert key of class &quot; + record.key().getClass().getName() +
+                    &quot; to class &quot; + producerConfig.getClass(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG).getName() +
+                    &quot; specified in key.serializer&quot;);
+        }
+        byte[] serializedValue;
+        try {
+            serializedValue = valueSerializer.serialize(record.topic(), record.value());
+        } catch (ClassCastException cce) {
+            throw new SerializationException(&quot;Can&#39;t convert value of class &quot; + record.value().getClass().getName() +
+                    &quot; to class &quot; + producerConfig.getClass(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG).getName() +
+                    &quot; specified in value.serializer&quot;);
+        }
+          // 3. 确定需要发送的partition
+        int partition = partition(record, serializedKey, serializedValue, cluster);
+        int serializedSize = Records.LOG_OVERHEAD + Record.recordSize(serializedKey, serializedValue);
+        ensureValidRecordSize(serializedSize);
+        tp = new TopicPartition(record.topic(), partition);
+        long timestamp = record.timestamp() == null ? time.milliseconds() : record.timestamp();
+        log.trace(&quot;Sending record {} with callback {} to topic {} partition {}&quot;, record, callback, record.topic(), partition);
+        // producer callback will make sure to call both &#39;callback&#39; and interceptor callback
+        Callback interceptCallback = this.interceptors == null ? callback : new InterceptorCallback&lt;&gt;(callback, this.interceptors, tp);
+
+        // 4. 往RecordAccumulator追加record
+        RecordAccumulator.RecordAppendResult result = accumulator.append(tp, timestamp, serializedKey, serializedValue, interceptCallback, remainingWaitMs);
+
+        // 5. 如果batch已经满了，或者新的batch已经创建了，则唤醒send线程发送数据
+        if (result.batchIsFull || result.newBatchCreated) {
+            log.trace(&quot;Waking up the sender since topic {} partition {} is either full or getting a new batch&quot;, record.topic(), partition);
+            this.sender.wakeup();
+        }
+        return result.future;
+        // handling exceptions and record the errors;
+        // for API exceptions return them in the future,
+        // for other exceptions throw directly
+    } catch (ApiException e) {
+        log.debug(&quot;Exception occurred during message send:&quot;, e);
+        if (callback != null)
+            callback.onCompletion(null, e);
+        this.errors.record();
+        if (this.interceptors != null)
+            this.interceptors.onSendError(record, tp, e);
+        return new FutureFailure(e);
+    } catch (InterruptedException e) {
+        this.errors.record();
+        if (this.interceptors != null)
+            this.interceptors.onSendError(record, tp, e);
+        throw new InterruptException(e);
+    } catch (BufferExhaustedException e) {
+        this.errors.record();
+        this.metrics.sensor(&quot;buffer-exhausted-records&quot;).record();
+        if (this.interceptors != null)
+            this.interceptors.onSendError(record, tp, e);
+        throw e;
+    } catch (KafkaException e) {
+        this.errors.record();
+        if (this.interceptors != null)
+            this.interceptors.onSendError(record, tp, e);
+        throw e;
+    } catch (Exception e) {
+        // we notify interceptor about all exceptions, since onSend is called before anything else in this method
+        if (this.interceptors != null)
+            this.interceptors.onSendError(record, tp, e);
+        throw e;
+    }
+}
+</code></pre><p>doSend方法主要做了一下几件事情</p>
+<h4 id="1-确认topic的元数据是否可用"><a href="#1-确认topic的元数据是否可用" class="headerlink" title="1. 确认topic的元数据是否可用"></a>1. 确认topic的元数据是否可用</h4><pre><code>ClusterAndWaitTime clusterAndWaitTime = waitOnMetadata(record.topic(), record.partition(), maxBlockTimeMs);
+</code></pre><h4 id="2-对record的key和value进行序列化"><a href="#2-对record的key和value进行序列化" class="headerlink" title="2. 对record的key和value进行序列化"></a>2. 对record的key和value进行序列化</h4><p>kafka提供了需要的序列化的方法，用户也可以根据需要自定义序列化方法，只要实现Serializer接口即可<br><img src="https://ws4.sinaimg.cn/large/006tNc79gy1fyvqrc8es2j31zq0kwais.jpg" alt=""></p>
+<h4 id="3-确定需要发送的partition"><a href="#3-确定需要发送的partition" class="headerlink" title="3. 确定需要发送的partition"></a>3. 确定需要发送的partition</h4><pre><code>int partition = partition(record, serializedKey, serializedValue, cluster);
+
+private int partition(ProducerRecord&lt;K, V&gt; record, byte[] serializedKey, byte[] serializedValue, Cluster cluster) {
+    Integer partition = record.partition();
+    // 若指定了partition则使用指定的partition，若没指定则使用默认(DefaultPartitioner)的生成规则
+    return partition != null ?
+            partition :
+            partitioner.partition(
+                    record.topic(), record.key(), serializedKey, record.value(), serializedValue, cluster);
+}
+
+//DefaultPartitioner 中的partition方法
+public int partition(String topic, Object key, byte[] keyBytes, Object value, byte[] valueBytes, Cluster cluster) {
+    List&lt;PartitionInfo&gt; partitions = cluster.partitionsForTopic(topic);
+    int numPartitions = partitions.size();
+    // 若key为空，则随机生成一个num，利用num对partition的格式取余，同时保存num，下次在取num时，则对num递增即可
+    if (keyBytes == null) {
+        int nextValue = nextValue(topic);
+        List&lt;PartitionInfo&gt; availablePartitions = cluster.availablePartitionsForTopic(topic);
+        if (availablePartitions.size() &gt; 0) {
+            int part = Utils.toPositive(nextValue) % availablePartitions.size();
+            return availablePartitions.get(part).partition();
+        } else {
+            // no partitions are available, give a non-available partition
+            return Utils.toPositive(nextValue) % numPartitions;
+        }
+    } else {
+        // 若key不为空，则对key进行hash，并用得到的hash值对partition的个数进行取余
+        return Utils.toPositive(Utils.murmur2(keyBytes)) % numPartitions;
+    }
+}
+
+private int nextValue(String topic) {
+    AtomicInteger counter = topicCounterMap.get(topic);
+    // 若num为null，则随机取个num
+    if (null == counter) {
+        counter = new AtomicInteger(new Random().nextInt());
+        AtomicInteger currentCounter = topicCounterMap.putIfAbsent(topic, counter);
+        if (currentCounter != null) {
+            counter = currentCounter;
+        }
+    }
+    // 对num进行自增操作
+    return counter.getAndIncrement();
+}
+</code></pre><p>获取partition的流程图<br><img src="https://ws1.sinaimg.cn/large/006tNc79gy1fyvr5e6f0ij319i0nwn59.jpg" alt=""></p>
+<h4 id="4-往RecordAccumulator追加record"><a href="#4-往RecordAccumulator追加record" class="headerlink" title="4. 往RecordAccumulator追加record"></a>4. 往RecordAccumulator追加record</h4><p>RecordAccumulator最重要的数据结构是batches，这是一个map，其中key是topicPartition，value是一个recordBatch的先进后出的队列, batchs的结构如下图所示。batchs每次从队尾append数据，从队头开始send数据</p>
+<pre><code>private final ConcurrentMap&lt;TopicPartition, Deque&lt;RecordBatch&gt;&gt; batches;
+</code></pre><p><img src="https://ws3.sinaimg.cn/large/006tNc79gy1fyvrv76ah2j30py0f4juz.jpg" alt=""></p>
+<pre><code>public RecordAppendResult append(TopicPartition tp,
+                                 long timestamp,
+                                 byte[] key,
+                                 byte[] value,
+                                 Callback callback,
+                                 long maxTimeToBlock) throws InterruptedException {
+    // abortIncompleteBatches().
+    appendsInProgress.incrementAndGet();
+    try {
+        // 获取对应topicPartition的Deque
+        Deque&lt;RecordBatch&gt; dq = getOrCreateDeque(tp);
+
+        //对deque进行append操作，会保证线程安全
+        synchronized (dq) {
+            if (closed)
+                throw new IllegalStateException(&quot;Cannot send after the producer is closed.&quot;);
+            // 开始追加数据
+            RecordAppendResult appendResult = tryAppend(timestamp, key, value, callback, dq);
+            // 当前队尾的recordBatch数据追加成功，无需新建recordBatch
+            if (appendResult != null)
+                return appendResult;
+        }
+
+        // 当前队尾无recordBatch，或者数据已满，需要新分配recordBatch
+        int size = Math.max(this.batchSize, Records.LOG_OVERHEAD + Record.recordSize(key, value));
+        log.trace(&quot;Allocating a new {} byte message buffer for topic {} partition {}&quot;, size, tp.topic(), tp.partition());
+        ByteBuffer buffer = free.allocate(size, maxTimeToBlock);
+        synchronized (dq) {
+            // Need to check if producer is closed again after grabbing the dequeue lock.
+            if (closed)
+                throw new IllegalStateException(&quot;Cannot send after the producer is closed.&quot;);
+
+            RecordAppendResult appendResult = tryAppend(timestamp, key, value, callback, dq);
+            // recordBatch已经创建，需要释放刚刚分配的buffer
+            if (appendResult != null) {
+                free.deallocate(buffer);
+                return appendResult;
+            }
+            MemoryRecordsBuilder recordsBuilder = MemoryRecords.builder(buffer, compression, TimestampType.CREATE_TIME, this.batchSize);
+            RecordBatch batch = new RecordBatch(tp, recordsBuilder, time.milliseconds());
+            FutureRecordMetadata future = Utils.notNull(batch.tryAppend(timestamp, key, value, callback, time.milliseconds()));
+                // 在deque中追加新建的recordBatch
+            dq.addLast(batch);
+
+            // 往未返回ack的队列中，增加刚刚创建的recordBatch
+            incomplete.add(batch);
+            // 如果队列中有多个recordBatch，那么最先创建的recordBatch，肯定是可以发送的，或者新建的recordBatch已满，则可以发送数据
+            return new RecordAppendResult(future, dq.size() &gt; 1 || batch.isFull(), true);
+        }
+    } finally {
+        appendsInProgress.decrementAndGet();
+    }
+}
+</code></pre><h4 id="5-唤醒send线程发送数据"><a href="#5-唤醒send线程发送数据" class="headerlink" title="5. 唤醒send线程发送数据"></a>5. 唤醒send线程发送数据</h4><p>如果发现recordBatch达到发送的要求，则唤醒send线程开始发送数据，下面来看下send线程中的run方法</p>
+<pre><code>package org.apache.kafka.clients.producer.internals;
+
+void run(long now) {
+    Cluster cluster = metadata.fetch();
+    // 获取可以发送的recordBatch
+    RecordAccumulator.ReadyCheckResult result = this.accumulator.ready(cluster, now);
+
+    // 如果topicPartition的leader是未知，则强制更新metadata
+    if (!result.unknownLeaderTopics.isEmpty()) {
+        // The set of topics with unknown leader contains topics with leader election pending as well as
+        // topics which may have expired. Add the topic again to metadata to ensure it is included
+        // and request metadata update, since there are messages to send to the topic.
+        for (String topic : result.unknownLeaderTopics)
+            this.metadata.add(topic);
+        this.metadata.requestUpdate();
+    }
+
+    // 删除没有ready的node
+    Iterator&lt;Node&gt; iter = result.readyNodes.iterator();
+    long notReadyTimeout = Long.MAX_VALUE;
+    while (iter.hasNext()) {
+        Node node = iter.next();
+        if (!this.client.ready(node, now)) {
+            iter.remove();
+            notReadyTimeout = Math.min(notReadyTimeout, this.client.connectionDelay(node, now));
+        }
+    }
+
+    // 获取对应node可发送的RecordBatch，key为node id
+    Map&lt;Integer, List&lt;RecordBatch&gt;&gt; batches = this.accumulator.drain(cluster,
+                                                                     result.readyNodes,
+                                                                     this.maxRequestSize,
+                                                                     now);
+    if (guaranteeMessageOrder) {
+        // Mute all the partitions drained
+        for (List&lt;RecordBatch&gt; batchList : batches.values()) {
+            for (RecordBatch batch : batchList)
+                this.accumulator.mutePartition(batch.topicPartition);
+        }
+    }
+
+    // 删除超时的RecordBatch
+    List&lt;RecordBatch&gt; expiredBatches = this.accumulator.abortExpiredBatches(this.requestTimeout, now);
+    // update sensors
+    for (RecordBatch expiredBatch : expiredBatches)
+        this.sensors.recordErrors(expiredBatch.topicPartition.topic(), expiredBatch.recordCount);
+
+    sensors.updateProduceRequestMetrics(batches);
+
+    // If we have any nodes that are ready to send + have sendable data, poll with 0 timeout so this can immediately
+    // loop and try sending more data. Otherwise, the timeout is determined by nodes that have partitions with data
+    // that isn&#39;t yet sendable (e.g. lingering, backing off). Note that this specifically does not include nodes
+    // with sendable data that aren&#39;t ready to send since they would cause busy looping.
+    long pollTimeout = Math.min(result.nextReadyCheckDelayMs, notReadyTimeout);
+    if (!result.readyNodes.isEmpty()) {
+        log.trace(&quot;Nodes with data ready to send: {}&quot;, result.readyNodes);
+        pollTimeout = 0;
+    }
+    // 发送RecordBatch
+    sendProduceRequests(batches, now);
+
+    // if some partitions are already ready to be sent, the select time would be 0;
+    // otherwise if some partition already has some data accumulated but not ready yet,
+    // the select time will be the time difference between now and its linger expiry time;
+    // otherwise the select time will be the time difference between now and the metadata expiry time;
+    this.client.poll(pollTimeout, now);
+}
+</code></pre><p>可以看到具体的发送逻辑在sendProduceRequests</p>
+<pre><code>private void sendProduceRequest(long now, int destination, short acks, int timeout, List&lt;RecordBatch&gt; batches) {
+    Map&lt;TopicPartition, MemoryRecords&gt; produceRecordsByPartition = new HashMap&lt;&gt;(batches.size());
+    final Map&lt;TopicPartition, RecordBatch&gt; recordsByPartition = new HashMap&lt;&gt;(batches.size());
+    // 将同一个topicPartition的RecordBatch放在一起发送
+    for (RecordBatch batch : batches) {
+        TopicPartition tp = batch.topicPartition;
+        produceRecordsByPartition.put(tp, batch.records());
+        recordsByPartition.put(tp, batch);
+    }
+
+    ProduceRequest.Builder requestBuilder =
+            new ProduceRequest.Builder(acks, timeout, produceRecordsByPartition);
+    RequestCompletionHandler callback = new RequestCompletionHandler() {
+        public void onComplete(ClientResponse response) {
+            handleProduceResponse(response, recordsByPartition, time.milliseconds());
+        }
+    };
+
+    String nodeId = Integer.toString(destination);
+    ClientRequest clientRequest = client.newClientRequest(nodeId, requestBuilder, now, acks != 0, callback);
+    client.send(clientRequest, now);
+    log.trace(&quot;Sent produce request to {}: {}&quot;, nodeId, requestBuilder);
+}
+</code></pre><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>总结一下Producer的发送流程</p>
+<ol>
+<li>确认topic的元数据是否可用</li>
+<li>对key和value进行序列化</li>
+<li>确定发送的partition</li>
+<li>往RecordAccumulator追加record</li>
+<li>如果满足发送条件，则唤醒sender线程发送数据</li>
+</ol>
+
+            </div>
+            <hr>
+
+            
+            <style>
+    #reward {
+        margin: 40px 0;
+        text-align: center;
+    }
+
+    #reward .reward-link {
+        font-size: 1.88rem;
+    }
+
+    #reward .btn-floating:hover {
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    #rewardModal {
+        width: 320px;
+        height: 350px;
+    }
+
+    #rewardModal .reward-title {
+        margin: 15px auto;
+        padding-bottom: 5px;
+    }
+
+    #rewardModal .modal-content {
+        padding: 10px;
+    }
+
+    #rewardModal .close {
+        position: absolute;
+        right: 15px;
+        top: 15px;
+        color: rgba(0, 0, 0, 0.5);
+        font-size: 1.3rem;
+        line-height: 20px;
+        cursor: pointer;
+    }
+
+    #rewardModal .reward-tabs {
+        margin: 0 auto;
+        width: 210px;
+    }
+
+    .reward-tabs .tabs {
+        height: 38px;
+        margin: 10px auto;
+        padding-left: 0;
+    }
+
+    .reward-tabs .tabs .tab {
+        height: 38px;
+        line-height: 38px;
+    }
+
+    .reward-tabs .tab a {
+        color: #fff;
+        background-color: #ccc;
+    }
+
+    .reward-tabs .tab a:hover {
+        color: #fff;
+    }
+
+    .reward-tabs .wechat-tab .active {
+        color: #fff;
+        background-color: #22AB38;
+    }
+
+    .reward-tabs .alipay-tab .active {
+        color: #fff;
+        background-color: #019FE8;
+    }
+
+    .reward-tabs .reward-img {
+        width: 210px;
+        height: 210px;
+    }
+</style>
+
+<div id="reward">
+    <a class="reward-link btn-floating btn-large waves-effect waves-light red">赏</a>
+
+    <!-- Modal Structure -->
+    <div id="rewardModal" class="modal">
+        <div class="modal-content">
+            <a class="close"><i class="fa fa-close"></i></a>
+            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <div class="reward-content">
+                <div class="reward-tabs">
+                    <ul class="tabs">
+                        <li class="tab wechat-tab waves-effect waves-light"><a class="active" href="#wechat">微信</a></li>
+                        <li class="tab alipay-tab waves-effect waves-light"><a href="#alipay">支付宝</a></li>
+                    </ul>
+                    <div id="wechat">
+                        <img src="/medias/reward/wechat.jpeg" class="reward-img" alt="微信打赏二维码">
+                    </div>
+                    <div id="alipay">
+                        <img src="/medias/reward/alipay.jpeg" class="reward-img" alt="支付宝打赏二维码">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('#reward .reward-link').on('click', function () {
+            $('#rewardModal').openModal();
+        });
+
+        $('#rewardModal .close').on('click', function () {
+            $('#rewardModal').closeModal();
+        });
+    });
+</script>
+            
+
+            <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+
+<div id="article-share">
+    
+    <div class="social-share" data-disabled="qzone, qq, weibo, douban"></div>
+    
+</div>
+
+<script src="/libs/share/js/social-share.min.js"></script>
+
+            <div class="reprint">
+                <p>
+                    <span class="reprint-tip">Reprint please specify: </span>
+                    <a href="http://yoursite.com" class="b-link-green">wbl</a>
+                    <i class="fa fa-angle-right fa-lg fa-fw text-color"></i>
+                    <a href="/2019/01/05/kafka-yuan-ma-fen-xi-producer/" class="b-link-green">Kafka源码分析——Producer</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">Current</div>
+            <div class="card">
+                <a href="/2019/01/05/kafka-yuan-ma-fen-xi-producer/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/13.jpg" class="responsive-img" alt="Kafka源码分析——Producer">
+                        
+                        <span class="card-title">Kafka源码分析——Producer</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary">Producer 使用示例kafka-console-producersh kafka-console-producer.sh --broker-list localhost:9092 --topic test
+producer clien</div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-01-05
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fa fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/后端/" class="post-category" target="_blank">
+                                    后端
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Kafka/" target="_blank">
+                        <span class="chip bg-color">Kafka</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">Next</div>
+            <div class="card">
+                <a href="/2018/12/20/kafka-quickstart-2/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/12.jpg" class="responsive-img" alt="Kafka——QuickStart(2)">
+                        
+                        <span class="card-title">Kafka——QuickStart(2)</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary">安装下载源码安装下载地址
+我用的kafka的版本是0.10.2.0，后续的例子都是使用这个版本
+tar -zxvf kafka-0.10.2.0-src.tgz
+cd kafka-0.10.2.0
+Mac Homebrew安装brew in</div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2018-12-20
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fa fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/后端/" class="post-category" target="_blank">
+                                    后端
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Kafka/" target="_blank">
+                        <span class="chip bg-color">Kafka</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+</div>
+    
+
+</main>
+
+
+<footer class="page-footer bg-color">
+    <div class="container row center-align">
+        <div class="col s12 m8 l8 copy-right">
+            本站基于
+            <a href="https://hexo.io/" target="_blank">Hexo</a> 采用
+            <a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">hexo-theme-matery</a>的主题搭建.
+        </div>
+        <div class="col s12 m4 l4 social-link"><a href="https://github.com/BloodHunter" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+    <i class="fa fa-github"></i>
+</a>
+<a href="mailto:15201414128@163.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+    <i class="fa fa-envelope-open"></i>
+</a>
+<a href="#!" class="tooltipped" data-tooltip="QQ联系我: 765759638" data-position="top" data-delay="50">
+    <i class="fa fa-qq"></i>
+</a>
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+<!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title">Search</span>
+            <input type="search" id="searchInput" name="s" placeholder="Please enter a search keyword" class="search-input" autofocus>
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script src="/js/search.js"></script>
+<script type="text/javascript">
+    searchFunc("/" + "search.xml", 'searchInput', 'searchResult');
+</script>
+<!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fa fa-angle-up"></i>
+    </a>
+</div>
+
+
+<script src="/libs/materialize/js/materialize.min.js"></script>
+<script src="/libs/masonry/masonry.pkgd.min.js"></script>
+<script src="/libs/aos/aos.js"></script>
+<script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+<script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+<script src="/js/matery.js"></script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+</body>
+</html>
