@@ -380,7 +380,7 @@ response_time_count=3 总共采集了3条数据
 &lt;metric_name&gt;_sum 采集数据求和的值
 &lt;metric_name&gt;_count 采集条数
 </code></pre><h3 id="Histogram-VS-Summary"><a href="#Histogram-VS-Summary" class="headerlink" title="Histogram VS Summary"></a>Histogram VS Summary</h3><ul>
-<li>都包含\<basename>_sum，\<basename>_count</basename></basename></li>
+<li>都包含&lt;basename>_sum，&lt;basename>_count</li>
 <li>Histogram 需要通过 \<basename>_bucket 计算 quantile, 而 Summary 直接存储了 quantile 的值。</basename></li>
 </ul>
 <h2 id="Prometheus实例演示"><a href="#Prometheus实例演示" class="headerlink" title="Prometheus实例演示"></a>Prometheus实例演示</h2><h3 id="启动prometheus"><a href="#启动prometheus" class="headerlink" title="启动prometheus"></a>启动prometheus</h3><pre><code>./prometheus --config.file=&quot;prometheus.yml&quot;
