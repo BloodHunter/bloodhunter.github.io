@@ -5,12 +5,10 @@
 
 <head><meta name="generator" content="Hexo 3.8.0">
     <meta charset="utf-8">
-    <meta name="keywords" content="Prometheus简介, wbl">
-    <meta name="description" content="Prometheus简介Prometheus 是一套开源的系统监控报警框架。作为新一代的监控框架，Prometheus具有如下几个特点
+    <meta name="keywords" content="Prometheus2.0实战, wbl">
+    <meta name="description" content="Prometheus 1.x VS Prometheus 2.x1.0版本与2.0版本最大的改变之一就是存储引擎，1.x版本使用的是LevelDB，2.x使用的是TSDB，性能上有较大的提升，以下是官方对比数据
 
-多维度的数据模型
-灵活和强大的查询语句(PromQL)
-易于管理，prometheus是一个独立的二进">
+与 Prometheus ">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -18,7 +16,7 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Prometheus简介 | wbl</title>
+    <title>Prometheus2.0实战 | wbl</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/font-awesome.min.css">
@@ -251,13 +249,13 @@
 
 
 
-<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/5.jpg')">
+<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/12.jpg')">
     <div class="container">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
                     <div class="description center-align post-title">
-                        Prometheus简介
+                        Prometheus2.0实战
                     </div>
                 </div>
             </div>
@@ -277,8 +275,8 @@
             
             <div class="article-tag">
                 
-                <a href="/tags/prometheus/" target="_blank">
-                    <span class="chip bg-color">prometheus</span>
+                <a href="/tags/Prometheus/" target="_blank">
+                    <span class="chip bg-color">Prometheus</span>
                 </a>
                 
             </div>
@@ -296,104 +294,207 @@
                 
 
                 <span class="post-date">
-                    <i class="fa fa-clock-o fa-fw"></i>2019-01-16
+                    <i class="fa fa-clock-o fa-fw"></i>2019-01-26
                 </span>
             </div>
         </div>
         <hr>
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h2 id="Prometheus简介"><a href="#Prometheus简介" class="headerlink" title="Prometheus简介"></a>Prometheus简介</h2><p>Prometheus 是一套开源的系统监控报警框架。作为新一代的监控框架，Prometheus具有如下几个特点</p>
-<ol>
-<li>多维度的数据模型</li>
-<li>灵活和强大的查询语句(PromQL)</li>
-<li>易于管理，prometheus是一个独立的二进制文件，不依赖分布式存储</li>
-<li>采用pull模式利用HTTP采集数据</li>
-<li>有多种的可视化图形界面(目前推荐使用Grafana展示数据)</li>
-</ol>
-<p>prometheus的架构如下图所示</p>
-<p><img src="https://ws3.sinaimg.cn/large/006tNc79gy1fzbvfyy503j31ae0r60yu.jpg" alt=""></p>
-<p>prometheus的主要工作流程如下</p>
-<ol>
-<li>prometheus serve定期从job pull metric，或者接收来自Pushgateway的metrics</li>
-<li>prometheus将获取的metric存储在本地，并根据配置的alert rule向Alertmanage发送告警信息</li>
-<li>Alertmanage根据配置，对接收的告警信息进行处理，发出相应的告警</li>
-<li>可视化采集的数据</li>
-</ol>
-<h2 id="Prometheus相关概念"><a href="#Prometheus相关概念" class="headerlink" title="Prometheus相关概念"></a>Prometheus相关概念</h2><h3 id="instance"><a href="#instance" class="headerlink" title="instance"></a>instance</h3><p>一个单独采集的目标(target)，一般对应一个进程</p>
-<h3 id="job"><a href="#job" class="headerlink" title="job"></a>job</h3><p>一组相同类型的instance</p>
-<pre><code>web-api部署在多台实例上，prometheus会从每个实例上去采集数据
-job: web-api
-    instance x.x.x.x:port1
-    instance x.x.x.x:port2
-</code></pre><h3 id="sample"><a href="#sample" class="headerlink" title="sample"></a>sample</h3><p>实际的时间序列，每一个时间序列包含一个float64的值以及一个毫秒级的时间戳</p>
-<h3 id="metric"><a href="#metric" class="headerlink" title="metric"></a>metric</h3><p>prometheus有4中metric，可以将metric理解为数据模型，metric的格式如下</p>
-<pre><code>&lt;metric name&gt;{&lt;label name&gt;=&lt;label value&gt;,...}
-</code></pre><h3 id="label"><a href="#label" class="headerlink" title="label"></a>label</h3><p>标签，用来表示采集数据的维度,例如有个指标为http_request_total表示所有http请求的总数，则http_request_total{method=”POST”}则表示请求方式为POST的请求总数，其中method就是label</p>
-<h2 id="Prometheus安装配置"><a href="#Prometheus安装配置" class="headerlink" title="Prometheus安装配置"></a>Prometheus安装配置</h2><p>下载<a href="https://prometheus.io/download" target="_blank" rel="noopener">prometheus</a>，解压安装包</p>
-<pre><code>tar -zxvf prometheus-2.6.0.darwin-amd64.tar.gz
-cd prometheus-2.6.0.darwin-amd64
-</code></pre><h3 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h3><p>prometheus安装包下有一个二进制文件，叫prometheus，之前运行该文件，即可启动prometheus server</p>
-<pre><code>./prometheus --help
-</code></pre><h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><p>prometheus的配置文件为prometheus.yml，内容如下</p>
-<pre><code>global:
-  scrape_interval:     15s # prometheus server 从instance拉取metric的间隔
-  evaluation_interval: 15s # prometheus server检测alert rule的间隔
-  scrape_timeout: 10s # proemtheus server抓取数据的超时时间
-
-# Alertmanager 配置
-alerting:
-  alertmanagers:
-  - static_configs:
-    - targets:
-      # - alertmanager:9093
-
-# 告警规则
-rule_files:
-  # - &quot;first_rules.yml&quot;
-  # - &quot;second_rules.yml&quot;
-
-# 抓取对象配置
-scrape_configs:
-  # 全局唯一的名称，用来标识一个job
-  - job_name: &#39;prometheus&#39;
-
-    # 该job对应的所有instance
-    static_configs:
-    - targets: [&#39;localhost:9090&#39;]
-</code></pre><h2 id="Metric"><a href="#Metric" class="headerlink" title="Metric"></a>Metric</h2><h3 id="Counter"><a href="#Counter" class="headerlink" title="Counter"></a>Counter</h3><p>对数据进行累加，数据只会递增，例如http请求数，错误个数</p>
-<h3 id="Guage"><a href="#Guage" class="headerlink" title="Guage"></a>Guage</h3><p>可以对数据进行加减，例如温度，线程数量</p>
-<h3 id="Histogram"><a href="#Histogram" class="headerlink" title="Histogram"></a>Histogram</h3><p>可以理解为柱状图，依据事先设置的阈值，对采集数据进行分类统计，适合统计的指标如response time，request size等</p>
-<p>Histogram具有3个指标值</p>
-<pre><code>&lt;metric_name&gt;_bucket 对应分桶的条数
-&lt;metric_name&gt;_sum 采集数据求和的值
-&lt;metric_name&gt;_count 采集条数
-</code></pre><p>下面以实例来说明上述三个指标，例如对response time进行统计，总共采集了3条数据，分别是</p>
-<pre><code>100ms,200ms,120ms
-</code></pre><p>则以下三个指标分别表示</p>
-<pre><code>response_time_bucket{le=120}=2, response time小于等于120ms的数据有两条
-response_time_sum=(100+200+120)=420 对所有的response time进行求和
-response_time_count=3 总共采集了3条数据
-</code></pre><h3 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h3><p>与Histogram类似，最大的区别在于Summary可以精确的统计百分位的值，例如90%的响应时间低于200ms</p>
-<p>summary也有三个指标</p>
-<pre><code>&lt;metric_name&gt;{quantile=&quot;&lt;q&gt;&quot;}  0=&lt;q&lt;=1 百分位位于q的值
-&lt;metric_name&gt;_sum 采集数据求和的值
-&lt;metric_name&gt;_count 采集条数
-</code></pre><h3 id="Histogram-VS-Summary"><a href="#Histogram-VS-Summary" class="headerlink" title="Histogram VS Summary"></a>Histogram VS Summary</h3><ul>
-<li>都包含&lt;basename>_sum，&lt;basename>_count</li>
-<li>Histogram 需要通过 \<basename>_bucket 计算 quantile, 而 Summary 直接存储了 quantile 的值。</basename></li>
+                <h2 id="Prometheus-1-x-VS-Prometheus-2-x"><a href="#Prometheus-1-x-VS-Prometheus-2-x" class="headerlink" title="Prometheus 1.x VS Prometheus 2.x"></a>Prometheus 1.x VS Prometheus 2.x</h2><p>1.0版本与2.0版本最大的改变之一就是存储引擎，1.x版本使用的是LevelDB，2.x使用的是TSDB，性能上有较大的提升，以下是官方对比数据</p>
+<ul>
+<li>与 Prometheus 1.8 相比，CPU使用率降低了 20％ - 40％</li>
+<li>与 Prometheus 1.8 相比，磁盘空间使用率降低了 33％ - 50％</li>
+<li>没有太多查询，平均负载的磁盘 I/O&lt;1％</li>
 </ul>
-<h2 id="Prometheus实例演示"><a href="#Prometheus实例演示" class="headerlink" title="Prometheus实例演示"></a>Prometheus实例演示</h2><h3 id="启动prometheus"><a href="#启动prometheus" class="headerlink" title="启动prometheus"></a>启动prometheus</h3><pre><code>./prometheus --config.file=&quot;prometheus.yml&quot;
-</code></pre><p>启动成功之后可以在localhost:9090上查看对应的metric<br><img src="https://ws4.sinaimg.cn/large/006tNc79gy1fzbx49z7fqj327w0ra78w.jpg" alt=""></p>
-<h3 id="查看对应的指标"><a href="#查看对应的指标" class="headerlink" title="查看对应的指标"></a>查看对应的指标</h3><p>在输入框中输入指标名称，即可看到对应指标的值</p>
-<p><img src="https://ws2.sinaimg.cn/large/006tNc79gy1fzbx6jtpt3j327i0mu428.jpg" alt=""></p>
-<h3 id="可视化指标"><a href="#可视化指标" class="headerlink" title="可视化指标"></a>可视化指标</h3><p>选择graph标签页，即可将对应的数据可视化，例如查看http请求code为200的QPS</p>
-<pre><code>rate(promhttp_metric_handler_requests_total{code=&quot;200&quot;}[1m])
-</code></pre><p><img src="https://ws3.sinaimg.cn/large/006tNc79gy1fzbxac8hggj31ww0u0jva.jpg" alt=""></p>
+<h2 id="Prometheus-存储"><a href="#Prometheus-存储" class="headerlink" title="Prometheus 存储"></a>Prometheus 存储</h2><h3 id="本地存储"><a href="#本地存储" class="headerlink" title="本地存储"></a>本地存储</h3><p>Prometheus将两个小时的数据存储在一个目录底下，目录包含chunk(存储时间序列样本)，meta(存储元数据)，index(存储metric名称以及label)</p>
+<p>数据会先缓存在内存中而不会立刻持久化到磁盘中，因此Prometheus采用write-ahead-log机制，当prometheus server发生异常，重启之后会根据日志重新加载数据。</p>
+<p>通过API删除数据，数据先保存到tombstone文件，而不是立即从磁盘删除</p>
+<pre><code>./data/01BKGTZQ1SYQJTR4PB43C8PD98
+./data/01BKGTZQ1SYQJTR4PB43C8PD98/meta.json
+./data/01BKGTZQ1SYQJTR4PB43C8PD98/index
+./data/01BKGTZQ1SYQJTR4PB43C8PD98/chunks
+./data/01BKGTZQ1SYQJTR4PB43C8PD98/chunks/000001
+./data/01BKGTZQ1SYQJTR4PB43C8PD98/tombstones
+</code></pre><h3 id="远程存储"><a href="#远程存储" class="headerlink" title="远程存储"></a>远程存储</h3><p>prometheus可以与远程系统进行如下交互：</p>
+<ol>
+<li>prometheus可以通过remote_write写入数据</li>
+<li>prometheus可以通过remote_read读取数据</li>
+</ol>
+<p><img src="https://prometheus.io/docs/prometheus/latest/images/remote_integrations.png" alt=""></p>
+<p>目前prometheus是通过HTTP协议传输数据，未来可能会使用gRPC。</p>
+<p>采用远程存储时，prometheus进行查询时，会从远端拉取所需的数据，然后进行相应的处理，因此可靠性不能保证。目前PromQL是不支持分布式查询。</p>
+<p>目前支持prometheus远程存储的数据源如下：</p>
+<p><img src="https://ws2.sinaimg.cn/large/006tNc79gy1fzgkyab3ybj30bc0brmye.jpg" alt=""></p>
+<h2 id="Prometheus-Federation"><a href="#Prometheus-Federation" class="headerlink" title="Prometheus Federation"></a>Prometheus Federation</h2><h3 id="Hierarchical-federation"><a href="#Hierarchical-federation" class="headerlink" title="Hierarchical federation"></a>Hierarchical federation</h3><p>这种方式相同job的不同instance分布在不同的prometheus上，高一层级的prometheus server从低层级的prometheus server查询数据。</p>
+<p>这种方式适合于某个job收集metrics过多，单台prometheus无法负荷时，可以利用这种方式对job的instance进行水平扩展，将不同的instance拆分到不同的prometheus中，在由全局的prometheus来收集聚合数据<br><img src="https://ws3.sinaimg.cn/large/006tNc79gy1fzgjb6rttlj30kp08at92.jpg" alt=""></p>
+<h3 id="Cross-service-federation"><a href="#Cross-service-federation" class="headerlink" title="Cross-service federation"></a>Cross-service federation</h3><p>这种方式是以service维度来拆分prometheus，在由全局的prometheus来收集聚合数据<br><img src="https://ws4.sinaimg.cn/large/006tNc79gy1fzgjg57ocrj30gx07q3yo.jpg" alt=""></p>
+<h3 id="Federation的优缺点"><a href="#Federation的优缺点" class="headerlink" title="Federation的优缺点"></a>Federation的优缺点</h3><p>优点：数据集中式管理，告警，不需要为每个prometheus实例管理数据</p>
+<p>缺点：数据集中化，网络可能会延迟。Federation没有解决数据单点问题</p>
+<h2 id="Recording-rules"><a href="#Recording-rules" class="headerlink" title="Recording rules"></a>Recording rules</h2><p>recording rule类似于Influxdb的CQ，可以在后台处理配置的表达式，并将表达式的结果存储起来。recording rule主要目的是为了提前计算一些复杂运算结果，提供查询效率。CQ的主要目的在于聚合数据，从而通过不同的RP策略来保存数据</p>
+<pre><code>groups:
+  - name: example
+    rules:
+    - record: job:http_inprogress_requests:sum
+      expr: sum(http_inprogress_requests) by (job)
+</code></pre><p>其中record表示指标的名称，expr则是指标的表达式</p>
+<h2 id="prometheus高可用部署"><a href="#prometheus高可用部署" class="headerlink" title="prometheus高可用部署"></a>prometheus高可用部署</h2><h3 id="基于HA"><a href="#基于HA" class="headerlink" title="基于HA"></a>基于HA</h3><p>部署多台prometheus server(一主一从)，并采集相同export的指标。</p>
+<p><img src="https://ws4.sinaimg.cn/large/006tNc79gy1fziofcdgszj30el06c74a.jpg" alt=""></p>
+<p>基于HA模式只能确保prometheus服务可用性问题，但是不解决prometheus server之间数据一致性问题已经持久化问题(数据丢失无法恢复)。</p>
+<h3 id="基于HA-远程存储"><a href="#基于HA-远程存储" class="headerlink" title="基于HA + 远程存储"></a>基于HA + 远程存储</h3><p>在HA的基础上通过添加remote storage，将监控数据存储到第三方存储服务上。既解决了服务可用性问题，同时也确保了数据的持久化</p>
+<p><img src="https://ws2.sinaimg.cn/large/006tNc79gy1fzirxf5gtnj30e207ndfx.jpg" alt=""></p>
+<h3 id="基于HA-远程存储-联邦集成"><a href="#基于HA-远程存储-联邦集成" class="headerlink" title="基于HA + 远程存储 + 联邦集成"></a>基于HA + 远程存储 + 联邦集成</h3><p>当单台prometheus需要处理大量的采集任务时，可以使用prometheusde联邦的方式，将采集任务分割到不同的prometheus实例中。</p>
+<p><img src="https://ws4.sinaimg.cn/large/006tNc79gy1fzisip7noyj30pw09l0t5.jpg" alt=""></p>
+<h3 id="三种方式对比"><a href="#三种方式对比" class="headerlink" title="三种方式对比"></a>三种方式对比</h3><table>
+<thead>
+<tr>
+<th>部署方式</th>
+<th>使用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>基于HA</td>
+<td>监控规模不大，prometheus server不会经常发生迁移，并且数据保存周期较短</td>
+</tr>
+<tr>
+<td>基于HA + 远程存储</td>
+<td>监控规模不大，但要求监控数据持久化</td>
+</tr>
+<tr>
+<td>基于HA + 远程存储 + 联邦集成</td>
+<td>单数据中心，并且采集指标量很大，此时prometheus的性能瓶颈主要在于大量的采集任务</td>
+</tr>
+</tbody>
+</table>
+<h3 id="Thanos"><a href="#Thanos" class="headerlink" title="Thanos"></a>Thanos</h3><p><a href="https://github.com/improbable-eng/thanos" target="_blank" rel="noopener">thanos</a>是开源的大规模Prometheus集群解决方案，它的设计目标如下</p>
+<ol>
+<li>全局的查询视图</li>
+<li>不受限的数据存储</li>
+<li>高可用性</li>
+</ol>
+<p>thanos的架构如图</p>
+<p><img src="https://ws2.sinaimg.cn/large/006tNc79gy1fzk1j4mmlnj317f0u07kq.jpg" alt=""></p>
+<h3 id="M3"><a href="#M3" class="headerlink" title="M3"></a>M3</h3><p><a href="https://github.com/m3db/m3" target="_blank" rel="noopener">M3</a>是Uber开源的基于M3DB的指标平台，它提供了如下的功能</p>
+<ol>
+<li>全局数据查询和存储</li>
+<li>提供数据聚合以及保留(retention)功能</li>
+<li>可作为prometheus的存储后台，提供prometheus的高可用部署</li>
+</ol>
+<p><img src="http://eng.uber.com/wp-content/uploads/2018/08/image4-1.png" alt=""></p>
+<p><img src="http://eng.uber.com/wp-content/uploads/2018/08/image1-1.png" alt=""></p>
+<h2 id="Prometheus实践"><a href="#Prometheus实践" class="headerlink" title="Prometheus实践"></a>Prometheus实践</h2><h3 id="recording-rule"><a href="#recording-rule" class="headerlink" title="recording rule"></a>recording rule</h3><p>生成recording rule</p>
+<pre><code>groups:
+ - name: test
+   rules:
+   - record: job:prometheus_http_response_size_bytes_sum:sum
+     expr: sum(prometheus_http_response_size_bytes_sum) by (job)
+</code></pre><p>在graph中查看recording rule生成的指标</p>
+<p><img src="https://ws2.sinaimg.cn/large/006tNc79gy1fzjyh83xnsj32200f0jt9.jpg" alt=""></p>
+<p>可以看到生成的新指标与表达式得到的指标值一致</p>
+<p><img src="https://ws4.sinaimg.cn/large/006tNc79gy1fzjyjcgsasj31vk0eumyu.jpg" alt="">       </p>
+<h3 id="remote-write-remote-read"><a href="#remote-write-remote-read" class="headerlink" title="remote_write/remote_read"></a>remote_write/remote_read</h3><h4 id="influxdb"><a href="#influxdb" class="headerlink" title="influxdb"></a>influxdb</h4><p>influxdb内部已经实现了读写prometheus数据的协议，只需要在prometheus.yml中配置remote_write和remote_read的url地址即可</p>
+<pre><code>remote_write:
+ - url: &quot;http://127.0.0.1:8086/api/v1/prom/write?db=prometheus_test&quot;
+remote_read:
+ - url: &quot;http://127.0.0.1:8086/api/v1/prom/read?db=prometheus_test&quot;
+</code></pre><p>配置prometheus之后，需要在infludb中创建配置中对应的数据库</p>
+<pre><code>create database prometheus_test
+</code></pre><p>启动prometheus之后，可以在influxdb中看到生成的measurement，每个metric对应一个measurement，而metric中的label对应inflxudb的tag</p>
+<pre><code># Prometheus metric
+example_metric{queue=&quot;0:http://example:8086/api/v1/prom/write?db=prometheus&quot;,le=&quot;0.005&quot;} 308
+
+# Same metric parsed into InfluxDB
+measurement
+  example_metric
+tags
+  queue = &quot;0:http://example:8086/api/v1/prom/write?db=prometheus&quot;
+  le = &quot;0.005&quot;
+  job = &quot;prometheus&quot;
+  instance = &quot;localhost:9090&quot;
+  __name__ = &quot;example_metric&quot;
+fields
+  value = 308
+</code></pre><p><img src="https://ws1.sinaimg.cn/large/006tNc79gy1fzjzk2viz9j30sw0le423.jpg" alt=""></p>
+<p><img src="https://ws1.sinaimg.cn/large/006tNc79gy1fzjzkukt4wj317y0bmtac.jpg" alt=""></p>
+<h3 id="federation"><a href="#federation" class="headerlink" title="federation"></a>federation</h3><p>启动三台prometheus server，其中一台作为master，从另外两台拉取数据</p>
+<table>
+<thead>
+<tr>
+<th>name</th>
+<th>role</th>
+<th>port</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>prometheus</td>
+<td>master</td>
+<td>9090</td>
+</tr>
+<tr>
+<td>node1</td>
+<td>collector</td>
+<td>9091</td>
+</tr>
+<tr>
+<td>node2</td>
+<td>collector</td>
+<td>9092</td>
+</tr>
+</tbody>
+</table>
+<p>master配置</p>
+<pre><code>global:
+  scrape_interval: 15s 
+  evaluation_interval: 15s 
+scrape_configs:
+ - job_name: &#39;prometheus&#39;
+   honor_labels: true
+   metrics_path: &#39;/federate&#39;
+   params:
+    &#39;match[]&#39;:
+      - &#39;{job=&quot;node1&quot;}&#39;
+      - &#39;{job=&quot;node2&quot;}&#39;
+</code></pre><p>node1配置</p>
+<pre><code>global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+  external_labels:
+      server: &#39;node1&#39;
+scrape_configs:
+  - job_name: &#39;node1&#39;
+    static_configs:
+      - targets: [&#39;localhost:9091&#39;]
+</code></pre><p>node2配置    </p>
+<pre><code>global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+  external_labels:
+      server: &#39;node2&#39;
+scrape_configs:
+  - job_name: &#39;node2&#39;
+    static_configs:
+      - targets: [&#39;localhost:9092&#39;]
+</code></pre><p>启动3台prometheus</p>
+<pre><code>#master
+./prometheus --config.file=prometheus.yml
+
+#node1
+./prometheus --config.file=prometheus-node1-9091.yml --storage.tsdb.path=data-node1 --web.listen-address=0.0.0.0:9091
+
+#node2
+./prometheus --config.file=prometheus-node2-9092.yml --storage.tsdb.path=data-node2 --web.listen-address=0.0.0.0:9092
+</code></pre><p>可以看到在master可以查询到另外两台node的数据</p>
+<p><img src="https://ws3.sinaimg.cn/large/006tNc79gy1fzk187nu4wj326u0l443s.jpg" alt="">                 </p>
 <h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
-<li><a href="https://prometheus.io/docs/introduction/overview/" target="_blank" rel="noopener">https://prometheus.io/docs/introduction/overview/</a></li>
-<li><a href="https://prometheus.io/docs/practices/histograms/" target="_blank" rel="noopener">https://prometheus.io/docs/practices/histograms/</a></li>
-<li><a href="https://www.ibm.com/developerworks/cn/cloud/library/cl-lo-prometheus-getting-started-and-practice/index.html" target="_blank" rel="noopener">https://www.ibm.com/developerworks/cn/cloud/library/cl-lo-prometheus-getting-started-and-practice/index.html</a></li>
+<li><a href="https://www.ctolib.com/docs/sfile/prometheus-book/alert/prometheus-recoding-rules.html" target="_blank" rel="noopener">使用Recoding Rules优化性能</a></li>
+<li><a href="https://www.imuo.com/a/dbe9b42ff8b0c9569db6d250c4ca1261fc228876ef86ada92d45dc3523c20e20" target="_blank" rel="noopener">Prometheus 联邦及高可用详解</a></li>
+<li><a href="https://hk.saowen.com/a/c1c70c681b1df019e2e8bc9291e1e43b489bbaaca5923b5b4fd9bb4f734c7d73" target="_blank" rel="noopener">Prometheus高可用方案策略</a></li>
+<li><a href="http://dockone.io/article/6019" target="_blank" rel="noopener">Thanos：开源的大规模Prometheus集群解决方案</a></li>
+<li><a href="https://docs.mesosphere.com/services/prometheus/0.1.1-2.3.2/configuration/remote-storage/" target="_blank" rel="noopener">Prometheus Remote Storage to InfluxDB</a></li>
+<li><a href="https://docs.influxdata.com/influxdb/v1.7/supported_protocols/prometheus/" target="_blank" rel="noopener">Prometheus remote read and write API support</a></li>
+<li><a href="https://kairen.github.io/2018/06/29/devops/prometheus-federation/" target="_blank" rel="noopener">了解 Prometheus Federation 功能</a></li>
 </ul>
 
             </div>
@@ -533,7 +634,7 @@ response_time_count=3 总共采集了3条数据
                     <span class="reprint-tip">Reprint please specify: </span>
                     <a href="http://yoursite.com" class="b-link-green">wbl</a>
                     <i class="fa fa-angle-right fa-lg fa-fw text-color"></i>
-                    <a href="/2019/01/16/prometheus-jian-jie/" class="b-link-green">Prometheus简介</a>
+                    <a href="/2019/01/26/prometheus2-0-shi-zhan/" class="b-link-green">Prometheus2.0实战</a>
                 </p>
             </div>
         </div>
@@ -555,7 +656,7 @@ response_time_count=3 总共采集了3条数据
     <div class="row article-row">
         
         <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge left-badge text-color">Previous</div>
+            <div class="article-badge left-badge text-color">Current</div>
             <div class="card">
                 <a href="/2019/01/26/prometheus2-0-shi-zhan/">
                     <div class="card-image">
@@ -571,9 +672,9 @@ response_time_count=3 总共采集了3条数据
 
 与 Prometheus </div>
                     <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="fa fa-clock-o fa-fw icon-date"></i>2019-01-26
-                        </span>
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-01-26
+                            </span>
                         <span class="publish-author">
                             
                             <i class="fa fa-bookmark fa-fw icon-category"></i>
@@ -586,6 +687,7 @@ response_time_count=3 总共采集了3条数据
                         </span>
                     </div>
                 </div>
+
                 
                 <div class="card-action article-tags">
                     
@@ -602,27 +704,31 @@ response_time_count=3 总共采集了3条数据
         <div class="article col s12 m6" data-aos="fade-up">
             <div class="article-badge right-badge text-color">Next</div>
             <div class="card">
-                <a href="/2019/01/13/kafka-yuan-ma-fen-xi-consumer/">
+                <a href="/2019/01/16/prometheus-jian-jie/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/7.jpg" class="responsive-img" alt="Kafka源码分析——Consumer">
+                        <img src="/medias/featureimages/5.jpg" class="responsive-img" alt="Prometheus简介">
                         
-                        <span class="card-title">Kafka源码分析——Consumer</span>
+                        <span class="card-title">Prometheus简介</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
-                    <div class="summary">Consumer使用实例kafka-console-consumersh kafka-console-consumer.sh ----bootstrap-server localhost:9092 --topic test --from-b</div>
+                    <div class="summary">Prometheus简介Prometheus 是一套开源的系统监控报警框架。作为新一代的监控框架，Prometheus具有如下几个特点
+
+多维度的数据模型
+灵活和强大的查询语句(PromQL)
+易于管理，prometheus是一个独立的二进</div>
                     <div class="publish-info">
                             <span class="publish-date">
-                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-01-13
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-01-16
                             </span>
                         <span class="publish-author">
                             
                             <i class="fa fa-bookmark fa-fw icon-category"></i>
                             
-                            <a href="/categories/后端/" class="post-category" target="_blank">
-                                    后端
+                            <a href="/categories/监控/" class="post-category" target="_blank">
+                                    监控
                                 </a>
                             
                             
@@ -632,8 +738,8 @@ response_time_count=3 总共采集了3条数据
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/Kafka/" target="_blank">
-                        <span class="chip bg-color">Kafka</span>
+                    <a href="/tags/prometheus/" target="_blank">
+                        <span class="chip bg-color">prometheus</span>
                     </a>
                     
                 </div>
