@@ -5,10 +5,11 @@
 
 <head><meta name="generator" content="Hexo 3.8.0">
     <meta charset="utf-8">
-    <meta name="keywords" content="Prometheus2.0实战, wbl">
-    <meta name="description" content="Prometheus 1.x VS Prometheus 2.x1.0版本与2.0版本最大的改变之一就是存储引擎，1.x版本使用的是LevelDB，2.x使用的是TSDB，性能上有较大的提升，以下是官方对比数据
-
-与 Prometheus ">
+    <meta name="keywords" content="logback配置, wbl">
+    <meta name="description" content="logback配置文件加载顺序
+在 classpath 中寻找 logback-test.xml文件
+如果找不到 logback-test.xml，则在 classpath 中寻找 logback.groovy 文件
+如果找不到 logba">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -16,7 +17,7 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Prometheus2.0实战 | wbl</title>
+    <title>logback配置 | wbl</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/font-awesome.min.css">
@@ -249,13 +250,13 @@
 
 
 
-<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/12.jpg')">
+<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/4.jpg')">
     <div class="container">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
                     <div class="description center-align post-title">
-                        Prometheus2.0实战
+                        logback配置
                     </div>
                 </div>
             </div>
@@ -275,8 +276,8 @@
             
             <div class="article-tag">
                 
-                <a href="/tags/Prometheus/" target="_blank">
-                    <span class="chip bg-color">Prometheus</span>
+                <a href="/tags/Logback/" target="_blank">
+                    <span class="chip bg-color">Logback</span>
                 </a>
                 
             </div>
@@ -286,217 +287,236 @@
                 <span class="post-cate">
                     <i class="fa fa-bookmark fa-fw icon-category"></i>
                     
-                    <a href="/categories/监控/" class="post-category" target="_blank">
-                        监控
+                    <a href="/categories/Spring-Boot/" class="post-category" target="_blank">
+                        Spring Boot
                     </a>
                     
                 </span>
                 
 
                 <span class="post-date">
-                    <i class="fa fa-clock-o fa-fw"></i>2019-01-26
+                    <i class="fa fa-clock-o fa-fw"></i>2019-02-01
                 </span>
             </div>
         </div>
         <hr>
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h2 id="Prometheus-1-x-VS-Prometheus-2-x"><a href="#Prometheus-1-x-VS-Prometheus-2-x" class="headerlink" title="Prometheus 1.x VS Prometheus 2.x"></a>Prometheus 1.x VS Prometheus 2.x</h2><p>1.0版本与2.0版本最大的改变之一就是存储引擎，1.x版本使用的是LevelDB，2.x使用的是TSDB，性能上有较大的提升，以下是官方对比数据</p>
-<ul>
-<li>与 Prometheus 1.8 相比，CPU使用率降低了 20％ - 40％</li>
-<li>与 Prometheus 1.8 相比，磁盘空间使用率降低了 33％ - 50％</li>
-<li>没有太多查询，平均负载的磁盘 I/O&lt;1％</li>
-</ul>
-<h2 id="Prometheus-存储"><a href="#Prometheus-存储" class="headerlink" title="Prometheus 存储"></a>Prometheus 存储</h2><h3 id="本地存储"><a href="#本地存储" class="headerlink" title="本地存储"></a>本地存储</h3><p>Prometheus将两个小时的数据存储在一个目录底下，目录包含chunk(存储时间序列样本)，meta(存储元数据)，index(存储metric名称以及label)</p>
-<p>数据会先缓存在内存中而不会立刻持久化到磁盘中，因此Prometheus采用write-ahead-log机制，当prometheus server发生异常，重启之后会根据日志重新加载数据。</p>
-<p>通过API删除数据，数据先保存到tombstone文件，而不是立即从磁盘删除</p>
-<pre><code>./data/01BKGTZQ1SYQJTR4PB43C8PD98
-./data/01BKGTZQ1SYQJTR4PB43C8PD98/meta.json
-./data/01BKGTZQ1SYQJTR4PB43C8PD98/index
-./data/01BKGTZQ1SYQJTR4PB43C8PD98/chunks
-./data/01BKGTZQ1SYQJTR4PB43C8PD98/chunks/000001
-./data/01BKGTZQ1SYQJTR4PB43C8PD98/tombstones
-</code></pre><h3 id="远程存储"><a href="#远程存储" class="headerlink" title="远程存储"></a>远程存储</h3><p>prometheus可以与远程系统进行如下交互：</p>
-<ol>
-<li>prometheus可以通过remote_write写入数据</li>
-<li>prometheus可以通过remote_read读取数据</li>
+                <h2 id="logback配置文件加载顺序"><a href="#logback配置文件加载顺序" class="headerlink" title="logback配置文件加载顺序"></a>logback配置文件加载顺序</h2><ol>
+<li>在 classpath 中寻找 logback-test.xml文件</li>
+<li>如果找不到 logback-test.xml，则在 classpath 中寻找 logback.groovy 文件</li>
+<li>如果找不到 logback.groovy，则在 classpath 中寻找 logback.xml文件</li>
+<li>如果上述的文件都找不到，则 logback 会使用 JDK 的 SPI 机制查找 META-INF/services/ch.qos.logback.classic.spi.Configurator 中的 logback 配置实现类，这个实现类必须实现 Configuration 接口，使用它的实现来进行配置</li>
+<li>如果上述操作都不成功，logback 就会使用它自带的 BasicConfigurator 来配置，并将日志输出到 console<h2 id="logback配置结构"><a href="#logback配置结构" class="headerlink" title="logback配置结构"></a>logback配置结构</h2> configuration<pre><code> - appender
+ - logger
+ - root 
+</code></pre></li>
 </ol>
-<p><img src="https://prometheus.io/docs/prometheus/latest/images/remote_integrations.png" alt=""></p>
-<p>目前prometheus是通过HTTP协议传输数据，未来可能会使用gRPC。</p>
-<p>采用远程存储时，prometheus进行查询时，会从远端拉取所需的数据，然后进行相应的处理，因此可靠性不能保证。目前PromQL是不支持分布式查询。</p>
-<p>目前支持prometheus远程存储的数据源如下：</p>
-<p><img src="https://ws2.sinaimg.cn/large/006tNc79gy1fzgkyab3ybj30bc0brmye.jpg" alt=""></p>
-<h2 id="Prometheus-Federation"><a href="#Prometheus-Federation" class="headerlink" title="Prometheus Federation"></a>Prometheus Federation</h2><h3 id="Hierarchical-federation"><a href="#Hierarchical-federation" class="headerlink" title="Hierarchical federation"></a>Hierarchical federation</h3><p>这种方式相同job的不同instance分布在不同的prometheus上，高一层级的prometheus server从低层级的prometheus server查询数据。</p>
-<p>这种方式适合于某个job收集metrics过多，单台prometheus无法负荷时，可以利用这种方式对job的instance进行水平扩展，将不同的instance拆分到不同的prometheus中，在由全局的prometheus来收集聚合数据<br><img src="https://ws3.sinaimg.cn/large/006tNc79gy1fzgjb6rttlj30kp08at92.jpg" alt=""></p>
-<h3 id="Cross-service-federation"><a href="#Cross-service-federation" class="headerlink" title="Cross-service federation"></a>Cross-service federation</h3><p>这种方式是以service维度来拆分prometheus，在由全局的prometheus来收集聚合数据<br><img src="https://ws4.sinaimg.cn/large/006tNc79gy1fzgjg57ocrj30gx07q3yo.jpg" alt=""></p>
-<h3 id="Federation的优缺点"><a href="#Federation的优缺点" class="headerlink" title="Federation的优缺点"></a>Federation的优缺点</h3><p>优点：数据集中式管理，告警，不需要为每个prometheus实例管理数据</p>
-<p>缺点：数据集中化，网络可能会延迟。Federation没有解决数据单点问题</p>
-<h2 id="Recording-rules"><a href="#Recording-rules" class="headerlink" title="Recording rules"></a>Recording rules</h2><p>recording rule类似于Influxdb的CQ，可以在后台处理配置的表达式，并将表达式的结果存储起来。recording rule主要目的是为了提前计算一些复杂运算结果，提供查询效率。CQ的主要目的在于聚合数据，从而通过不同的RP策略来保存数据</p>
-<pre><code>groups:
-  - name: example
-    rules:
-    - record: job:http_inprogress_requests:sum
-      expr: sum(http_inprogress_requests) by (job)
-</code></pre><p>其中record表示指标的名称，expr则是指标的表达式</p>
-<h2 id="prometheus高可用部署"><a href="#prometheus高可用部署" class="headerlink" title="prometheus高可用部署"></a>prometheus高可用部署</h2><h3 id="基于HA"><a href="#基于HA" class="headerlink" title="基于HA"></a>基于HA</h3><p>部署多台prometheus server(一主一从)，并采集相同export的指标。</p>
-<p><img src="https://ws4.sinaimg.cn/large/006tNc79gy1fziofcdgszj30el06c74a.jpg" alt=""></p>
-<p>基于HA模式只能确保prometheus服务可用性问题，但是不解决prometheus server之间数据一致性问题已经持久化问题(数据丢失无法恢复)。</p>
-<h3 id="基于HA-远程存储"><a href="#基于HA-远程存储" class="headerlink" title="基于HA + 远程存储"></a>基于HA + 远程存储</h3><p>在HA的基础上通过添加remote storage，将监控数据存储到第三方存储服务上。既解决了服务可用性问题，同时也确保了数据的持久化</p>
-<p><img src="https://ws2.sinaimg.cn/large/006tNc79gy1fzirxf5gtnj30e207ndfx.jpg" alt=""></p>
-<h3 id="基于HA-远程存储-联邦集成"><a href="#基于HA-远程存储-联邦集成" class="headerlink" title="基于HA + 远程存储 + 联邦集成"></a>基于HA + 远程存储 + 联邦集成</h3><p>当单台prometheus需要处理大量的采集任务时，可以使用prometheusde联邦的方式，将采集任务分割到不同的prometheus实例中。</p>
-<p><img src="https://ws4.sinaimg.cn/large/006tNc79gy1fzisip7noyj30pw09l0t5.jpg" alt=""></p>
-<h3 id="三种方式对比"><a href="#三种方式对比" class="headerlink" title="三种方式对比"></a>三种方式对比</h3><table>
+<p>下面详细说明各个标签的详细配置</p>
+<h2 id="configuration"><a href="#configuration" class="headerlink" title="configuration"></a>configuration</h2><pre><code>&lt;configuration scan=&quot;true&quot; scanPeriod=&quot;60 seconds&quot; debug=&quot;false&quot;&gt;  
+    &lt;property name=&quot;glmapper-name&quot; value=&quot;glmapper-demo&quot; /&gt; 
+    &lt;contextName&gt;${glmapper-name}&lt;/contextName&gt; 
+
+    &lt;appender&gt;
+        //xxxx
+    &lt;/appender&gt;   
+
+    &lt;logger&gt;
+        //xxxx
+    &lt;/logger&gt;
+
+    &lt;root&gt;             
+       //xxxx
+    &lt;/root&gt;  
+&lt;/configuration&gt;   
+</code></pre><table>
 <thead>
 <tr>
-<th>部署方式</th>
-<th>使用场景</th>
+<th>属性名称</th>
+<th>属性说明</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>基于HA</td>
-<td>监控规模不大，prometheus server不会经常发生迁移，并且数据保存周期较短</td>
+<td>scan</td>
+<td>为true时，配置文件变化后会自动重新加载，默认设置为true</td>
 </tr>
 <tr>
-<td>基于HA + 远程存储</td>
-<td>监控规模不大，但要求监控数据持久化</td>
+<td>scanPeriod</td>
+<td>扫描配置文件的时间间隔，如果没有给出时间单位，默认为ms。当scan为true，此属性生效，默认值为1m</td>
 </tr>
 <tr>
-<td>基于HA + 远程存储 + 联邦集成</td>
-<td>单数据中心，并且采集指标量很大，此时prometheus的性能瓶颈主要在于大量的采集任务</td>
+<td>debug</td>
+<td>为true时，打印logback内部的日志，默认为false</td>
 </tr>
 </tbody>
 </table>
-<h3 id="Thanos"><a href="#Thanos" class="headerlink" title="Thanos"></a>Thanos</h3><p><a href="https://github.com/improbable-eng/thanos" target="_blank" rel="noopener">thanos</a>是开源的大规模Prometheus集群解决方案，它的设计目标如下</p>
-<ol>
-<li>全局的查询视图</li>
-<li>不受限的数据存储</li>
-<li>高可用性</li>
-</ol>
-<p>thanos的架构如图</p>
-<p><img src="https://ws2.sinaimg.cn/large/006tNc79gy1fzk1j4mmlnj317f0u07kq.jpg" alt=""></p>
-<h3 id="M3"><a href="#M3" class="headerlink" title="M3"></a>M3</h3><p><a href="https://github.com/m3db/m3" target="_blank" rel="noopener">M3</a>是Uber开源的基于M3DB的指标平台，它提供了如下的功能</p>
-<ol>
-<li>全局数据查询和存储</li>
-<li>提供数据聚合以及保留(retention)功能</li>
-<li>可作为prometheus的存储后台，提供prometheus的高可用部署</li>
-</ol>
-<p><img src="http://eng.uber.com/wp-content/uploads/2018/08/image4-1.png" alt=""></p>
-<p><img src="http://eng.uber.com/wp-content/uploads/2018/08/image1-1.png" alt=""></p>
-<h2 id="Prometheus实践"><a href="#Prometheus实践" class="headerlink" title="Prometheus实践"></a>Prometheus实践</h2><h3 id="recording-rule"><a href="#recording-rule" class="headerlink" title="recording rule"></a>recording rule</h3><p>生成recording rule</p>
-<pre><code>groups:
- - name: test
-   rules:
-   - record: job:prometheus_http_response_size_bytes_sum:sum
-     expr: sum(prometheus_http_response_size_bytes_sum) by (job)
-</code></pre><p>在graph中查看recording rule生成的指标</p>
-<p><img src="https://ws2.sinaimg.cn/large/006tNc79gy1fzjyh83xnsj32200f0jt9.jpg" alt=""></p>
-<p>可以看到生成的新指标与表达式得到的指标值一致</p>
-<p><img src="https://ws4.sinaimg.cn/large/006tNc79gy1fzjyjcgsasj31vk0eumyu.jpg" alt="">       </p>
-<h3 id="remote-write-remote-read"><a href="#remote-write-remote-read" class="headerlink" title="remote_write/remote_read"></a>remote_write/remote_read</h3><h4 id="influxdb"><a href="#influxdb" class="headerlink" title="influxdb"></a>influxdb</h4><p>influxdb内部已经实现了读写prometheus数据的协议，只需要在prometheus.yml中配置remote_write和remote_read的url地址即可</p>
-<pre><code>remote_write:
- - url: &quot;http://127.0.0.1:8086/api/v1/prom/write?db=prometheus_test&quot;
-remote_read:
- - url: &quot;http://127.0.0.1:8086/api/v1/prom/read?db=prometheus_test&quot;
-</code></pre><p>配置prometheus之后，需要在infludb中创建配置中对应的数据库</p>
-<pre><code>create database prometheus_test
-</code></pre><p>启动prometheus之后，可以在influxdb中看到生成的measurement，每个metric对应一个measurement，而metric中的label对应inflxudb的tag</p>
-<pre><code># Prometheus metric
-example_metric{queue=&quot;0:http://example:8086/api/v1/prom/write?db=prometheus&quot;,le=&quot;0.005&quot;} 308
-
-# Same metric parsed into InfluxDB
-measurement
-  example_metric
-tags
-  queue = &quot;0:http://example:8086/api/v1/prom/write?db=prometheus&quot;
-  le = &quot;0.005&quot;
-  job = &quot;prometheus&quot;
-  instance = &quot;localhost:9090&quot;
-  __name__ = &quot;example_metric&quot;
-fields
-  value = 308
-</code></pre><p><img src="https://ws1.sinaimg.cn/large/006tNc79gy1fzjzk2viz9j30sw0le423.jpg" alt=""></p>
-<p><img src="https://ws1.sinaimg.cn/large/006tNc79gy1fzjzkukt4wj317y0bmtac.jpg" alt=""></p>
-<h3 id="federation"><a href="#federation" class="headerlink" title="federation"></a>federation</h3><p>启动三台prometheus server，其中一台作为master，从另外两台拉取数据</p>
+<h2 id="contextName"><a href="#contextName" class="headerlink" title="contextName"></a>contextName</h2><pre><code>&lt;contextName&gt;${glmapper-name}&lt;/contextName&gt; 
+</code></pre><p>默认的contextName为default，可以通过设置contextName来区分不同应用程序的日志</p>
+<h2 id="property"><a href="#property" class="headerlink" title="property"></a>property</h2><pre><code>&lt;property name=&quot;glmapper-name&quot; value=&quot;glmapper-demo&quot; /&gt;
+</code></pre><p>property标签用来定义变量，具有如下两个属性</p>
 <table>
 <thead>
 <tr>
-<th>name</th>
-<th>role</th>
-<th>port</th>
+<th>属性名称</th>
+<th>属性说明</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>prometheus</td>
-<td>master</td>
-<td>9090</td>
+<td>name</td>
+<td>变量名称</td>
 </tr>
 <tr>
-<td>node1</td>
-<td>collector</td>
-<td>9091</td>
-</tr>
-<tr>
-<td>node2</td>
-<td>collector</td>
-<td>9092</td>
+<td>value</td>
+<td>变量值</td>
 </tr>
 </tbody>
 </table>
-<p>master配置</p>
-<pre><code>global:
-  scrape_interval: 15s 
-  evaluation_interval: 15s 
-scrape_configs:
- - job_name: &#39;prometheus&#39;
-   honor_labels: true
-   metrics_path: &#39;/federate&#39;
-   params:
-    &#39;match[]&#39;:
-      - &#39;{job=&quot;node1&quot;}&#39;
-      - &#39;{job=&quot;node2&quot;}&#39;
-</code></pre><p>node1配置</p>
-<pre><code>global:
-  scrape_interval:     15s
-  evaluation_interval: 15s
-  external_labels:
-      server: &#39;node1&#39;
-scrape_configs:
-  - job_name: &#39;node1&#39;
-    static_configs:
-      - targets: [&#39;localhost:9091&#39;]
-</code></pre><p>node2配置    </p>
-<pre><code>global:
-  scrape_interval:     15s
-  evaluation_interval: 15s
-  external_labels:
-      server: &#39;node2&#39;
-scrape_configs:
-  - job_name: &#39;node2&#39;
-    static_configs:
-      - targets: [&#39;localhost:9092&#39;]
-</code></pre><p>启动3台prometheus</p>
-<pre><code>#master
-./prometheus --config.file=prometheus.yml
+<p>定义变量之后，可以通过表示式来使用变量</p>
+<pre><code>${name}
+</code></pre><h2 id="logger"><a href="#logger" class="headerlink" title="logger"></a>logger</h2><p>用来设置某一个包或者具体的某一个类的日志打印级别以及指定appender。</p>
+<pre><code>&lt;logger name=&quot;com.meitu.alarm&quot; level=&quot;debug&quot; additivity=&quot;false&quot;&gt;
+</code></pre><table>
+<thead>
+<tr>
+<th>属性名称</th>
+<th>属性说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>name</td>
+<td>logger名称，必填，与LoggerFactory.getLogger(“name”)中的name对应</td>
+</tr>
+<tr>
+<td>level</td>
+<td>level的取值可以为TRACE, DEBUG, INFO, WARN, ERROR, ALL, OFF</td>
+</tr>
+<tr>
+<td>additivity</td>
+<td>是否向父类继续上报日志，如果设置为true，则日志会向上传递，父类也会打印该日志</td>
+</tr>
+</tbody>
+</table>
+<p><logger>标签只有一个子标签<appender-ref>，用来绑定对应的appender</appender-ref></logger></p>
+<h2 id="appender"><a href="#appender" class="headerlink" title="appender"></a>appender</h2><p>appender用来标识日志输出的格式以及日志输出地点，可以是控制台，文件</p>
+<pre><code>&lt;appender name=&quot;console&quot; class=&quot;ch.qos.logback.core.ConsoleAppender&quot;&gt;
+&lt;/appender&gt;
+</code></pre><table>
+<thead>
+<tr>
+<th>属性名称</th>
+<th>属性说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>name</td>
+<td>appender的名称</td>
+</tr>
+<tr>
+<td>class</td>
+<td>appender的实现类名称</td>
+</tr>
+</tbody>
+</table>
+<appender> 标签下可以包含至多一个 <layout>，0个或多个 <encoder>，0个或多个 <filter><br><br>以下是几种常见的appender<br>### Console<br>将日志输出到控制台中<br><br>    <appender name="console" class="ch.qos.logback.core.ConsoleAppender"><br>        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder"><br>            <pattern>%d{YY-MM-dd HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern><br>        </encoder><br>    </appender>
 
-#node1
-./prometheus --config.file=prometheus-node1-9091.yml --storage.tsdb.path=data-node1 --web.listen-address=0.0.0.0:9091
+<h3 id="RollingFileAppender-by-time"><a href="#RollingFileAppender-by-time" class="headerlink" title="RollingFileAppender(by time)"></a>RollingFileAppender(by time)</h3><p>将日志输出到文件中，并根据time分割日志</p>
+<pre><code>&lt;appender name=&quot;debug&quot; class=&quot;ch.qos.logback.core.rolling.RollingFileAppender&quot;&gt;
+        &lt;file&gt;${LOG_PATH}/debug.log&lt;/file&gt;
+        &lt;encoder class=&quot;ch.qos.logback.classic.encoder.PatternLayoutEncoder&quot;&gt;
+            &lt;pattern&gt;%d{yyyy-MM-dd HH:mm:ss} %logger %msg%n&lt;/pattern&gt;
+        &lt;/encoder&gt;
+        &lt;rollingPolicy class=&quot;ch.qos.logback.core.rolling.TimeBasedRollingPolicy&quot;&gt;
+            &lt;fileNamePattern&gt;${LOG_PATH}/debug.%d{yyyyMMdd-HH}.log&lt;/fileNamePattern&gt;
+            &lt;maxHistory&gt;30&lt;/maxHistory&gt;
+        &lt;/rollingPolicy&gt;
+        &lt;filter class=&quot;ch.qos.logback.classic.filter.LevelFilter&quot;&gt;
+            &lt;level&gt;DEBUG&lt;/level&gt;
+            &lt;onMatch&gt;ACCEPT&lt;/onMatch&gt;
+            &lt;onMismatch&gt;DENY&lt;/onMismatch&gt;
+        &lt;/filter&gt;
+    &lt;/appender&gt;
+</code></pre><h3 id="JSON-Appender"><a href="#JSON-Appender" class="headerlink" title="JSON Appender"></a>JSON Appender</h3><p>按照JSON格式输出日志</p>
+<pre><code>&lt;appender name=&quot;console&quot; class=&quot;ch.qos.logback.core.ConsoleAppender&quot;&gt;
+    &lt;encoder class=&quot;net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder&quot;&gt;
+        &lt;providers&gt;
+            &lt;pattern&gt;
+                &lt;pattern&gt;
+                    {
+                    &quot;timestamp&quot;: &quot;%date{\&quot;yyyy-MM-dd HH:mm:ss\&quot;}&quot;,
+                    &quot;log_level&quot;: &quot;%level&quot;,
+                    &quot;class_name&quot;: &quot;%class&quot;,
+                    &quot;message&quot;: &quot;%message&quot;,
+                    &quot;stack_trace&quot;: &quot;%exception{5}&quot;
+                    }
+                &lt;/pattern&gt;
+            &lt;/pattern&gt;
+        &lt;/providers&gt;
+        &lt;!--&lt;charset&gt;UTF-8&lt;/charset&gt;--&gt;
+    &lt;/encoder&gt;
+&lt;/appender&gt;
+</code></pre><h2 id="多环境日志输出"><a href="#多环境日志输出" class="headerlink" title="多环境日志输出"></a>多环境日志输出</h2><p>根据不同的环境(test,dev,pre,release)来定义输出日志</p>
+<pre><code>&lt;springProfile name=&quot;test,dev&quot;&gt; //多个环境用逗号分隔
+    &lt;logger name=&quot;com.meitu.alarm&quot; level=&quot;debug&quot; additivity=&quot;false&quot;&gt;
+        &lt;appender-ref ref=&quot;debug&quot;/&gt;
+        &lt;appender-ref ref=&quot;info&quot;/&gt;
+        &lt;appender-ref ref=&quot;warn&quot;/&gt;
+        &lt;appender-ref ref=&quot;error&quot;/&gt;
+    &lt;/logger&gt;
+&lt;/springProfile&gt;
 
-#node2
-./prometheus --config.file=prometheus-node2-9092.yml --storage.tsdb.path=data-node2 --web.listen-address=0.0.0.0:9092
-</code></pre><p>可以看到在master可以查询到另外两台node的数据</p>
-<p><img src="https://ws3.sinaimg.cn/large/006tNc79gy1fzk187nu4wj326u0l443s.jpg" alt="">                 </p>
-<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
-<li><a href="https://www.ctolib.com/docs/sfile/prometheus-book/alert/prometheus-recoding-rules.html" target="_blank" rel="noopener">使用Recoding Rules优化性能</a></li>
-<li><a href="https://www.imuo.com/a/dbe9b42ff8b0c9569db6d250c4ca1261fc228876ef86ada92d45dc3523c20e20" target="_blank" rel="noopener">Prometheus 联邦及高可用详解</a></li>
-<li><a href="https://hk.saowen.com/a/c1c70c681b1df019e2e8bc9291e1e43b489bbaaca5923b5b4fd9bb4f734c7d73" target="_blank" rel="noopener">Prometheus高可用方案策略</a></li>
-<li><a href="http://dockone.io/article/6019" target="_blank" rel="noopener">Thanos：开源的大规模Prometheus集群解决方案</a></li>
-<li><a href="https://docs.mesosphere.com/services/prometheus/0.1.1-2.3.2/configuration/remote-storage/" target="_blank" rel="noopener">Prometheus Remote Storage to InfluxDB</a></li>
-<li><a href="https://docs.influxdata.com/influxdb/v1.7/supported_protocols/prometheus/" target="_blank" rel="noopener">Prometheus remote read and write API support</a></li>
-<li><a href="https://kairen.github.io/2018/06/29/devops/prometheus-federation/" target="_blank" rel="noopener">了解 Prometheus Federation 功能</a></li>
+&lt;springProfile name=&quot;release&quot;&gt;
+    &lt;logger name=&quot;com.meitu.alarm&quot; level=&quot;info&quot; additivity=&quot;false&quot;&gt;
+        &lt;appender-ref ref=&quot;console&quot;/&gt;
+    &lt;/logger&gt;
+&lt;/springProfile&gt;
+</code></pre><h2 id="关闭某个包或者某个类的日志"><a href="#关闭某个包或者某个类的日志" class="headerlink" title="关闭某个包或者某个类的日志"></a>关闭某个包或者某个类的日志</h2><pre><code>&lt;logger name=&quot;packageName&quot; level=&quot;OFF&quot; /&gt;
+</code></pre><h2 id="自定义字段"><a href="#自定义字段" class="headerlink" title="自定义字段"></a>自定义字段</h2><p>若日志最终存储到ES中，可以在JSON中添加自定义的字段，方便问题的排查</p>
+<h3 id="StructuredArguments提供的结构化字段"><a href="#StructuredArguments提供的结构化字段" class="headerlink" title="StructuredArguments提供的结构化字段"></a>StructuredArguments提供的结构化字段</h3><pre><code>import static net.logstash.logback.argument.StructuredArguments.*
+//output: log message value
+logger.info(&quot;log message {}&quot;, value(&quot;name&quot;, &quot;value&quot;));
+
+//output: log message name=value
+logger.info(&quot;log message {}&quot;, keyValue(&quot;name&quot;, &quot;value&quot;));
+
+//json output: {&quot;message&quot;:&quot;log message&quot;,&quot;name&quot;:&quot;value&quot;}
+logger.info(&quot;log message&quot;, keyValue(&quot;name&quot;, &quot;value&quot;));
+</code></pre><p>如果想在输出的JSON中，加上自定义字段，需要配置arguments参数</p>
+<pre><code>&lt;encoder class=&quot;net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder&quot;&gt;
+        &lt;providers&gt;
+            &lt;pattern&gt;
+                &lt;pattern&gt;
+                    {
+                    &quot;timestamp&quot;: &quot;%date{\&quot;yyyy-MM-dd HH:mm:ss\&quot;}&quot;,
+                    &quot;log_level&quot;: &quot;%level&quot;,
+                    &quot;class_name&quot;: &quot;%class&quot;,
+                    &quot;thread&quot;: &quot;%thread&quot;,
+                    &quot;message&quot;: &quot;%message&quot;,
+                    &quot;stack_trace&quot;: &quot;%exception{5}&quot;
+                    }
+                &lt;/pattern&gt;
+            &lt;/pattern&gt;
+            &lt;arguments/&gt;
+        &lt;/providers&gt;
+    &lt;/encoder&gt;
+</code></pre><h3 id="Markers提供的标记"><a href="#Markers提供的标记" class="headerlink" title="Markers提供的标记"></a>Markers提供的标记</h3><pre><code>import static net.logstash.logback.marker.Markers.*
+
+ /*
+ * Add &quot;name&quot;:&quot;value&quot; to the JSON output.
+ */
+logger.info(append(&quot;name&quot;, &quot;value&quot;), &quot;log message&quot;);
+
+/*
+ * Add &quot;name1&quot;:&quot;value1&quot;,&quot;name2&quot;:&quot;value2&quot; to the JSON output by using multiple markers.
+ */
+logger.info(append(&quot;name1&quot;, &quot;value1&quot;).and(append(&quot;name2&quot;, &quot;value2&quot;)), &quot;log message&quot;);
+</code></pre><h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a href="https://www.jianshu.com/p/a26da0c55255" target="_blank" rel="noopener">logstash中logback的json编码器插件</a></li>
 </ul>
-
+</filter></encoder></layout></appender>
             </div>
             <hr>
 
@@ -634,7 +654,7 @@ scrape_configs:
                     <span class="reprint-tip">Reprint please specify: </span>
                     <a href="http://yoursite.com" class="b-link-green">wbl</a>
                     <i class="fa fa-angle-right fa-lg fa-fw text-color"></i>
-                    <a href="/2019/01/26/prometheus2-0-shi-zhan/" class="b-link-green">Prometheus2.0实战</a>
+                    <a href="/2019/02/01/logback-pei-zhi/" class="b-link-green">logback配置</a>
                 </p>
             </div>
         </div>
@@ -656,7 +676,7 @@ scrape_configs:
     <div class="row article-row">
         
         <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge left-badge text-color">Previous</div>
+            <div class="article-badge left-badge text-color">Current</div>
             <div class="card">
                 <a href="/2019/02/01/logback-pei-zhi/">
                     <div class="card-image">
@@ -673,9 +693,9 @@ scrape_configs:
 如果找不到 logback-test.xml，则在 classpath 中寻找 logback.groovy 文件
 如果找不到 logba</div>
                     <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="fa fa-clock-o fa-fw icon-date"></i>2019-02-01
-                        </span>
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-02-01
+                            </span>
                         <span class="publish-author">
                             
                             <i class="fa fa-bookmark fa-fw icon-category"></i>
@@ -688,6 +708,7 @@ scrape_configs:
                         </span>
                     </div>
                 </div>
+
                 
                 <div class="card-action article-tags">
                     
@@ -704,24 +725,22 @@ scrape_configs:
         <div class="article col s12 m6" data-aos="fade-up">
             <div class="article-badge right-badge text-color">Next</div>
             <div class="card">
-                <a href="/2019/01/16/prometheus-jian-jie/">
+                <a href="/2019/01/26/prometheus2-0-shi-zhan/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/5.jpg" class="responsive-img" alt="Prometheus简介">
+                        <img src="/medias/featureimages/12.jpg" class="responsive-img" alt="Prometheus2.0实战">
                         
-                        <span class="card-title">Prometheus简介</span>
+                        <span class="card-title">Prometheus2.0实战</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
-                    <div class="summary">Prometheus简介Prometheus 是一套开源的系统监控报警框架。作为新一代的监控框架，Prometheus具有如下几个特点
+                    <div class="summary">Prometheus 1.x VS Prometheus 2.x1.0版本与2.0版本最大的改变之一就是存储引擎，1.x版本使用的是LevelDB，2.x使用的是TSDB，性能上有较大的提升，以下是官方对比数据
 
-多维度的数据模型
-灵活和强大的查询语句(PromQL)
-易于管理，prometheus是一个独立的二进</div>
+与 Prometheus </div>
                     <div class="publish-info">
                             <span class="publish-date">
-                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-01-16
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-01-26
                             </span>
                         <span class="publish-author">
                             
@@ -738,8 +757,8 @@ scrape_configs:
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/prometheus/" target="_blank">
-                        <span class="chip bg-color">prometheus</span>
+                    <a href="/tags/Prometheus/" target="_blank">
+                        <span class="chip bg-color">Prometheus</span>
                     </a>
                     
                 </div>
