@@ -3,6 +3,29 @@
   
     
     <entry>
+      <title>InfluxDB简介</title>
+      <link href="/2019/02/16/influxdb-jian-jie/"/>
+      <url>/2019/02/16/influxdb-jian-jie/</url>
+      
+        <content type="html"><![CDATA[<h2 id="InfluxDB简介"><a href="#InfluxDB简介" class="headerlink" title="InfluxDB简介"></a>InfluxDB简介</h2><p>InfluxDB是一个时序型数据库，用于高性能的查询与存储时序型数据。目前，InfluxDB被广泛的用于监控系统中。InfluxDB与Grafana结合，可以为用户带来清晰明了的监控面板。</p><h2 id="InfluxDB安装"><a href="#InfluxDB安装" class="headerlink" title="InfluxDB安装"></a>InfluxDB安装</h2><h3 id="macOS"><a href="#macOS" class="headerlink" title="macOS"></a>macOS</h3><pre><code>brew updatebrew install influxdbinfluxd -config /usr/local/etc/influxdb.conf   //启动influxdb</code></pre><h3 id="Ubuntu"><a href="#Ubuntu" class="headerlink" title="Ubuntu"></a>Ubuntu</h3><pre><code>sudo apt-get update &amp;&amp; sudo apt-get install influxdbsudo service influxdb start</code></pre><h2 id="InfluxDB相关概念"><a href="#InfluxDB相关概念" class="headerlink" title="InfluxDB相关概念"></a>InfluxDB相关概念</h2><h3 id="database"><a href="#database" class="headerlink" title="database"></a>database</h3><p>数据库，包含用户，数据保留策略以及时序型数据。类似关系型数据库中数据库</p><h3 id="measurement"><a href="#measurement" class="headerlink" title="measurement"></a>measurement</h3><p>具有相同tag以及filed的数据集合</p><h3 id="tag"><a href="#tag" class="headerlink" title="tag"></a>tag</h3><p>influxdb使用键值对key-value的形式来保存数据，tag是具有索引的数据</p><h3 id="filed"><a href="#filed" class="headerlink" title="filed"></a>filed</h3><p>influxdb中用来存储具体数值，也是key-value的形式，与tag相比，filed没有索引，因此用filed来过滤查询数据性能会很低</p><h3 id="point"><a href="#point" class="headerlink" title="point"></a>point</h3><p>tag + filed + timestamp = point，类似于关系型数据库中的一行数据(row)</p><h3 id="continuous-query-CQ"><a href="#continuous-query-CQ" class="headerlink" title="continuous query(CQ)"></a>continuous query(CQ)</h3><p>InfluxDB自动并且周期性执行的SQL语句，主要用来自动聚合数据，提供查询性能</p><h3 id="retention-policy-RP"><a href="#retention-policy-RP" class="headerlink" title="retention policy(RP)"></a>retention policy(RP)</h3><p>保留数据策略，每一个RP都会设置一个数据保留期限(duration)，对于超过期限的数据，InfluxDB会自动删除。例如RP设置的期限为7天，则7天之前的数据都会被删除</p><h3 id="series"><a href="#series" class="headerlink" title="series"></a>series</h3><p>在同一个measurement，具有相同的retention policy以及相同tag的数据集合</p><h3 id="shard"><a href="#shard" class="headerlink" title="shard"></a>shard</h3><p>分片包含了实际加密和压缩的数据，一个分片对应了磁盘上的一个TSM文件</p><h2 id="InfluxDB与关系型数据库的对比"><a href="#InfluxDB与关系型数据库的对比" class="headerlink" title="InfluxDB与关系型数据库的对比"></a>InfluxDB与关系型数据库的对比</h2><h3 id="相关概念对比"><a href="#相关概念对比" class="headerlink" title="相关概念对比"></a>相关概念对比</h3><table><thead><tr><th>InfluxDB</th><th>关系型数据库</th></tr></thead><tbody><tr><td>database</td><td>database</td></tr><tr><td>measurement</td><td>table</td></tr><tr><td>tag</td><td>primary-key</td></tr><tr><td>filed</td><td>column</td></tr><tr><td>point</td><td>row</td></tr></tbody></table><p>下面一张表，可以对应到InfluxDB的measurement中<br><img src="https://ws4.sinaimg.cn/large/006tKfTcgy1g08cg9a683j30su076q44.jpg" alt=""></p><p><img src="https://ws1.sinaimg.cn/large/006tKfTcgy1g08chjy7isj30xk08st9w.jpg" alt=""></p><h2 id="InfluxDB-Quick-start"><a href="#InfluxDB-Quick-start" class="headerlink" title="InfluxDB Quick start"></a>InfluxDB Quick start</h2><pre><code>//1. 启动influxd</code></pre><p><img src="https://ws3.sinaimg.cn/large/006tKfTcgy1g08co9olscj327c0icaff.jpg" alt=""></p><pre><code>//2. 进入命令行influx -precision rfc3339</code></pre><p>-precision 用来指定时间戳的显示格式<br><img src="https://ws1.sinaimg.cn/large/006tKfTcgy1g08cpc9a2fj30x006yjsu.jpg" alt=""></p><pre><code>//3. 查看databaseshow databases;</code></pre><p><img src="https://ws4.sinaimg.cn/large/006tKfTcgy1g08crkttvjj310e09sjs2.jpg" alt=""></p><pre><code>//4. 使用databaseuse media_quality//5. 查看measurementshow measurements</code></pre><p><img src="https://ws4.sinaimg.cn/large/006tKfTcgy1g08cthchcvj30l609qmy4.jpg" alt=""></p><pre><code>//6. 查询数据select * from [measurement] where time &gt; now() - 5m limit 10</code></pre><h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul><li><a href="https://docs.influxdata.com/influxdb/v1.7/about_the_project/" target="_blank" rel="noopener">InfluDB官网</a>                </li></ul>]]></content>
+      
+      
+      <categories>
+          
+          <category> 监控 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> influxDB </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
       <title>logback配置</title>
       <link href="/2019/02/01/logback-pei-zhi/"/>
       <url>/2019/02/01/logback-pei-zhi/</url>
