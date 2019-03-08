@@ -5,12 +5,8 @@
 
 <head><meta name="generator" content="Hexo 3.8.0">
     <meta charset="utf-8">
-    <meta name="keywords" content="InfluxDB配置详解, wbl">
-    <meta name="description" content="配置文件位置Linux：/etc/influxdb/influxdb.conf
-
-maxOS：/usr/local/etc/influxdb.conf
-使用配置文件
-influxd -config /etc/influxdb/influxd">
+    <meta name="keywords" content="InfluxDB group by time()说明, wbl">
+    <meta name="description" content="使用姿势SELECT &amp;lt;function&amp;gt;(&amp;lt;field_key&amp;gt;) FROM_clause WHERE &amp;lt;time_range&amp;gt; GROUP BY time(&amp;lt;time_interval&amp;gt;)">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -18,7 +14,7 @@ influxd -config /etc/influxdb/influxd">
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>InfluxDB配置详解 | wbl</title>
+    <title>InfluxDB group by time()说明 | wbl</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/font-awesome.min.css">
@@ -251,13 +247,13 @@ influxd -config /etc/influxdb/influxd">
 
 
 
-<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/10.jpg')">
+<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/12.jpg')">
     <div class="container">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
                     <div class="description center-align post-title">
-                        InfluxDB配置详解
+                        InfluxDB group by time()说明
                     </div>
                 </div>
             </div>
@@ -296,267 +292,150 @@ influxd -config /etc/influxdb/influxd">
                 
 
                 <span class="post-date">
-                    <i class="fa fa-clock-o fa-fw"></i>2019-02-24
+                    <i class="fa fa-clock-o fa-fw"></i>2019-03-08
                 </span>
             </div>
         </div>
         <hr>
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h2 id="配置文件位置"><a href="#配置文件位置" class="headerlink" title="配置文件位置"></a>配置文件位置</h2><pre><code>Linux：/etc/influxdb/influxdb.conf
+                <h2 id="使用姿势"><a href="#使用姿势" class="headerlink" title="使用姿势"></a>使用姿势</h2><pre><code>SELECT &lt;function&gt;(&lt;field_key&gt;) FROM_clause WHERE &lt;time_range&gt; GROUP BY time(&lt;time_interval&gt;),[tag_key] [fill(&lt;fill_option&gt;)]
+</code></pre><p>group time(interval)会对查询结果按照interval进行聚合，例如，time(5m),interval=5m, 则会将数据每隔5m进行聚合</p>
+<h2 id="示例说明"><a href="#示例说明" class="headerlink" title="示例说明"></a>示例说明</h2><p>样例数据</p>
+<pre><code>&gt; SELECT &quot;water_level&quot;,&quot;location&quot; FROM &quot;h2o_feet&quot; WHERE time &gt;= &#39;2015-08-18T00:00:00Z&#39; AND time &lt;= &#39;2015-08-18T00:30:00Z&#39;
 
-maxOS：/usr/local/etc/influxdb.conf
-</code></pre><p>使用配置文件</p>
-<pre><code>influxd -config /etc/influxdb/influxdb.conf
-</code></pre><p>可以使用环境变量INFLUXDB_CONFIG_PATH来指定配置文件位置</p>
-<pre><code>echo $INFLUXDB_CONFIG_PATH
-/etc/influxdb/influxdb.conf
+name: h2o_feet
+--------------
+time                   water_level   location
+2015-08-18T00:00:00Z   8.12          coyote_creek
+2015-08-18T00:00:00Z   2.064         santa_monica
+2015-08-18T00:06:00Z   8.005         coyote_creek
+2015-08-18T00:06:00Z   2.116         santa_monica
+2015-08-18T00:12:00Z   7.887         coyote_creek
+2015-08-18T00:12:00Z   2.028         santa_monica
+2015-08-18T00:18:00Z   7.762         coyote_creek
+2015-08-18T00:18:00Z   2.126         santa_monica
+2015-08-18T00:24:00Z   7.635         coyote_creek
+2015-08-18T00:24:00Z   2.041         santa_monica
+2015-08-18T00:30:00Z   7.5           coyote_creek
+2015-08-18T00:30:00Z   2.051         santa_monica
+</code></pre><p>此时按照interval=12m 对数据进行聚合，查询语句以及查询结果如下：</p>
+<pre><code>&gt; SELECT COUNT(&quot;water_level&quot;) FROM &quot;h2o_feet&quot; WHERE &quot;location&quot;=&#39;coyote_creek&#39; AND time &gt;= &#39;2015-08-18T00:00:00Z&#39; AND time &lt;= &#39;2015-08-18T00:30:00Z&#39; GROUP BY time(12m)
 
-influxd
-</code></pre><h2 id="环境变量配置"><a href="#环境变量配置" class="headerlink" title="环境变量配置"></a>环境变量配置</h2><p>InfluxDB的配置可以放在环境变量中，InfluxDB相关的环境变量都已INFLUXDB_作为前缀</p>
-<pre><code>INFLUXDB_*
-</code></pre><h2 id="配置优先级"><a href="#配置优先级" class="headerlink" title="配置优先级"></a>配置优先级</h2><p>inflxudb所有的配置项可以在配置文件influxdb.conf中配置，也可以通过环境变量来配置。环境变量的配置优先级高于配置文件的配置。如果有配置环境变量，环境变量的配置将覆盖配置文件的配置</p>
-<pre><code>环境变量 &gt;     配置文件 &gt; InfluxDB内置配置
-</code></pre><h2 id="全局配置"><a href="#全局配置" class="headerlink" title="全局配置"></a>全局配置</h2><table>
-<thead>
-<tr>
-<th>配置名称</th>
-<th>默认值</th>
-<th>说明</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>reporting-disabled</td>
-<td>false</td>
-<td>是否向每隔24小时向influxdb汇报信息，包括influxdb版本，database，measurement和series的数量等信息</td>
-</tr>
-<tr>
-<td>bind-address</td>
-<td>127.0.0.1:8088</td>
-<td>RPC服务的地址</td>
-</tr>
-</tbody>
-</table>
-<h2 id="元数据配置-meta"><a href="#元数据配置-meta" class="headerlink" title="元数据配置[meta]"></a>元数据配置[meta]</h2><p>用来控制influxdb的元数据信息，包括database，rp策略，CQ等信息</p>
+name: h2o_feet
+--------------
+time                   count
+2015-08-18T00:00:00Z   2
+2015-08-18T00:12:00Z   2
+2015-08-18T00:24:00Z   2
+</code></pre><p>InfluxDB在计算group by时，会用到两个时间区间，一个是根据interval形成的预设区间，一个是根据where语句中的time_range形成的区间，在上述例子中time_range为[2015-08-18T00:00:00Z,2015-08-18T00:30:00Z),详细说明如下所示</p>
 <table>
 <thead>
 <tr>
-<th>配置名称</th>
-<th>默认值</th>
-<th>说明</th>
+<th>预设区间</th>
+<th>where time_range</th>
+<th>数据</th>
+<th>返回时间戳</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>dir</td>
-<td>/usr/local/var/influxdb/meta</td>
-<td>存储元数据信息的路径</td>
+<td>time&gt;=2015-08-18T00:00:00Z and time&lt;2015-08-18T00:12:00Z</td>
+<td>time&gt;=2015-08-18T00:00:00Z and time&lt;2015-08-18T00:12:00Z</td>
+<td>8.12，8.005</td>
+<td>2015-08-18T00:00:00Z</td>
 </tr>
 <tr>
-<td>retention-autocreate</td>
-<td>true</td>
-<td>当数据库创建时是否自动创建默认的retention policy</td>
+<td>time&gt;=2015-08-18T00:12:00Z and time&lt;2015-08-18T00:24:00Z</td>
+<td>time&gt;=2015-08-18T00:12:00Z and time&lt;2015-08-18T00:24:00Z</td>
+<td>7.887，7.762</td>
+<td>2015-08-18T00:12:00Z</td>
 </tr>
 <tr>
-<td>logging-enabled</td>
-<td>true</td>
-<td>是否允许打印元数据相关的日志</td>
+<td>time&gt;=2015-08-18T00:24:00Z and time&lt;2015-08-18T00:36:00Z</td>
+<td>time&gt;=2015-08-18T00:24:00Z and time&lt;2015-08-18T00:30:00Z</td>
+<td>7.635,7.5</td>
+<td>2015-08-18T00:24:00Z</td>
 </tr>
 </tbody>
 </table>
-<h2 id="数据配置-data"><a href="#数据配置-data" class="headerlink" title="数据配置[data]"></a>数据配置[data]</h2><table>
+<h2 id="异常情况说明"><a href="#异常情况说明" class="headerlink" title="异常情况说明"></a>异常情况说明</h2><p>有的时候使用group by time()，会发现查询结果的时间与where条件中的time_range冲突，这是因为InfluxDB在返回时间时是以预设区间的时间为主。详细说明如下</p>
+<p>样本数据</p>
+<pre><code>&gt; SELECT &quot;water_level&quot; FROM &quot;h2o_feet&quot; WHERE &quot;location&quot;=&#39;coyote_creek&#39; AND time &gt;= &#39;2015-08-18T00:00:00Z&#39; AND time &lt;= &#39;2015-08-18T00:18:00Z&#39;
+name: h2o_feet
+--------------
+time                   water_level
+2015-08-18T00:00:00Z   8.12
+2015-08-18T00:06:00Z   8.005
+2015-08-18T00:12:00Z   7.887
+2015-08-18T00:18:00Z   7.762
+</code></pre><p>查询语句以及查询结果：</p>
+<pre><code>&gt; SELECT COUNT(&quot;water_level&quot;) FROM &quot;h2o_feet&quot; WHERE &quot;location&quot;=&#39;coyote_creek&#39; AND time &gt;= &#39;2015-08-18T00:06:00Z&#39; AND time &lt; &#39;2015-08-18T00:18:00Z&#39; GROUP BY time(12m)
+
+name: h2o_feet
+time                   count
+----                   -----
+2015-08-18T00:00:00Z   1        &lt;----- 时间戳超出where条件中的起始时间
+2015-08-18T00:12:00Z   1
+</code></pre><table>
 <thead>
 <tr>
-<th>配置名称</th>
-<th>默认值</th>
-<th>说明</th>
+<th>预设区间</th>
+<th>where time_range</th>
+<th>数据</th>
+<th>返回时间戳</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>dir</td>
-<td>/usr/local/var/influxdb/data</td>
-<td>TSM文件存储的路径</td>
+<td>time&gt;=2015-08-18T00:00:00Z and time&lt;2015-08-18T00:12:00Z</td>
+<td>time&gt;=2015-08-18T00:06:00Z and time&lt;2015-08-18T00:12:00Z</td>
+<td>8.005</td>
+<td>2015-08-18T00:00:00Z</td>
 </tr>
 <tr>
-<td>wal-dir</td>
-<td>/usr/local/var/influxdb/wal</td>
-<td>WAL文件存储的路径</td>
-</tr>
-<tr>
-<td>trace-logging-enabled</td>
-<td>false</td>
-<td>输出TSM Engine的日志</td>
-</tr>
-<tr>
-<td>query-log-enabled</td>
-<td>true</td>
-<td>在执行查询语句之前，将查询语句输出到日志中</td>
-</tr>
-<tr>
-<td>cache-max-memory-size</td>
-<td>1g</td>
-<td>shard缓存的最大值，如果超过最大值，shard将不再写入数据。若不带单位，则默认为字节</td>
-</tr>
-<tr>
-<td>cache-snapshot-memory-size</td>
-<td>25m</td>
-<td>缓存快照的大小，超过数值，engine会将数据写入到TSM文件中</td>
+<td>time&gt;=2015-08-18T00:12:00Z and time&lt;2015-08-18T00:24:00Z</td>
+<td>time&gt;=2015-08-18T00:12:00Z and time&lt;2015-08-18T00:18:00Z</td>
+<td>7.887</td>
+<td>2015-08-18T00:12:00Z</td>
 </tr>
 </tbody>
 </table>
-<p>cache-snapshot-write-cold-duration|10m|当shard没有写入或删除数据，engine将cache的数据写入到TSM文件中的间隔<br>|compact-full-write-cold-duration|4h|当shard没有写入或删除数据时，engine压缩shard中所有TSM文件的间隔<br>|max-series-per-database|1000000|每个database允许的最大series的最大值，当database的series的数据量超过数值，将拒绝写入，并返回{“error”:”max series per database exceeded: <series>“}。设置为0表示对series的数量没有限制<br>|max-values-per-tag|100000|每个tag value所允许的最大数量。当tag的数量超过配置，influxdb会返回partial write 错误。对应已有的tag value写入不会失败，但是对于新建的tag value，写入会失败</series></p>
-<h2 id="查询配置-coordinator"><a href="#查询配置-coordinator" class="headerlink" title="查询配置[coordinator]"></a>查询配置[coordinator]</h2><table>
+<p>数据需要同时在预设区间和time_range在能满足查询条件，8.12这条数据在预设区间中，但是不在time_range中，所以不满足条件，只有8.005这条数据满足</p>
+<p>如果要避免这种异常情况，需要group by time()的高级用法</p>
+<h2 id="高级用法"><a href="#高级用法" class="headerlink" title="高级用法"></a>高级用法</h2><p>使用姿势</p>
+<pre><code>SELECT &lt;function&gt;(&lt;field_key&gt;) FROM_clause WHERE &lt;time_range&gt; GROUP BY time(&lt;time_interval&gt;,&lt;offset_interval&gt;),[tag_key] [fill(&lt;fill_option&gt;)]
+</code></pre><p>与基本用法的唯一区别在于多了一个offset_interval的参数，这个参数表示在设置预设区间时需要偏移的时间，可以为正数或负数</p>
+<p>若time_range为[2019-03-08T16:00:00Z, 2019-03-08T16:30:00Z)</p>
+<p>###group by time(10m)</p>
+<table>
 <thead>
 <tr>
-<th>配置名称</th>
-<th>默认值</th>
-<th>说明</th>
+<th>预设区间</th>
+<th>where time_range</th>
+<th>返回时间戳</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>write-timeout</td>
-<td>10s</td>
-<td>写入超时时间</td>
+<td>time&gt;=2019-03-08T16:00:00Z and time&lt;2019-03-08T16:10:00Z</td>
+<td>time&gt;=2019-03-08T16:00:00Z and time&lt;2019-03-08T16:10:00Z</td>
+<td>2019-03-08T16:00:00Z</td>
 </tr>
 <tr>
-<td>max-concurrent-queries</td>
-<td>0</td>
-<td>inflxudb实例允许的最大查询数</td>
+<td>time&gt;=2019-03-08T16:10:00Z and time&lt;2019-03-08T16:20:00Z</td>
+<td>与预设区间相同</td>
+<td>2019-03-08T16:10:00Z</td>
 </tr>
 <tr>
-<td>query-timeout</td>
-<td>0s</td>
-<td>查询超时时间，设置为0表示查询没有超时时间</td>
-</tr>
-<tr>
-<td>log-queries-after</td>
-<td>0s</td>
-<td>慢查询时间，当查询时间超过配置，influxdb将把这个查询记录到日志中</td>
-</tr>
-<tr>
-<td>max-select-point</td>
-<td>0</td>
-<td>select语句所能处理的最大point数，设置为0，表示没有限制</td>
-</tr>
-<tr>
-<td>max-select-series</td>
-<td>0</td>
-<td>select语句所能处理的最大series数据，设置为0，表示没有限制</td>
-</tr>
-<tr>
-<td>max-select_buckets</td>
-<td>0</td>
-<td>group by time()的最大数量</td>
+<td>time&gt;=2019-03-08T16:20:00Z and time&lt;2019-03-08T16:30:00Z</td>
+<td>与预设区间相同</td>
+<td>2019-03-08T16:20:00Z</td>
 </tr>
 </tbody>
 </table>
-<h2 id="retention-policy配置-retention"><a href="#retention-policy配置-retention" class="headerlink" title="retention policy配置[retention]"></a>retention policy配置[retention]</h2><table>
-<thead>
-<tr>
-<th>配置名称</th>
-<th>默认值</th>
-<th>说明</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>enabled</td>
-<td>true</td>
-<td>是否启用retention policy</td>
-</tr>
-<tr>
-<td>check-interval</td>
-<td>30ms0s</td>
-<td>check retention policy的间隔</td>
-</tr>
-</tbody>
-</table>
-<h2 id="监控配置-monitor"><a href="#监控配置-monitor" class="headerlink" title="监控配置[monitor]"></a>监控配置[monitor]</h2><table>
-<thead>
-<tr>
-<th>配置名称</th>
-<th>默认值</th>
-<th>说明</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>store-enabled</td>
-<td>true</td>
-<td>是否记录监控信息</td>
-</tr>
-<tr>
-<td>store-database</td>
-<td>_interval</td>
-<td>监控数据存储的数据库</td>
-</tr>
-<tr>
-<td>store-interval</td>
-<td>10s</td>
-<td>记录监控信息的间隔</td>
-</tr>
-</tbody>
-</table>
-<h2 id="http配置-http"><a href="#http配置-http" class="headerlink" title="http配置[http]"></a>http配置[http]</h2><table>
-<thead>
-<tr>
-<th>配置名称</th>
-<th>默认值</th>
-<th>说明</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>enabled</td>
-<td>true</td>
-<td>是否启用http</td>
-</tr>
-<tr>
-<td>bind-address</td>
-<td>8086</td>
-<td>Http端口</td>
-</tr>
-<tr>
-<td>auth-enabled</td>
-<td>false</td>
-<td>是否开启验证</td>
-</tr>
-<tr>
-<td>max-body-size</td>
-<td>25000000</td>
-<td>request body的最大值，如果超过配置，将返回413</td>
-</tr>
-</tbody>
-</table>
-<h2 id="CQ配置-continuous-queries"><a href="#CQ配置-continuous-queries" class="headerlink" title="CQ配置[continuous_queries]"></a>CQ配置[continuous_queries]</h2><table>
-<thead>
-<tr>
-<th>配置名称</th>
-<th>默认值</th>
-<th>说明</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>enabled</td>
-<td>true</td>
-<td>是否启用CQ</td>
-</tr>
-<tr>
-<td>query-stats-enabled</td>
-<td>false</td>
-<td>是否将CQ的监控信息记录到默认的监控数据库</td>
-</tr>
-<tr>
-<td>run-interval</td>
-<td>1s</td>
-<td>influxdb检查是否需要执行CQ的间隔</td>
-</tr>
-</tbody>
-</table>
+<p>###group by time(10m,-5m)<br>|预设区间|where time_range|返回时间戳<br>|—|—|—|<br>|time&gt;=2019-03-08T15:55:00Z and time&lt;2019-03-08T16:05:00Z|time&gt;=2019-03-08T16:00:00Z and time&lt;2019-03-08T16:10:00Z|2019-03-08T15:55:00Z<br>|time&gt;=2019-03-08T16:05:00Z and time&lt;2019-03-08T16:15:00Z|time&gt;=2019-03-08T16:10:00Z and time&lt;2019-03-08T16:20:00Z|2019-03-08T16:05:00Z<br>|time&gt;=2019-03-08T16:15:00Z and time&lt;2019-03-08T16:25:00Z|time&gt;=2019-03-08T16:20:00Z and time&lt;2019-03-08T16:30:00Z|2019-03-08T16:15:00Z<br>|time&gt;=2019-03-08T16:25:00Z and time&lt;2019-03-08T16:35:00Z||2019-03-08T16:25:00Z</p>
+<h2 id="group-by-time-1d"><a href="#group-by-time-1d" class="headerlink" title="group by time(1d)"></a>group by time(1d)</h2><p>InfluxDB默认是使用UTC时区，所以在进行计算group by time(1d)，对于CST时区，数据会偏移8个小时，所以在聚合1d数据时，需要使用time(1d, -8h)</p>
 
             </div>
             <hr>
@@ -695,7 +574,7 @@ influxd
                     <span class="reprint-tip">Reprint please specify: </span>
                     <a href="http://yoursite.com" class="b-link-green">wbl</a>
                     <i class="fa fa-angle-right fa-lg fa-fw text-color"></i>
-                    <a href="/2019/02/24/influxdb-pei-zhi-xiang-jie/" class="b-link-green">InfluxDB配置详解</a>
+                    <a href="/2019/03/08/influxdb-group-by-time-shuo-ming/" class="b-link-green">InfluxDB group by time()说明</a>
                 </p>
             </div>
         </div>
@@ -717,7 +596,7 @@ influxd
     <div class="row article-row">
         
         <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge left-badge text-color">Previous</div>
+            <div class="article-badge left-badge text-color">Current</div>
             <div class="card">
                 <a href="/2019/03/08/influxdb-group-by-time-shuo-ming/">
                     <div class="card-image">
@@ -731,9 +610,57 @@ influxd
                 <div class="card-content article-content">
                     <div class="summary">使用姿势SELECT &lt;function&gt;(&lt;field_key&gt;) FROM_clause WHERE &lt;time_range&gt; GROUP BY time(&lt;time_interval&gt;)</div>
                     <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="fa fa-clock-o fa-fw icon-date"></i>2019-03-08
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-03-08
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fa fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/监控/" class="post-category" target="_blank">
+                                    监控
+                                </a>
+                            
+                            
                         </span>
+                    </div>
+                </div>
+
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/InfluxDB/" target="_blank">
+                        <span class="chip bg-color">InfluxDB</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">Next</div>
+            <div class="card">
+                <a href="/2019/02/24/influxdb-pei-zhi-xiang-jie/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/10.jpg" class="responsive-img" alt="InfluxDB配置详解">
+                        
+                        <span class="card-title">InfluxDB配置详解</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary">配置文件位置Linux：/etc/influxdb/influxdb.conf
+
+maxOS：/usr/local/etc/influxdb.conf
+使用配置文件
+influxd -config /etc/influxdb/influxd</div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-02-24
+                            </span>
                         <span class="publish-author">
                             
                             <i class="fa fa-bookmark fa-fw icon-category"></i>
@@ -751,50 +678,6 @@ influxd
                     
                     <a href="/tags/InfluxDB/" target="_blank">
                         <span class="chip bg-color">InfluxDB</span>
-                    </a>
-                    
-                </div>
-                
-            </div>
-        </div>
-        
-        
-        <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge right-badge text-color">Next</div>
-            <div class="card">
-                <a href="/2019/02/16/influxdb-jian-jie/">
-                    <div class="card-image">
-                        
-                        
-                        <img src="/medias/featureimages/17.jpg" class="responsive-img" alt="InfluxDB简介">
-                        
-                        <span class="card-title">InfluxDB简介</span>
-                    </div>
-                </a>
-                <div class="card-content article-content">
-                    <div class="summary">InfluxDB简介InfluxDB是一个时序型数据库，用于高性能的查询与存储时序型数据。目前，InfluxDB被广泛的用于监控系统中。InfluxDB与Grafana结合，可以为用户带来清晰明了的监控面板。
-InfluxDB安装macOS</div>
-                    <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-02-16
-                            </span>
-                        <span class="publish-author">
-                            
-                            <i class="fa fa-bookmark fa-fw icon-category"></i>
-                            
-                            <a href="/categories/监控/" class="post-category" target="_blank">
-                                    监控
-                                </a>
-                            
-                            
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="card-action article-tags">
-                    
-                    <a href="/tags/influxDB/" target="_blank">
-                        <span class="chip bg-color">influxDB</span>
                     </a>
                     
                 </div>
