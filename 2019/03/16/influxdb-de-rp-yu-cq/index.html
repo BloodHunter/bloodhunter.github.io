@@ -5,8 +5,9 @@
 
 <head><meta name="generator" content="Hexo 3.8.0">
     <meta charset="utf-8">
-    <meta name="keywords" content="InfluxDB group by time()说明, wbl">
-    <meta name="description" content="使用姿势SELECT &amp;lt;function&amp;gt;(&amp;lt;field_key&amp;gt;) FROM_clause WHERE &amp;lt;time_range&amp;gt; GROUP BY time(&amp;lt;time_interval&amp;gt;)">
+    <meta name="keywords" content="InfluxDB的RP与CQ, wbl">
+    <meta name="description" content="Retention PolicyRP表示数据保留策略，策略包含数据保留时长，备份个数等信息。InfluxDB为每个database默认创建了一个默认的RP，名称为autogen，默认数据保留时间为永久。
+查看RPshow retention">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -14,7 +15,7 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>InfluxDB group by time()说明 | wbl</title>
+    <title>InfluxDB的RP与CQ | wbl</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/font-awesome.min.css">
@@ -247,13 +248,13 @@
 
 
 
-<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/12.jpg')">
+<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/14.jpg')">
     <div class="container">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
                     <div class="description center-align post-title">
-                        InfluxDB group by time()说明
+                        InfluxDB的RP与CQ
                     </div>
                 </div>
             </div>
@@ -292,150 +293,226 @@
                 
 
                 <span class="post-date">
-                    <i class="fa fa-clock-o fa-fw"></i>2019-03-08
+                    <i class="fa fa-clock-o fa-fw"></i>2019-03-16
                 </span>
             </div>
         </div>
         <hr>
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h2 id="使用姿势"><a href="#使用姿势" class="headerlink" title="使用姿势"></a>使用姿势</h2><pre><code>SELECT &lt;function&gt;(&lt;field_key&gt;) FROM_clause WHERE &lt;time_range&gt; GROUP BY time(&lt;time_interval&gt;),[tag_key] [fill(&lt;fill_option&gt;)]
-</code></pre><p>group time(interval)会对查询结果按照interval进行聚合，例如，time(5m),interval=5m, 则会将数据每隔5m进行聚合</p>
-<h2 id="示例说明"><a href="#示例说明" class="headerlink" title="示例说明"></a>示例说明</h2><p>样例数据</p>
-<pre><code>&gt; SELECT &quot;water_level&quot;,&quot;location&quot; FROM &quot;h2o_feet&quot; WHERE time &gt;= &#39;2015-08-18T00:00:00Z&#39; AND time &lt;= &#39;2015-08-18T00:30:00Z&#39;
-
-name: h2o_feet
---------------
-time                   water_level   location
-2015-08-18T00:00:00Z   8.12          coyote_creek
-2015-08-18T00:00:00Z   2.064         santa_monica
-2015-08-18T00:06:00Z   8.005         coyote_creek
-2015-08-18T00:06:00Z   2.116         santa_monica
-2015-08-18T00:12:00Z   7.887         coyote_creek
-2015-08-18T00:12:00Z   2.028         santa_monica
-2015-08-18T00:18:00Z   7.762         coyote_creek
-2015-08-18T00:18:00Z   2.126         santa_monica
-2015-08-18T00:24:00Z   7.635         coyote_creek
-2015-08-18T00:24:00Z   2.041         santa_monica
-2015-08-18T00:30:00Z   7.5           coyote_creek
-2015-08-18T00:30:00Z   2.051         santa_monica
-</code></pre><p>此时按照interval=12m 对数据进行聚合，查询语句以及查询结果如下：</p>
-<pre><code>&gt; SELECT COUNT(&quot;water_level&quot;) FROM &quot;h2o_feet&quot; WHERE &quot;location&quot;=&#39;coyote_creek&#39; AND time &gt;= &#39;2015-08-18T00:00:00Z&#39; AND time &lt;= &#39;2015-08-18T00:30:00Z&#39; GROUP BY time(12m)
-
-name: h2o_feet
---------------
-time                   count
-2015-08-18T00:00:00Z   2
-2015-08-18T00:12:00Z   2
-2015-08-18T00:24:00Z   2
-</code></pre><p>InfluxDB在计算group by时，会用到两个时间区间，一个是根据interval形成的预设区间，一个是根据where语句中的time_range形成的区间，在上述例子中time_range为[2015-08-18T00:00:00Z,2015-08-18T00:30:00Z),详细说明如下所示</p>
-<table>
-<thead>
-<tr>
-<th>预设区间</th>
-<th>where time_range</th>
-<th>数据</th>
-<th>返回时间戳</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>time&gt;=2015-08-18T00:00:00Z and time&lt;2015-08-18T00:12:00Z</td>
-<td>time&gt;=2015-08-18T00:00:00Z and time&lt;2015-08-18T00:12:00Z</td>
-<td>8.12，8.005</td>
-<td>2015-08-18T00:00:00Z</td>
-</tr>
-<tr>
-<td>time&gt;=2015-08-18T00:12:00Z and time&lt;2015-08-18T00:24:00Z</td>
-<td>time&gt;=2015-08-18T00:12:00Z and time&lt;2015-08-18T00:24:00Z</td>
-<td>7.887，7.762</td>
-<td>2015-08-18T00:12:00Z</td>
-</tr>
-<tr>
-<td>time&gt;=2015-08-18T00:24:00Z and time&lt;2015-08-18T00:36:00Z</td>
-<td>time&gt;=2015-08-18T00:24:00Z and time&lt;2015-08-18T00:30:00Z</td>
-<td>7.635,7.5</td>
-<td>2015-08-18T00:24:00Z</td>
-</tr>
-</tbody>
-</table>
-<h2 id="异常情况说明"><a href="#异常情况说明" class="headerlink" title="异常情况说明"></a>异常情况说明</h2><p>有的时候使用group by time()，会发现查询结果的时间与where条件中的time_range冲突，这是因为InfluxDB在返回时间时是以预设区间的时间为主。详细说明如下</p>
-<p>样本数据</p>
-<pre><code>&gt; SELECT &quot;water_level&quot; FROM &quot;h2o_feet&quot; WHERE &quot;location&quot;=&#39;coyote_creek&#39; AND time &gt;= &#39;2015-08-18T00:00:00Z&#39; AND time &lt;= &#39;2015-08-18T00:18:00Z&#39;
-name: h2o_feet
---------------
-time                   water_level
-2015-08-18T00:00:00Z   8.12
-2015-08-18T00:06:00Z   8.005
-2015-08-18T00:12:00Z   7.887
-2015-08-18T00:18:00Z   7.762
-</code></pre><p>查询语句以及查询结果：</p>
-<pre><code>&gt; SELECT COUNT(&quot;water_level&quot;) FROM &quot;h2o_feet&quot; WHERE &quot;location&quot;=&#39;coyote_creek&#39; AND time &gt;= &#39;2015-08-18T00:06:00Z&#39; AND time &lt; &#39;2015-08-18T00:18:00Z&#39; GROUP BY time(12m)
-
-name: h2o_feet
-time                   count
-----                   -----
-2015-08-18T00:00:00Z   1        &lt;----- 时间戳超出where条件中的起始时间
-2015-08-18T00:12:00Z   1
+                <h2 id="Retention-Policy"><a href="#Retention-Policy" class="headerlink" title="Retention Policy"></a>Retention Policy</h2><p>RP表示数据保留策略，策略包含数据保留时长，备份个数等信息。InfluxDB为每个database默认创建了一个默认的RP，名称为autogen，默认数据保留时间为永久。</p>
+<h3 id="查看RP"><a href="#查看RP" class="headerlink" title="查看RP"></a>查看RP</h3><pre><code>show retention policies
+</code></pre><p><img src="https://ws2.sinaimg.cn/large/006tKfTcgy1g14lvppooxj311808sjtd.jpg" alt="">    </p>
+<h3 id="新建RP"><a href="#新建RP" class="headerlink" title="新建RP"></a>新建RP</h3><pre><code>CREATE RETENTION POLICY &lt;retention_policy_name&gt; ON &lt;database_name&gt; DURATION &lt;duration&gt; REPLICATION &lt;n&gt; [SHARD DURATION &lt;duration&gt;] [DEFAULT]
 </code></pre><table>
 <thead>
 <tr>
-<th>预设区间</th>
-<th>where time_range</th>
-<th>数据</th>
-<th>返回时间戳</th>
+<th>name</th>
+<th>example</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>time&gt;=2015-08-18T00:00:00Z and time&lt;2015-08-18T00:12:00Z</td>
-<td>time&gt;=2015-08-18T00:06:00Z and time&lt;2015-08-18T00:12:00Z</td>
-<td>8.005</td>
-<td>2015-08-18T00:00:00Z</td>
+<td>duration</td>
+<td>表示数据保留时间，最长为INF，最短为1h</td>
 </tr>
 <tr>
-<td>time&gt;=2015-08-18T00:12:00Z and time&lt;2015-08-18T00:24:00Z</td>
-<td>time&gt;=2015-08-18T00:12:00Z and time&lt;2015-08-18T00:18:00Z</td>
-<td>7.887</td>
-<td>2015-08-18T00:12:00Z</td>
+<td>replication</td>
+<td>备份数，在集群模式中可用</td>
+</tr>
+<tr>
+<td>shard duration</td>
+<td>一个分片包含的时间，InfluxDB会根据duration设置默认的shard duration</td>
+</tr>
+<tr>
+<td>default</td>
+<td>表示该RP为默认的RP</td>
 </tr>
 </tbody>
 </table>
-<p>数据需要同时在预设区间和time_range在能满足查询条件，8.12这条数据在预设区间中，但是不在time_range中，所以不满足条件，只有8.005这条数据满足</p>
-<p>如果要避免这种异常情况，需要group by time()的高级用法</p>
-<h2 id="高级用法"><a href="#高级用法" class="headerlink" title="高级用法"></a>高级用法</h2><p>使用姿势</p>
-<pre><code>SELECT &lt;function&gt;(&lt;field_key&gt;) FROM_clause WHERE &lt;time_range&gt; GROUP BY time(&lt;time_interval&gt;,&lt;offset_interval&gt;),[tag_key] [fill(&lt;fill_option&gt;)]
-</code></pre><p>与基本用法的唯一区别在于多了一个offset_interval的参数，这个参数表示在设置预设区间时需要偏移的时间，可以为正数或负数</p>
-<p>若time_range为[2019-03-08T16:00:00Z, 2019-03-08T16:30:00Z)</p>
-<p>###group by time(10m)</p>
+<p>新建一个RP，保留时间为1d</p>
+<pre><code>CREATE RETENTION POLICY &quot;one_day_only&quot; ON &quot;NOAA_water_database&quot; DURATION 1d REPLICATION 1    
+</code></pre><h3 id="修改RP"><a href="#修改RP" class="headerlink" title="修改RP"></a>修改RP</h3><pre><code>ALTER RETENTION POLICY &lt;retention_policy_name&gt; ON &lt;database_name&gt; DURATION &lt;duration&gt; REPLICATION &lt;n&gt; SHARD DURATION &lt;duration&gt; DEFAULT
+</code></pre><h3 id="删除RP"><a href="#删除RP" class="headerlink" title="删除RP"></a>删除RP</h3><pre><code>DROP RETENTION POLICY &lt;retention_policy_name&gt; ON &lt;database_name&gt;
+</code></pre><h3 id="RP使用"><a href="#RP使用" class="headerlink" title="RP使用"></a>RP使用</h3><p>在查询或者插入数据时，需要指定RP，若不指定，则认为选择了默认的RP</p>
+<pre><code>select sum(value) from &quot;rp_1h&quot;.test_me where time &gt; now() - 6h;
+</code></pre><p>假设默认RP为autogen，则</p>
+<pre><code>select sum(value) from test_me where time &gt; now() - 6h;
+
+=== 两条语句等价
+
+select sum(value) from &quot;autogen&quot;.test_me where time &gt; now() - 6h;
+</code></pre><h2 id="Continue-Query"><a href="#Continue-Query" class="headerlink" title="Continue Query"></a>Continue Query</h2><p>InfluxDB提供了自动聚合数据，并将聚合数据存储至measurement的方法，即continue query</p>
+<h3 id="基础用法"><a href="#基础用法" class="headerlink" title="基础用法"></a>基础用法</h3><pre><code>CREATE CONTINUOUS QUERY &lt;cq_name&gt; ON &lt;database_name&gt;
+BEGIN
+  &lt;cq_query&gt;
+END            
+</code></pre><p>其中cq_query表示聚合语句，</p>
+<pre><code>SELECT &lt;function[s]&gt; INTO &lt;destination_measurement&gt; FROM &lt;measurement&gt; [WHERE &lt;stuff&gt;] GROUP BY time(&lt;interval&gt;)[,&lt;tag_key[s]&gt;]
+</code></pre><p>cq_query的where条件中不需要设置时间区间，inflxuDB会自动生成时间区间</p>
+<p>influxDB根据cq_query中的Group By time(interval)的interval，每隔interval执行一次cq_query，而查询的时间区间也为interval。例如当前时间为17：00，interval为1h，则cq_query会查询16:00至16：59分的数据。</p>
+<p>生成一条CQ如下，则每隔1h执行一次query</p>
+<pre><code>CREATE CONTINUOUS QUERY &quot;cq_basic&quot; ON &quot;transportation&quot;
+BEGIN
+  SELECT mean(&quot;passengers&quot;) INTO &quot;average_passengers&quot; FROM &quot;bus_data&quot; GROUP BY time(1h)
+END
+</code></pre><p>在8：00，时间区间为[7:00,8:00)</p>
+<p>在9：00，时间区间为[8:00,9:00)</p>
+<p>根据CQ的特性，可以进行数据降准，例如将维度为1m的数据聚合为5m,measurement_1m存储维度为1m的数据，cq每隔5m对数据进行聚合，并将聚合的数据存储到rp_5m.measurement_5m中，此时维度变成了5m</p>
+<pre><code>CREATE CONTINUOUS QUERY &quot;cq_basic_5m&quot; ON &quot;test_database&quot;
+BEGIN
+  SELECT mean(*) INTO &quot;rp_5m&quot;.&quot;measurement_5m&quot; 
+  FROM &quot;rp_1m&quot;.&quot;measurement_1m&quot;
+  GROUP BY time(5m),*
+END    
+</code></pre><h4 id="时间偏移"><a href="#时间偏移" class="headerlink" title="时间偏移"></a>时间偏移</h4><pre><code>CREATE CONTINUOUS QUERY &quot;cq_basic_offset&quot; ON &quot;transportation&quot;
+BEGIN
+  SELECT mean(&quot;passengers&quot;) INTO &quot;average_passengers&quot; FROM &quot;bus_data&quot; GROUP BY time(1h,15m)
+END
+</code></pre><p>group by time(1h) 与 group by time(1h,15m)的区别</p>
+<p>group by time(1h)的执行时间点和时间区间</p>
 <table>
 <thead>
 <tr>
-<th>预设区间</th>
-<th>where time_range</th>
-<th>返回时间戳</th>
+<th>time</th>
+<th>range</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>time&gt;=2019-03-08T16:00:00Z and time&lt;2019-03-08T16:10:00Z</td>
-<td>time&gt;=2019-03-08T16:00:00Z and time&lt;2019-03-08T16:10:00Z</td>
-<td>2019-03-08T16:00:00Z</td>
+<td>8:00</td>
+<td>[7:00,8:00)</td>
 </tr>
 <tr>
-<td>time&gt;=2019-03-08T16:10:00Z and time&lt;2019-03-08T16:20:00Z</td>
-<td>与预设区间相同</td>
-<td>2019-03-08T16:10:00Z</td>
-</tr>
-<tr>
-<td>time&gt;=2019-03-08T16:20:00Z and time&lt;2019-03-08T16:30:00Z</td>
-<td>与预设区间相同</td>
-<td>2019-03-08T16:20:00Z</td>
+<td>9:00</td>
+<td>[8:00,9:00)</td>
 </tr>
 </tbody>
 </table>
-<p>###group by time(10m,-5m)<br>|预设区间|where time_range|返回时间戳<br>|—|—|—|<br>|time&gt;=2019-03-08T15:55:00Z and time&lt;2019-03-08T16:05:00Z|time&gt;=2019-03-08T16:00:00Z and time&lt;2019-03-08T16:10:00Z|2019-03-08T15:55:00Z<br>|time&gt;=2019-03-08T16:05:00Z and time&lt;2019-03-08T16:15:00Z|time&gt;=2019-03-08T16:10:00Z and time&lt;2019-03-08T16:20:00Z|2019-03-08T16:05:00Z<br>|time&gt;=2019-03-08T16:15:00Z and time&lt;2019-03-08T16:25:00Z|time&gt;=2019-03-08T16:20:00Z and time&lt;2019-03-08T16:30:00Z|2019-03-08T16:15:00Z<br>|time&gt;=2019-03-08T16:25:00Z and time&lt;2019-03-08T16:35:00Z||2019-03-08T16:25:00Z</p>
-<h2 id="group-by-time-1d"><a href="#group-by-time-1d" class="headerlink" title="group by time(1d)"></a>group by time(1d)</h2><p>InfluxDB默认是使用UTC时区，所以在进行计算group by time(1d)，对于CST时区，数据会偏移8个小时，所以在聚合1d数据时，需要使用time(1d, -8h)</p>
+<p>group by time(1h, 15m)的执行时间点和时间区间</p>
+<table>
+<thead>
+<tr>
+<th>time</th>
+<th>range</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>8:15</td>
+<td>[7:15,8:15)</td>
+</tr>
+<tr>
+<td>9:15</td>
+<td>[8:15,9:15)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="高级用法"><a href="#高级用法" class="headerlink" title="高级用法"></a>高级用法</h3><pre><code>CREATE CONTINUOUS QUERY &lt;cq_name&gt; ON &lt;database_name&gt;
+RESAMPLE EVERY &lt;interval&gt; FOR &lt;interval&gt;
+BEGIN
+  &lt;cq_query&gt;
+END    
+</code></pre><p>其中EVERY表示执行间隔，即每隔多久执行一次，FOR表示时间区间，即每次执行查询多久的数据，区间为[now - for_interval, now)</p>
+<h4 id="EVERY-30m-GROUP-BY-time-1h"><a href="#EVERY-30m-GROUP-BY-time-1h" class="headerlink" title="EVERY=30m,GROUP BY time(1h)"></a>EVERY=30m,GROUP BY time(1h)</h4><pre><code>CREATE CONTINUOUS QUERY &quot;cq_advanced_every&quot; ON &quot;transportation&quot;
+RESAMPLE EVERY 30m
+BEGIN
+  SELECT mean(&quot;passengers&quot;) INTO &quot;average_passengers&quot; FROM &quot;bus_data&quot; GROUP BY time(1h)
+END
+</code></pre><table>
+<thead>
+<tr>
+<th>time</th>
+<th>range</th>
+<th>返回time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>8:00</td>
+<td>[7:00,8:00)</td>
+<td>7:00</td>
+</tr>
+<tr>
+<td>8:30</td>
+<td>[7:00,8:00)</td>
+<td>7:00</td>
+</tr>
+<tr>
+<td>9:00</td>
+<td>[8:00,9:00)</td>
+<td>8:00</td>
+</tr>
+</tbody>
+</table>
+<p>可以看到区间[7:00,8:00)的数据被查询了两次，后一次的数据会覆盖前一次的查询</p>
+<h4 id="FOR-1h-GROUP-BY-time-30m"><a href="#FOR-1h-GROUP-BY-time-30m" class="headerlink" title="FOR=1h,GROUP BY time(30m)"></a>FOR=1h,GROUP BY time(30m)</h4><pre><code>CREATE CONTINUOUS QUERY &quot;cq_advanced_for&quot; ON &quot;transportation&quot;
+RESAMPLE FOR 1h
+BEGIN
+  SELECT mean(&quot;passengers&quot;) INTO &quot;average_passengers&quot; FROM &quot;bus_data&quot; GROUP BY time(30m)
+END
+</code></pre><table>
+<thead>
+<tr>
+<th>time</th>
+<th>range</th>
+<th>返回time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>8:00</td>
+<td>[7:00,8:00)</td>
+<td>7:00<br>7:30</td>
+</tr>
+<tr>
+<td>8:30</td>
+<td>[7:30,8:30)</td>
+<td>7:30<br>8:00</td>
+</tr>
+<tr>
+<td>9:00</td>
+<td>[8:00,9:00)</td>
+<td>8:00<br>8:30</td>
+</tr>
+</tbody>
+</table>
+<p>每次查询都会返回两条数据，每个时间点的数据都被计算了两次，这样在一定程度可以避免数据延迟而导致CQ数据丢失的情况。</p>
+<h4 id="EVERY-1h，FOR-90m，GROUP-BY-time-30m"><a href="#EVERY-1h，FOR-90m，GROUP-BY-time-30m" class="headerlink" title="EVERY=1h，FOR=90m，GROUP BY time(30m)"></a>EVERY=1h，FOR=90m，GROUP BY time(30m)</h4><pre><code>CREATE CONTINUOUS QUERY &quot;cq_advanced_every_for&quot; ON &quot;transportation&quot;
+RESAMPLE EVERY 1h FOR 90m
+BEGIN
+  SELECT mean(&quot;passengers&quot;) INTO &quot;average_passengers&quot; FROM &quot;bus_data&quot; GROUP BY time(30m)
+END
+</code></pre><table>
+<thead>
+<tr>
+<th>time</th>
+<th>range</th>
+<th>返回time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>8:00</td>
+<td>[6:30,8:00)</td>
+<td>6:30<br>7:00<br>7:30</td>
+</tr>
+<tr>
+<td>9:00</td>
+<td>[7:30,9:00)</td>
+<td>7:30<br>8:00<br>8:30    </td>
+</tr>
+</tbody>
+</table>
+<p>FOR interval必须大于GROUP by time(interval)以及EVERY interval，否则InfluxDB会返回如下错误，因为这样会造成数据丢失</p>
+<pre><code>error parsing query: FOR duration must be &gt;= GROUP BY time duration: must be a minimum of &lt;minimum-allowable-interval&gt; got &lt;user-specified-interval&gt;
+</code></pre><h3 id="CQ管理"><a href="#CQ管理" class="headerlink" title="CQ管理"></a>CQ管理</h3><h4 id="查看CQ"><a href="#查看CQ" class="headerlink" title="查看CQ"></a>查看CQ</h4><pre><code>SHOW CONTINUOUS QUERIES
+</code></pre><h4 id="删除CQ"><a href="#删除CQ" class="headerlink" title="删除CQ"></a>删除CQ</h4><pre><code>DROP CONTINUOUS QUERY &lt;cq_name&gt; ON &lt;database_name&gt;
+</code></pre><h4 id="修改CQ"><a href="#修改CQ" class="headerlink" title="修改CQ"></a>修改CQ</h4><p>CQ不能被修改，如果需要需改，只能先删除CQ，在重新创建CQ</p>
+<h2 id="使用CQ与RP的目的"><a href="#使用CQ与RP的目的" class="headerlink" title="使用CQ与RP的目的"></a>使用CQ与RP的目的</h2><ol>
+<li>利用CQ可以达到数据降准的目的，即将细粒度的数据转换为粗粒度的数据，例如1m维度的数据可以聚合为5m数据</li>
+<li>不同粒度的数据可以设置不同的RP，节省存储空间。例如1m维度的数据可以保存7d，而5m维度的数据则可以保存30d，细粒度的数据主要用于及时排查问题，粗粒度的数据在于查看变化趋势。            </li>
+</ol>
 
             </div>
             <hr>
@@ -574,7 +651,7 @@ time                   count
                     <span class="reprint-tip">Reprint please specify: </span>
                     <a href="http://yoursite.com" class="b-link-green">wbl</a>
                     <i class="fa fa-angle-right fa-lg fa-fw text-color"></i>
-                    <a href="/2019/03/08/influxdb-group-by-time-shuo-ming/" class="b-link-green">InfluxDB group by time()说明</a>
+                    <a href="/2019/03/16/influxdb-de-rp-yu-cq/" class="b-link-green">InfluxDB的RP与CQ</a>
                 </p>
             </div>
         </div>
@@ -596,7 +673,7 @@ time                   count
     <div class="row article-row">
         
         <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge left-badge text-color">Previous</div>
+            <div class="article-badge left-badge text-color">Current</div>
             <div class="card">
                 <a href="/2019/03/16/influxdb-de-rp-yu-cq/">
                     <div class="card-image">
@@ -611,9 +688,9 @@ time                   count
                     <div class="summary">Retention PolicyRP表示数据保留策略，策略包含数据保留时长，备份个数等信息。InfluxDB为每个database默认创建了一个默认的RP，名称为autogen，默认数据保留时间为永久。
 查看RPshow retention</div>
                     <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="fa fa-clock-o fa-fw icon-date"></i>2019-03-16
-                        </span>
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-03-16
+                            </span>
                         <span class="publish-author">
                             
                             <i class="fa fa-bookmark fa-fw icon-category"></i>
@@ -626,6 +703,7 @@ time                   count
                         </span>
                     </div>
                 </div>
+
                 
                 <div class="card-action article-tags">
                     
@@ -642,24 +720,20 @@ time                   count
         <div class="article col s12 m6" data-aos="fade-up">
             <div class="article-badge right-badge text-color">Next</div>
             <div class="card">
-                <a href="/2019/02/24/influxdb-pei-zhi-xiang-jie/">
+                <a href="/2019/03/08/influxdb-group-by-time-shuo-ming/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/10.jpg" class="responsive-img" alt="InfluxDB配置详解">
+                        <img src="/medias/featureimages/12.jpg" class="responsive-img" alt="InfluxDB group by time()说明">
                         
-                        <span class="card-title">InfluxDB配置详解</span>
+                        <span class="card-title">InfluxDB group by time()说明</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
-                    <div class="summary">配置文件位置Linux：/etc/influxdb/influxdb.conf
-
-maxOS：/usr/local/etc/influxdb.conf
-使用配置文件
-influxd -config /etc/influxdb/influxd</div>
+                    <div class="summary">使用姿势SELECT &lt;function&gt;(&lt;field_key&gt;) FROM_clause WHERE &lt;time_range&gt; GROUP BY time(&lt;time_interval&gt;)</div>
                     <div class="publish-info">
                             <span class="publish-date">
-                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-02-24
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-03-08
                             </span>
                         <span class="publish-author">
                             
