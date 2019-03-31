@@ -5,10 +5,8 @@
 
 <head><meta name="generator" content="Hexo 3.8.0">
     <meta charset="utf-8">
-    <meta name="keywords" content="Spring Boot多数据源, wbl">
-    <meta name="description" content="maven 配置&amp;lt;parent&amp;gt;
-    &amp;lt;groupId&amp;gt;org.springframework.boot&amp;lt;/groupId&amp;gt;
-    &amp;lt;artifactId&amp;gt;spring-boot-sta">
+    <meta name="keywords" content="Raft协议之Leader选举, wbl">
+    <meta name="description" content="Raft节点状态Raft协议的工作模式是一个Leader和多个Follower节点的模式。在Raft协议中，每个节点都维护了一个状态机，该状态机有3种状态，Leader，Follower，Candidate，在任意时间，集群中的任意节点都处">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -16,7 +14,7 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Spring Boot多数据源 | wbl</title>
+    <title>Raft协议之Leader选举 | wbl</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/font-awesome.min.css">
@@ -255,7 +253,7 @@
             <div class="col s12 m12 l12">
                 <div class="brand">
                     <div class="description center-align post-title">
-                        Spring Boot多数据源
+                        Raft协议之Leader选举
                     </div>
                 </div>
             </div>
@@ -275,8 +273,8 @@
             
             <div class="article-tag">
                 
-                <a href="/tags/Spring-Boot/" target="_blank">
-                    <span class="chip bg-color">Spring Boot</span>
+                <a href="/tags/Raft/" target="_blank">
+                    <span class="chip bg-color">Raft</span>
                 </a>
                 
             </div>
@@ -286,222 +284,85 @@
                 <span class="post-cate">
                     <i class="fa fa-bookmark fa-fw icon-category"></i>
                     
-                    <a href="/categories/Spring-Boot/" class="post-category" target="_blank">
-                        Spring Boot
+                    <a href="/categories/Raft/" class="post-category" target="_blank">
+                        Raft
                     </a>
                     
                 </span>
                 
 
                 <span class="post-date">
-                    <i class="fa fa-clock-o fa-fw"></i>2019-03-23
+                    <i class="fa fa-clock-o fa-fw"></i>2019-03-30
                 </span>
             </div>
         </div>
         <hr>
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h2 id="maven-配置"><a href="#maven-配置" class="headerlink" title="maven 配置"></a>maven 配置</h2><pre><code>&lt;parent&gt;
-    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
-    &lt;version&gt;2.1.3.RELEASE&lt;/version&gt;
-    &lt;relativePath/&gt; &lt;!-- lookup parent from repository --&gt;
-&lt;/parent&gt;
-
-&lt;dependencies&gt;
-     &lt;dependency&gt;
-        &lt;groupId&gt;mysql&lt;/groupId&gt;
-        &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
-        &lt;scope&gt;runtime&lt;/scope&gt;
-    &lt;/dependency&gt;
-    &lt;dependency&gt;
-        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-        &lt;artifactId&gt;spring-boot-configuration-processor&lt;/artifactId&gt;
-        &lt;optional&gt;true&lt;/optional&gt;
-    &lt;/dependency&gt;
-    &lt;dependency&gt;
-        &lt;groupId&gt;org.projectlombok&lt;/groupId&gt;
-        &lt;artifactId&gt;lombok&lt;/artifactId&gt;
-        &lt;optional&gt;true&lt;/optional&gt;
-    &lt;/dependency&gt;
-    &lt;dependency&gt;
-        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-        &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
-        &lt;scope&gt;test&lt;/scope&gt;
-    &lt;/dependency&gt;
-    &lt;dependency&gt;
-        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-        &lt;artifactId&gt;spring-boot-starter-jdbc&lt;/artifactId&gt;
-    &lt;/dependency&gt;
-    &lt;dependency&gt;
-        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-        &lt;artifactId&gt;spring-boot-starter-data-jpa&lt;/artifactId&gt;
-    &lt;/dependency&gt;
- &lt;/dependencies&gt;
-</code></pre><h2 id="application-properties-配置"><a href="#application-properties-配置" class="headerlink" title="application.properties 配置"></a>application.properties 配置</h2><p>配置两个数据源</p>
-<pre><code>## 数据源1
-user.datasource.jdbc-url=jdbc:mysql://localhost:3306/test
-user.datasource.username=root
-user.datasource.password=root
-
-## 数据源2
-product.datasource.jdbc-url=jdbc:mysql://172.16.28.3:6606/test
-product.datasource.username=root
-product.datasource.password=meitu.com
-</code></pre><h2 id="数据实例"><a href="#数据实例" class="headerlink" title="数据实例"></a>数据实例</h2><p>构建两个实例与两个数据源中的表格对应</p>
-<h3 id="user"><a href="#user" class="headerlink" title="user"></a>user</h3><pre><code>@Entity
-@Getter
-@Setter
-public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-    private String name;
-}    
-
-CREATE TABLE `user` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(20) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-)
-</code></pre><h3 id="product"><a href="#product" class="headerlink" title="product"></a>product</h3><pre><code>@Entity
-@Getter
-@Setter
-public class Product {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-    private String name;
-}
-
-CREATE TABLE `product` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(20) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-)
-</code></pre><h2 id="包结构"><a href="#包结构" class="headerlink" title="包结构"></a>包结构</h2><p>为了读取不同数据源的配置，根据包结构来对配置进行区分</p>
-<pre><code>src/main/java
-    - com.wbl.springDemo
-        - produce
-            - data            
-            - repo            
-            - config
-        - user
-            - data
-            - repo
-            - config
-</code></pre><h3 id="ProductDao"><a href="#ProductDao" class="headerlink" title="ProductDao"></a>ProductDao</h3><pre><code>@Repository
-public interface ProductDao extends JpaRepository&lt;Product, Integer&gt; {
-}                
-</code></pre><h3 id="UserDao"><a href="#UserDao" class="headerlink" title="UserDao"></a>UserDao</h3><pre><code>@Repository
-public interface UserDao extends JpaRepository&lt;User, Integer&gt; {
-}    
-</code></pre><h2 id="数据源配置"><a href="#数据源配置" class="headerlink" title="数据源配置"></a>数据源配置</h2><h3 id="user配置"><a href="#user配置" class="headerlink" title="user配置"></a>user配置</h3><pre><code>@Configuration
-@EnableTransactionManagement
-@EnableJpaRepositories(
-        entityManagerFactoryRef = &quot;userEntityManagerFactory&quot;,
-        transactionManagerRef = &quot;userTransactionManager&quot;,
-        basePackages = {
-                &quot;com.wbl.spingbootdemo.muldatasource.user.repo&quot;
-        }
-)
-public class UserConfig {
-    @Primary
-    @Bean(&quot;userDatasource&quot;)
-    @ConfigurationProperties(&quot;user.datasource&quot;)
-    public HikariDataSource userDatasource(){
-        return DataSourceBuilder.create().type(HikariDataSource.class).build();
-    }
-
-    @Primary
-    @Bean(&quot;userEntityManagerFactory&quot;)
-    public LocalContainerEntityManagerFactoryBean entityManagerFactory(
-            EntityManagerFactoryBuilder builder,
-            @Qualifier(&quot;userDatasource&quot;)DataSource dataSource){
-        return builder.dataSource(dataSource)
-                .packages(&quot;com.wbl.spingbootdemo.muldatasource.user.data&quot;)
-                .persistenceUnit(&quot;db1&quot;)
-                .build();
-    }
-
-    @Primary
-    @Bean(&quot;userTransactionManager&quot;)
-    public PlatformTransactionManager userTransactionManager(@Qualifier(&quot;userEntityManagerFactory&quot;) EntityManagerFactory entityManagerFactory){
-        return new JpaTransactionManager(entityManagerFactory);
-    }
-}
-</code></pre><h3 id="product-配置"><a href="#product-配置" class="headerlink" title="product 配置"></a>product 配置</h3><pre><code>@EnableTransactionManagement
-@EnableJpaRepositories(
-        entityManagerFactoryRef = &quot;productEntityManagerFactory&quot;,
-        transactionManagerRef = &quot;productTransactionManager&quot;,
-        basePackages = {
-                &quot;com.wbl.spingbootdemo.muldatasource.product.repo&quot;
-        }
-)
-public class ProductConfig {
-
-    @Bean(&quot;productDatasource&quot;)
-    @ConfigurationProperties(prefix = &quot;product.datasource&quot;)
-    public DataSource productDatasource(){
-        return DataSourceBuilder.create().build();
-    }
-
-    @Bean(&quot;productEntityManagerFactory&quot;)
-    public LocalContainerEntityManagerFactoryBean productEntityManagerFactory(
-            EntityManagerFactoryBuilder builder,
-            @Qualifier(&quot;productDatasource&quot;)DataSource productDatasource){
-        return builder.dataSource(productDatasource)
-                .packages(&quot;com.wbl.spingbootdemo.muldatasource.product.data&quot;)
-                .persistenceUnit(&quot;db2&quot;)
-                .build();
-    }
-
-    @Bean(name = &quot;productTransactionManager&quot;)
-    public PlatformTransactionManager productTransactionManager(
-            @Qualifier(&quot;productEntityManagerFactory&quot;) EntityManagerFactory productEntityManagerFactory
-    ) {
-        return new JpaTransactionManager(productEntityManagerFactory);
-    }
-}
-</code></pre><p>其中@Primary的作用是，在对同一接口有几种不同实现时，告诉spring默认注入哪个实例</p>
-<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><pre><code>@RunWith(SpringRunner.class)
-@SpringBootTest
-public class MultipleDataSourcesProductTests {
-
-    @Autowired
-    ProductDao productDao;
-
-    @Test
-    @Transactional(&quot;productTransactionManager&quot;)
-    public void testSaveProduct(){
-        Product product = new Product();
-        product.setName(&quot;product1&quot;);
-        product = productDao.save(product);
-        Assert.assertNotNull(productDao.findById(product.getId()));
-    }
-}        
-
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class MultipleDataSourcesUserTests {
-    @Autowired
-    private UserDao userDao;
-
-    @Test
-//    @Transactional(&quot;userTransactionManager&quot;)
-    public void testSaveUser(){
-        User user = new User();
-        user.setName(&quot;name&quot;);
-        userDao.save(user);
-    }
-}
-</code></pre><p>其中加入@Transactional注解，数据不会真正保存在数据库中</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>spring boot 多数据源配置步骤总结</p>
+                <h2 id="Raft节点状态"><a href="#Raft节点状态" class="headerlink" title="Raft节点状态"></a>Raft节点状态</h2><p>Raft协议的工作模式是一个Leader和多个Follower节点的模式。在Raft协议中，每个节点都维护了一个状态机，该状态机有3种状态，Leader，Follower，Candidate，在任意时间，集群中的任意节点都处于这三个状态之一。</p>
+<p><img src="https://ws4.sinaimg.cn/large/006tKfTcgy1g1kyvbmbw1j30ua0fw3zt.jpg" alt=""></p>
+<h3 id="Leader"><a href="#Leader" class="headerlink" title="Leader"></a>Leader</h3><blockquote>
+<p>Leader节点的主要工作有两个，一个是处理所有client的请求，另一个是定期向Follower节点发送心跳信息。</p>
+<p>当收到客户端写入请求时，Leader节点会在本地追加一个日志，然后将其封装成消息发送到集群中的其他Follow节点。Follower节点收到对应消息对其进行响应。Leader如果收到超过半数节点的响应信息，则认为该条日志已被committed，可以对client返回响应</p>
+<p>定期向Follower发送心跳信息是为了防止集群其他Follower节点的选举计时器超时而导致触发新一轮选举</p>
+</blockquote>
+<p><img src="https://ws4.sinaimg.cn/large/006tKfTcgy1g1kx1bm3g3j30ra0jugmo.jpg" alt=""></p>
+<h3 id="Follower"><a href="#Follower" class="headerlink" title="Follower"></a>Follower</h3><blockquote>
+<p>Follower节点不会处理任何请求，他们只是简单的响应来自Leader或者Candidate的请求。Follower会将client节点的请求重定向给集群的Leader节点</p>
+</blockquote>
+<h3 id="Candidate"><a href="#Candidate" class="headerlink" title="Candidate"></a>Candidate</h3><blockquote>
+<p>Candidate节点由Follower节点转换而来，当Follower节点长时间没有收到来自Leader节点发送的心跳信息，则该节点的选举计时器就会过期，同时将自身状态变为Candidate，发起新一轮选举</p>
+</blockquote>
+<h2 id="Leader选举"><a href="#Leader选举" class="headerlink" title="Leader选举"></a>Leader选举</h2><p>在Raft协议中有两个时间控制Leader选举发生</p>
 <ol>
-<li>配置application.properties，填入数据源的详细信息</li>
-<li>生成entity</li>
-<li>生成entity对应的Repository</li>
-<li>配置entityManager以及TransactionManager(事务管理)</li>
+<li>选举超时时间(election timeout)</li>
+<li>心跳超时时间(heartbeat timeout)</li>
+</ol>
+<blockquote>
+<p>选举超时时间：Follower在election timeout时间内没有收到Leader的心跳信息，则切换为Candidate开始新一轮的选举。election timeout一般设置为150ms~300ms的随机数，<strong>也即每个节点的选举超时时间一般都不同</strong></p>
+<p>心跳超时时间：Leader向Follower节点发送心跳消息的<strong>间隔</strong>时间</p>
+</blockquote>
+<h3 id="初始选举"><a href="#初始选举" class="headerlink" title="初始选举"></a>初始选举</h3><ol>
+<li>集群初始化时，所有节点为Follower</li>
+<li>在经过一段时间后(election timeout)收不到Leader的心跳信息，则认为Leader出现故障，切换为Candidate发起选举</li>
+<li>Raft协议中每次发起选举，任期(Term)都会进行递增，每个节点都会记录当前任期(currentTerm)</li>
+<li>当一个Candidate收到超过半数节点的选票，则成为Leader</li>
+</ol>
+<p>假设集群有A，B,C三个节点，若A节点的选举超时时间最先超时，则</p>
+<ol>
+<li>A切换为Candidate，同时重置选举计时器(election timer)</li>
+<li>A先把票投给自己，并向集群其他节点B,C发送选举请求(Request vote)，此时A的term=1</li>
+<li>B,C收到选举请求时，因为两个节点的term=0，且都是Follower状态，所以它们会把选票投给A节点</li>
+<li>B,C节点投票之后，会重置选举计时器，这是防止一个任期中出现多个Candidate，导致选举失败</li>
+<li>A节点得到超过半数的选票，在term=1的任期中，A成为集群的Leader</li>
+<li>A节点成为Leader后，会定期向B,C节点发送心跳信息，防止B,C节点的选举计时器超时而触发新一轮选举，所以心跳超时时间要远小于选举超时时间</li>
+</ol>
+<p><img src="https://ws4.sinaimg.cn/large/006tKfTcgy1g1l00eqkbaj314x0u00xd.jpg" alt=""></p>
+<h3 id="出现多个Candidate节点"><a href="#出现多个Candidate节点" class="headerlink" title="出现多个Candidate节点"></a>出现多个Candidate节点</h3><p>当出现多个Candidate同时发起选举，而每个Candidate都获取不到半数的选票，这种情况Raft情况会如何处理呢？</p>
+<p>假设集群有4个节点，其中节点A和节点B的选举计时器同时到期，切换为Candidate并向集群其他节点发起选举请求</p>
+<ol>
+<li>假设A的选举请求先到C，而B的请求先到D，则节点A和节点B得票数都为2，没有超过半数</li>
+<li>在这种情况下，这次选举以失败结束，随着时间流逝，当任意节点的选举计时器到期后，会再一次发起选举。</li>
+<li>由于election timeout是一个时间区间内取的随机数，所以上述情况多次出现的概率不大</li>
+</ol>
+<h3 id="宕机选举"><a href="#宕机选举" class="headerlink" title="宕机选举"></a>宕机选举</h3><p>假设集群中有4个节点，其中A为Leader，B，C，D为Follower，在系统运行一段时间后(当前term为5)，A因为故障而宕机。</p>
+<ol>
+<li>由于Leader不在往Follower发送心跳消息，Follower的election timer将会过期，假设为D节点最先超时，切换为Candidate发起新一轮选举</li>
+<li>当B和C收到节点D的选举请求后，会将其选票投给D，由于节点A已经宕机，无法投票，但D节点仍获得超过半数的投票，成为新任期(term=6)的Leader，并开始向其他节点发送心跳信息</li>
+<li>当A节点恢复后，会收到来自D节点的心跳信息，改信息中携带的任期号(term=6)大于节点A当前记录的任期号(term=5),A节点切换为Follower</li>
+</ol>
+<p><img src="https://ws1.sinaimg.cn/large/006tKfTcgy1g1lxrmbw9ij31pa0iw42h.jpg" alt=""></p>
+<p>在Raft协议中，当某个节点收到的消息中所携带的任期号大于当前节点记录的任期号，那么节点会自动切换为Follower，并且更新自身记录的任期号</p>
+<h2 id="Leader选举时间要求"><a href="#Leader选举时间要求" class="headerlink" title="Leader选举时间要求"></a>Leader选举时间要求</h2><p>通过上述几个例子，可以看到Leader选举对于时间的要求比较严格，一般要求整个集群的时间满足如下不等式</p>
+<pre><code>广播时间 &lt;&lt; 选举超时时间 &lt;&lt; 平均故障间隔时间
+</code></pre><p>广播时间指从一个节点发送心跳信息到其他节点收到信息并发出响应的平均时间</p>
+<p>平均故障时间是指一个节点，两次故障之间的平均时间。</p>
+<p>为了保证集群可用，广播时间必须比选举超时时间小一个数量级，这样Leader才能发送心跳信息来重置其他Follower的选举计时器，从而防止他们切换为Candidate，触发新一轮选举。选举超时时间是一个<strong>随机数</strong>    ，这样可以减少出现多个Candidate而瓜分选票的情况。</p>
+<p>一般情况广播时间可以做到0.5ms~50ms，选举超时时间一般设置为200ms~1s之间。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ol>
+<li>Raft协议中节点有三种状态Leader，Follower，Candidate</li>
+<li>控制选举触发的时间有两个，一是选举超时时间(election timeout)，一个心跳超时时间(heartbeat timeout)</li>
+<li>选举计时器(election timer)每次重置都会从某个时间区间随机取一个随机数，作为新的选举超时时间，这样是为了避免出现多个Candidate而导致选举无效的情况出现</li>
 </ol>
 
             </div>
@@ -641,7 +502,7 @@ public class MultipleDataSourcesUserTests {
                     <span class="reprint-tip">Reprint please specify: </span>
                     <a href="http://yoursite.com" class="b-link-green">wbl</a>
                     <i class="fa fa-angle-right fa-lg fa-fw text-color"></i>
-                    <a href="/2019/03/23/spring-boot-duo-shu-ju-yuan/" class="b-link-green">Spring Boot多数据源</a>
+                    <a href="/2019/03/30/raft-xie-yi-zhi-leader-xuan-ju/" class="b-link-green">Raft协议之Leader选举</a>
                 </p>
             </div>
         </div>
@@ -663,7 +524,7 @@ public class MultipleDataSourcesUserTests {
     <div class="row article-row">
         
         <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge left-badge text-color">Previous</div>
+            <div class="article-badge left-badge text-color">Current</div>
             <div class="card">
                 <a href="/2019/03/30/raft-xie-yi-zhi-leader-xuan-ju/">
                     <div class="card-image">
@@ -677,9 +538,9 @@ public class MultipleDataSourcesUserTests {
                 <div class="card-content article-content">
                     <div class="summary">Raft节点状态Raft协议的工作模式是一个Leader和多个Follower节点的模式。在Raft协议中，每个节点都维护了一个状态机，该状态机有3种状态，Leader，Follower，Candidate，在任意时间，集群中的任意节点都处</div>
                     <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="fa fa-clock-o fa-fw icon-date"></i>2019-03-30
-                        </span>
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-03-30
+                            </span>
                         <span class="publish-author">
                             
                             <i class="fa fa-bookmark fa-fw icon-category"></i>
@@ -692,6 +553,7 @@ public class MultipleDataSourcesUserTests {
                         </span>
                     </div>
                 </div>
+
                 
                 <div class="card-action article-tags">
                     
@@ -708,28 +570,29 @@ public class MultipleDataSourcesUserTests {
         <div class="article col s12 m6" data-aos="fade-up">
             <div class="article-badge right-badge text-color">Next</div>
             <div class="card">
-                <a href="/2019/03/16/influxdb-de-rp-yu-cq/">
+                <a href="/2019/03/23/spring-boot-duo-shu-ju-yuan/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/14.jpg" class="responsive-img" alt="InfluxDB的RP与CQ">
+                        <img src="/medias/featureimages/11.jpg" class="responsive-img" alt="Spring Boot多数据源">
                         
-                        <span class="card-title">InfluxDB的RP与CQ</span>
+                        <span class="card-title">Spring Boot多数据源</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
-                    <div class="summary">Retention PolicyRP表示数据保留策略，策略包含数据保留时长，备份个数等信息。InfluxDB为每个database默认创建了一个默认的RP，名称为autogen，默认数据保留时间为永久。
-查看RPshow retention</div>
+                    <div class="summary">maven 配置&lt;parent&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-sta</div>
                     <div class="publish-info">
                             <span class="publish-date">
-                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-03-16
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-03-23
                             </span>
                         <span class="publish-author">
                             
                             <i class="fa fa-bookmark fa-fw icon-category"></i>
                             
-                            <a href="/categories/监控/" class="post-category" target="_blank">
-                                    监控
+                            <a href="/categories/Spring-Boot/" class="post-category" target="_blank">
+                                    Spring Boot
                                 </a>
                             
                             
@@ -739,8 +602,8 @@ public class MultipleDataSourcesUserTests {
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/InfluxDB/" target="_blank">
-                        <span class="chip bg-color">InfluxDB</span>
+                    <a href="/tags/Spring-Boot/" target="_blank">
+                        <span class="chip bg-color">Spring Boot</span>
                     </a>
                     
                 </div>
