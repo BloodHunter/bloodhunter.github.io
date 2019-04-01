@@ -5,8 +5,8 @@
 
 <head><meta name="generator" content="Hexo 3.8.0">
     <meta charset="utf-8">
-    <meta name="keywords" content="Raft协议之Leader选举, wbl">
-    <meta name="description" content="Raft节点状态Raft协议的工作模式是一个Leader和多个Follower节点的模式。在Raft协议中，每个节点都维护了一个状态机，该状态机有3种状态，Leader，Follower，Candidate，在任意时间，集群中的任意节点都处">
+    <meta name="keywords" content="Raft协议之日志复制, wbl">
+    <meta name="description" content="上篇Raft协议之Leader选举介绍了Leader选举的过程。Leader会处理来自客户端的请求，并将客户端更新操作以消息(Append Entries消息)的形式发送到集群中所有Follower节点。本文将介绍Raft协议日志复制的流程">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -14,7 +14,7 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Raft协议之Leader选举 | wbl</title>
+    <title>Raft协议之日志复制 | wbl</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/font-awesome.min.css">
@@ -247,13 +247,13 @@
 
 
 
-<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/11.jpg')">
+<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/10.jpg')">
     <div class="container">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
                     <div class="description center-align post-title">
-                        Raft协议之Leader选举
+                        Raft协议之日志复制
                     </div>
                 </div>
             </div>
@@ -292,78 +292,126 @@
                 
 
                 <span class="post-date">
-                    <i class="fa fa-clock-o fa-fw"></i>2019-03-30
+                    <i class="fa fa-clock-o fa-fw"></i>2019-03-31
                 </span>
             </div>
         </div>
         <hr>
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h2 id="Raft节点状态"><a href="#Raft节点状态" class="headerlink" title="Raft节点状态"></a>Raft节点状态</h2><p>Raft协议的工作模式是一个Leader和多个Follower节点的模式。在Raft协议中，每个节点都维护了一个状态机，该状态机有3种状态，Leader，Follower，Candidate，在任意时间，集群中的任意节点都处于这三个状态之一。</p>
-<p><img src="https://ws4.sinaimg.cn/large/006tKfTcgy1g1kyvbmbw1j30ua0fw3zt.jpg" alt=""></p>
-<h3 id="Leader"><a href="#Leader" class="headerlink" title="Leader"></a>Leader</h3><blockquote>
-<p>Leader节点的主要工作有两个，一个是处理所有client的请求，另一个是定期向Follower节点发送心跳信息。</p>
-<p>当收到客户端写入请求时，Leader节点会在本地追加一个日志，然后将其封装成消息发送到集群中的其他Follow节点。Follower节点收到对应消息对其进行响应。Leader如果收到超过半数节点的响应信息，则认为该条日志已被committed，可以对client返回响应</p>
-<p>定期向Follower发送心跳信息是为了防止集群其他Follower节点的选举计时器超时而导致触发新一轮选举</p>
-</blockquote>
-<p><img src="https://ws4.sinaimg.cn/large/006tKfTcgy1g1kx1bm3g3j30ra0jugmo.jpg" alt=""></p>
-<h3 id="Follower"><a href="#Follower" class="headerlink" title="Follower"></a>Follower</h3><blockquote>
-<p>Follower节点不会处理任何请求，他们只是简单的响应来自Leader或者Candidate的请求。Follower会将client节点的请求重定向给集群的Leader节点</p>
-</blockquote>
-<h3 id="Candidate"><a href="#Candidate" class="headerlink" title="Candidate"></a>Candidate</h3><blockquote>
-<p>Candidate节点由Follower节点转换而来，当Follower节点长时间没有收到来自Leader节点发送的心跳信息，则该节点的选举计时器就会过期，同时将自身状态变为Candidate，发起新一轮选举</p>
-</blockquote>
-<h2 id="Leader选举"><a href="#Leader选举" class="headerlink" title="Leader选举"></a>Leader选举</h2><p>在Raft协议中有两个时间控制Leader选举发生</p>
+                <p>上篇<a href="https://bloodhunter.github.io/2019/03/30/raft-xie-yi-zhi-leader-xuan-ju/" target="_blank" rel="noopener">Raft协议之Leader选举</a>介绍了Leader选举的过程。Leader会处理来自客户端的请求，并将客户端更新操作以消息(Append Entries消息)的形式发送到集群中所有Follower节点。本文将介绍Raft协议日志复制的流程。</p>
+<h2 id="日志复制"><a href="#日志复制" class="headerlink" title="日志复制"></a>日志复制</h2><p>假设集群中有A，B，C三个节点，其中节点A为Leader，此时有一个客户端发送了一个更新操作到集群，</p>
 <ol>
-<li>选举超时时间(election timeout)</li>
-<li>心跳超时时间(heartbeat timeout)</li>
+<li>当收到客户端的请求，节点A会将更新操作记录到本地Log中</li>
+<li>节点A向其他节点发送Append Entries消息，消息中记录了Leader节点最近收到的请求日志</li>
+<li>B,C收到来自Leader的Append Entries消息时，会将该操作记录到本地Log中，并返回响应消息</li>
+<li>当A收到超过半数的响应消息时，会认为集群中有半数以上的节点已经记录了该更新操作。Leader节点将该日志设置为已提交(committed)</li>
+<li>Leader向客户端返回响应，并通知Follower节点该日志已被提交</li>
+<li>Follower收到消息时，才会认为该日志已被提交</li>
 </ol>
+<p><img src="https://ws4.sinaimg.cn/large/006tKfTcgy1g1m0wfu6bzj31em0eatbw.jpg" alt=""><br><img src="https://ws4.sinaimg.cn/large/006tKfTcgy1g1m149rhf4j31ok0e4dil.jpg" alt=""></p>
+<h2 id="日志一致性"><a href="#日志一致性" class="headerlink" title="日志一致性"></a>日志一致性</h2><p>当一个新的Leader被选举出来，它的日志可能会其他Follower不一致，这时候需要一个机制来保证日志的一致性。</p>
+<p>集群中每个节点都会维护一个本地log用于记录操作，另外，每个节点还会维护两个索引值，分别是commitIndex和lastApplied</p>
 <blockquote>
-<p>选举超时时间：Follower在election timeout时间内没有收到Leader的心跳信息，则切换为Candidate开始新一轮的选举。election timeout一般设置为150ms~300ms的随机数，<strong>也即每个节点的选举超时时间一般都不同</strong></p>
-<p>心跳超时时间：Leader向Follower节点发送心跳消息的<strong>间隔</strong>时间</p>
+<p>commitIndex表示当前节点<strong>已知的，最大的，已提交</strong>的日志索引</p>
+<p>lastApplied索引表示当前节点最后一条被应用到状态机的日志索引，当commitIndex大于lastApplied时，会将lastApplied加1，并将lastApplied对应的日志应用到状态机</p>
 </blockquote>
-<h3 id="初始选举"><a href="#初始选举" class="headerlink" title="初始选举"></a>初始选举</h3><ol>
-<li>集群初始化时，所有节点为Follower</li>
-<li>在经过一段时间后(election timeout)收不到Leader的心跳信息，则认为Leader出现故障，切换为Candidate发起选举</li>
-<li>Raft协议中每次发起选举，任期(Term)都会进行递增，每个节点都会记录当前任期(currentTerm)</li>
-<li>当一个Candidate收到超过半数节点的选票，则成为Leader</li>
+<p>Leader节点还需要知道每个Follower节点的日志复制到哪个位置，从而决定下次发送Append Entries消息中包含哪些日志记录。为此Leader会会维护两个数组，nextIndex[]和matchIndex[]</p>
+<blockquote>
+<p>nextIndex[]记录了需要发给每个Follower的下一条日志的索引值</p>
+<p>matchIndex[]记录了已经复制给每个Follower的最大的日志索引值</p>
+</blockquote>
+<p>下面通过一个示例来说明nextIndex[]和matchIndex[]在日志复制过程的作用，假设有三个节点A,B,C，其中节点A为term=1的Leader，C由于宕机导致一段时间没有与Leader同步日志，此时C的log并不包含全部已提交日志，此时Leader记录的nextIndex[]和matchIndex[]的值如下</p>
+<table>
+<thead>
+<tr>
+<th>节点</th>
+<th>nextIndex</th>
+<th>matchIndex</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>4</td>
+<td>3</td>
+</tr>
+<tr>
+<td>B</td>
+<td>4</td>
+<td>3</td>
+</tr>
+<tr>
+<td>C</td>
+<td>2</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p>因为Leader中记录了C的nextIndex=2，所以会向C发送index=2的Append Entries消息。C收到消息之后，会将日志记录到本地log中，并向Leader发送响应。Leader收到响应后，会递增C对应的nextIndex和matchIndex</p>
+<table>
+<thead>
+<tr>
+<th>节点</th>
+<th>nextIndex</th>
+<th>matchIndex</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>4</td>
+<td>3</td>
+</tr>
+<tr>
+<td>B</td>
+<td>4</td>
+<td>3</td>
+</tr>
+<tr>
+<td>C</td>
+<td>3</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<p><img src="https://ws2.sinaimg.cn/large/006tKfTcgy1g1m1z1w3kqj30so0f4q3p.jpg" alt=""></p>
+<p>如果在上述例子中，节点C故障恢复后，节点A宕机后重启，导致节点B成为term=2的新Leader，此时B不知道旧Leader节点的nextIndex和matchIndex，所以新的Leader会重置nextIndex[]和matchIndex[],其中nextIndex[]全部重置为新Leader节点自身最后一条已提交日志的index值，而matchIndex[]全部重置为0</p>
+<table>
+<thead>
+<tr>
+<th>节点</th>
+<th>nextIndex</th>
+<th>matchIndex</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>4</td>
+<td>0</td>
+</tr>
+<tr>
+<td>B</td>
+<td>4</td>
+<td>0</td>
+</tr>
+<tr>
+<td>C</td>
+<td>4</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p>新的Leader会发送新的Append Entries消息(term=2,index=4),对于C节点，它没有index=2，index=3两条日志，因此追加失败。</p>
+<p>Leader收到C追加日志失败的响应，会将nextIndex减1，即发送(term=2,index=3)的Append Entries消息给C。循环反复，不断减小nextIndex的值，直到节点C返回追加成功的响应。</p>
+<p><img src="https://ws2.sinaimg.cn/large/006tKfTcgy1g1m2man8dgj31mq0fignb.jpg" alt=""></p>
+<h2 id="选举限制"><a href="#选举限制" class="headerlink" title="选举限制"></a>选举限制</h2><ol>
+<li>Candidate在拉票时需要携带自己本地已经持久化的最新的日志信息，等待投票的节点如果发现自己本地的日志信息比竞选的Candidate更新，则拒绝给他投票</li>
+<li>只允许Leader提交（commit）当前Term的日志。</li>
 </ol>
-<p>假设集群有A，B,C三个节点，若A节点的选举超时时间最先超时，则</p>
-<ol>
-<li>A切换为Candidate，同时重置选举计时器(election timer)</li>
-<li>A先把票投给自己，并向集群其他节点B,C发送选举请求(Request vote)，此时A的term=1</li>
-<li>B,C收到选举请求时，因为两个节点的term=0，且都是Follower状态，所以它们会把选票投给A节点</li>
-<li>B,C节点投票之后，会重置选举计时器，这是防止一个任期中出现多个Candidate，导致选举失败</li>
-<li>A节点得到超过半数的选票，在term=1的任期中，A成为集群的Leader</li>
-<li>A节点成为Leader后，会定期向B,C节点发送心跳信息，防止B,C节点的选举计时器超时而触发新一轮选举，所以心跳超时时间要远小于选举超时时间</li>
-</ol>
-<p><img src="https://ws4.sinaimg.cn/large/006tKfTcgy1g1l00eqkbaj314x0u00xd.jpg" alt=""></p>
-<h3 id="出现多个Candidate节点"><a href="#出现多个Candidate节点" class="headerlink" title="出现多个Candidate节点"></a>出现多个Candidate节点</h3><p>当出现多个Candidate同时发起选举，而每个Candidate都获取不到半数的选票，这种情况Raft情况会如何处理呢？</p>
-<p>假设集群有4个节点，其中节点A和节点B的选举计时器同时到期，切换为Candidate并向集群其他节点发起选举请求</p>
-<ol>
-<li>假设A的选举请求先到C，而B的请求先到D，则节点A和节点B得票数都为2，没有超过半数</li>
-<li>在这种情况下，这次选举以失败结束，随着时间流逝，当任意节点的选举计时器到期后，会再一次发起选举。</li>
-<li>由于election timeout是一个时间区间内取的随机数，所以上述情况多次出现的概率不大</li>
-</ol>
-<h3 id="宕机选举"><a href="#宕机选举" class="headerlink" title="宕机选举"></a>宕机选举</h3><p>假设集群中有4个节点，其中A为Leader，B，C，D为Follower，在系统运行一段时间后(当前term为5)，A因为故障而宕机。</p>
-<ol>
-<li>由于Leader不在往Follower发送心跳消息，Follower的election timer将会过期，假设为D节点最先超时，切换为Candidate发起新一轮选举</li>
-<li>当B和C收到节点D的选举请求后，会将其选票投给D，由于节点A已经宕机，无法投票，但D节点仍获得超过半数的投票，成为新任期(term=6)的Leader，并开始向其他节点发送心跳信息</li>
-<li>当A节点恢复后，会收到来自D节点的心跳信息，改信息中携带的任期号(term=6)大于节点A当前记录的任期号(term=5),A节点切换为Follower</li>
-</ol>
-<p><img src="https://ws1.sinaimg.cn/large/006tKfTcgy1g1lxrmbw9ij31pa0iw42h.jpg" alt=""></p>
-<p>在Raft协议中，当某个节点收到的消息中所携带的任期号大于当前节点记录的任期号，那么节点会自动切换为Follower，并且更新自身记录的任期号</p>
-<h2 id="Leader选举时间要求"><a href="#Leader选举时间要求" class="headerlink" title="Leader选举时间要求"></a>Leader选举时间要求</h2><p>通过上述几个例子，可以看到Leader选举对于时间的要求比较严格，一般要求整个集群的时间满足如下不等式</p>
-<pre><code>广播时间 &lt;&lt; 选举超时时间 &lt;&lt; 平均故障间隔时间
-</code></pre><p>广播时间指从一个节点发送心跳信息到其他节点收到信息并发出响应的平均时间</p>
-<p>平均故障时间是指一个节点，两次故障之间的平均时间。</p>
-<p>为了保证集群可用，广播时间必须比选举超时时间小一个数量级，这样Leader才能发送心跳信息来重置其他Follower的选举计时器，从而防止他们切换为Candidate，触发新一轮选举。选举超时时间是一个<strong>随机数</strong>    ，这样可以减少出现多个Candidate而瓜分选票的情况。</p>
-<p>一般情况广播时间可以做到0.5ms~50ms，选举超时时间一般设置为200ms~1s之间。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ol>
-<li>Raft协议中节点有三种状态Leader，Follower，Candidate</li>
-<li>控制选举触发的时间有两个，一是选举超时时间(election timeout)，一个心跳超时时间(heartbeat timeout)</li>
-<li>选举计时器(election timer)每次重置都会从某个时间区间随机取一个随机数，作为新的选举超时时间，这样是为了避免出现多个Candidate而导致选举无效的情况出现</li>
-</ol>
+<p>第一条限制保证了已经Commited日志不会丢失，第二条限制是为了防止即使超过半数的节点已提交了日志，依然有可能被新选Leader覆盖的情况</p>
+<p>例如<br><img src="https://ws1.sinaimg.cn/large/006tKfTcgy1g1m2ryimtfj312z0u0142.jpg" alt=""></p>
 
             </div>
             <hr>
@@ -502,7 +550,7 @@
                     <span class="reprint-tip">Reprint please specify: </span>
                     <a href="http://yoursite.com" class="b-link-green">wbl</a>
                     <i class="fa fa-angle-right fa-lg fa-fw text-color"></i>
-                    <a href="/2019/03/30/raft-xie-yi-zhi-leader-xuan-ju/" class="b-link-green">Raft协议之Leader选举</a>
+                    <a href="/2019/03/31/raft-xie-yi-zhi-ri-zhi-fu-zhi/" class="b-link-green">Raft协议之日志复制</a>
                 </p>
             </div>
         </div>
@@ -524,7 +572,7 @@
     <div class="row article-row">
         
         <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge left-badge text-color">Previous</div>
+            <div class="article-badge left-badge text-color">Current</div>
             <div class="card">
                 <a href="/2019/03/31/raft-xie-yi-zhi-ri-zhi-fu-zhi/">
                     <div class="card-image">
@@ -538,9 +586,53 @@
                 <div class="card-content article-content">
                     <div class="summary">上篇Raft协议之Leader选举介绍了Leader选举的过程。Leader会处理来自客户端的请求，并将客户端更新操作以消息(Append Entries消息)的形式发送到集群中所有Follower节点。本文将介绍Raft协议日志复制的流程</div>
                     <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="fa fa-clock-o fa-fw icon-date"></i>2019-03-31
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-03-31
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fa fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Raft/" class="post-category" target="_blank">
+                                    Raft
+                                </a>
+                            
+                            
                         </span>
+                    </div>
+                </div>
+
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Raft/" target="_blank">
+                        <span class="chip bg-color">Raft</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">Next</div>
+            <div class="card">
+                <a href="/2019/03/30/raft-xie-yi-zhi-leader-xuan-ju/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/11.jpg" class="responsive-img" alt="Raft协议之Leader选举">
+                        
+                        <span class="card-title">Raft协议之Leader选举</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary">Raft节点状态Raft协议的工作模式是一个Leader和多个Follower节点的模式。在Raft协议中，每个节点都维护了一个状态机，该状态机有3种状态，Leader，Follower，Candidate，在任意时间，集群中的任意节点都处</div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-03-30
+                            </span>
                         <span class="publish-author">
                             
                             <i class="fa fa-bookmark fa-fw icon-category"></i>
@@ -558,51 +650,6 @@
                     
                     <a href="/tags/Raft/" target="_blank">
                         <span class="chip bg-color">Raft</span>
-                    </a>
-                    
-                </div>
-                
-            </div>
-        </div>
-        
-        
-        <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge right-badge text-color">Next</div>
-            <div class="card">
-                <a href="/2019/03/23/spring-boot-duo-shu-ju-yuan/">
-                    <div class="card-image">
-                        
-                        
-                        <img src="/medias/featureimages/11.jpg" class="responsive-img" alt="Spring Boot多数据源">
-                        
-                        <span class="card-title">Spring Boot多数据源</span>
-                    </div>
-                </a>
-                <div class="card-content article-content">
-                    <div class="summary">maven 配置&lt;parent&gt;
-    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-boot-sta</div>
-                    <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-03-23
-                            </span>
-                        <span class="publish-author">
-                            
-                            <i class="fa fa-bookmark fa-fw icon-category"></i>
-                            
-                            <a href="/categories/Spring-Boot/" class="post-category" target="_blank">
-                                    Spring Boot
-                                </a>
-                            
-                            
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="card-action article-tags">
-                    
-                    <a href="/tags/Spring-Boot/" target="_blank">
-                        <span class="chip bg-color">Spring Boot</span>
                     </a>
                     
                 </div>

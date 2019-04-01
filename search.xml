@@ -3,6 +3,29 @@
   
     
     <entry>
+      <title>Raft协议之日志复制</title>
+      <link href="/2019/03/31/raft-xie-yi-zhi-ri-zhi-fu-zhi/"/>
+      <url>/2019/03/31/raft-xie-yi-zhi-ri-zhi-fu-zhi/</url>
+      
+        <content type="html"><![CDATA[<p>上篇<a href="https://bloodhunter.github.io/2019/03/30/raft-xie-yi-zhi-leader-xuan-ju/" target="_blank" rel="noopener">Raft协议之Leader选举</a>介绍了Leader选举的过程。Leader会处理来自客户端的请求，并将客户端更新操作以消息(Append Entries消息)的形式发送到集群中所有Follower节点。本文将介绍Raft协议日志复制的流程。</p><h2 id="日志复制"><a href="#日志复制" class="headerlink" title="日志复制"></a>日志复制</h2><p>假设集群中有A，B，C三个节点，其中节点A为Leader，此时有一个客户端发送了一个更新操作到集群，</p><ol><li>当收到客户端的请求，节点A会将更新操作记录到本地Log中</li><li>节点A向其他节点发送Append Entries消息，消息中记录了Leader节点最近收到的请求日志</li><li>B,C收到来自Leader的Append Entries消息时，会将该操作记录到本地Log中，并返回响应消息</li><li>当A收到超过半数的响应消息时，会认为集群中有半数以上的节点已经记录了该更新操作。Leader节点将该日志设置为已提交(committed)</li><li>Leader向客户端返回响应，并通知Follower节点该日志已被提交</li><li>Follower收到消息时，才会认为该日志已被提交</li></ol><p><img src="https://ws4.sinaimg.cn/large/006tKfTcgy1g1m0wfu6bzj31em0eatbw.jpg" alt=""><br><img src="https://ws4.sinaimg.cn/large/006tKfTcgy1g1m149rhf4j31ok0e4dil.jpg" alt=""></p><h2 id="日志一致性"><a href="#日志一致性" class="headerlink" title="日志一致性"></a>日志一致性</h2><p>当一个新的Leader被选举出来，它的日志可能会其他Follower不一致，这时候需要一个机制来保证日志的一致性。</p><p>集群中每个节点都会维护一个本地log用于记录操作，另外，每个节点还会维护两个索引值，分别是commitIndex和lastApplied</p><blockquote><p>commitIndex表示当前节点<strong>已知的，最大的，已提交</strong>的日志索引</p><p>lastApplied索引表示当前节点最后一条被应用到状态机的日志索引，当commitIndex大于lastApplied时，会将lastApplied加1，并将lastApplied对应的日志应用到状态机</p></blockquote><p>Leader节点还需要知道每个Follower节点的日志复制到哪个位置，从而决定下次发送Append Entries消息中包含哪些日志记录。为此Leader会会维护两个数组，nextIndex[]和matchIndex[]</p><blockquote><p>nextIndex[]记录了需要发给每个Follower的下一条日志的索引值</p><p>matchIndex[]记录了已经复制给每个Follower的最大的日志索引值</p></blockquote><p>下面通过一个示例来说明nextIndex[]和matchIndex[]在日志复制过程的作用，假设有三个节点A,B,C，其中节点A为term=1的Leader，C由于宕机导致一段时间没有与Leader同步日志，此时C的log并不包含全部已提交日志，此时Leader记录的nextIndex[]和matchIndex[]的值如下</p><table><thead><tr><th>节点</th><th>nextIndex</th><th>matchIndex</th></tr></thead><tbody><tr><td>A</td><td>4</td><td>3</td></tr><tr><td>B</td><td>4</td><td>3</td></tr><tr><td>C</td><td>2</td><td>1</td></tr></tbody></table><p>因为Leader中记录了C的nextIndex=2，所以会向C发送index=2的Append Entries消息。C收到消息之后，会将日志记录到本地log中，并向Leader发送响应。Leader收到响应后，会递增C对应的nextIndex和matchIndex</p><table><thead><tr><th>节点</th><th>nextIndex</th><th>matchIndex</th></tr></thead><tbody><tr><td>A</td><td>4</td><td>3</td></tr><tr><td>B</td><td>4</td><td>3</td></tr><tr><td>C</td><td>3</td><td>2</td></tr></tbody></table><p><img src="https://ws2.sinaimg.cn/large/006tKfTcgy1g1m1z1w3kqj30so0f4q3p.jpg" alt=""></p><p>如果在上述例子中，节点C故障恢复后，节点A宕机后重启，导致节点B成为term=2的新Leader，此时B不知道旧Leader节点的nextIndex和matchIndex，所以新的Leader会重置nextIndex[]和matchIndex[],其中nextIndex[]全部重置为新Leader节点自身最后一条已提交日志的index值，而matchIndex[]全部重置为0</p><table><thead><tr><th>节点</th><th>nextIndex</th><th>matchIndex</th></tr></thead><tbody><tr><td>A</td><td>4</td><td>0</td></tr><tr><td>B</td><td>4</td><td>0</td></tr><tr><td>C</td><td>4</td><td>0</td></tr></tbody></table><p>新的Leader会发送新的Append Entries消息(term=2,index=4),对于C节点，它没有index=2，index=3两条日志，因此追加失败。</p><p>Leader收到C追加日志失败的响应，会将nextIndex减1，即发送(term=2,index=3)的Append Entries消息给C。循环反复，不断减小nextIndex的值，直到节点C返回追加成功的响应。</p><p><img src="https://ws2.sinaimg.cn/large/006tKfTcgy1g1m2man8dgj31mq0fignb.jpg" alt=""></p><h2 id="选举限制"><a href="#选举限制" class="headerlink" title="选举限制"></a>选举限制</h2><ol><li>Candidate在拉票时需要携带自己本地已经持久化的最新的日志信息，等待投票的节点如果发现自己本地的日志信息比竞选的Candidate更新，则拒绝给他投票</li><li>只允许Leader提交（commit）当前Term的日志。</li></ol><p>第一条限制保证了已经Commited日志不会丢失，第二条限制是为了防止即使超过半数的节点已提交了日志，依然有可能被新选Leader覆盖的情况</p><p>例如<br><img src="https://ws1.sinaimg.cn/large/006tKfTcgy1g1m2ryimtfj312z0u0142.jpg" alt=""></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> Raft </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Raft </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
       <title>Raft协议之Leader选举</title>
       <link href="/2019/03/30/raft-xie-yi-zhi-leader-xuan-ju/"/>
       <url>/2019/03/30/raft-xie-yi-zhi-leader-xuan-ju/</url>
