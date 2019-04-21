@@ -5,10 +5,10 @@
 
 <head><meta name="generator" content="Hexo 3.8.0">
     <meta charset="utf-8">
-    <meta name="keywords" content="Spring-boot定时任务, wbl">
-    <meta name="description" content="create project使用IDEA创建一个scheduler-demo项目，这里可以使用spring initializr插件初始化spring boot
+    <meta name="keywords" content="Spring-Boot Quick start, wbl">
+    <meta name="description" content="Create Project构建一个Spring Boot的项目非常方面，可以使用官方提供的Spring Initializr，打开https://start.spring.io/，输入项目基本信息即可构建一个项目
 
-@EnableScheduling注解EnableScheduling表示允">
+另外你还可以设置需要引">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -16,7 +16,7 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Spring-boot定时任务 | wbl</title>
+    <title>Spring-Boot Quick start | wbl</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/font-awesome.min.css">
@@ -249,13 +249,13 @@
 
 
 
-<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/12.jpg')">
+<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/1.jpg')">
     <div class="container">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
                     <div class="description center-align post-title">
-                        Spring-boot定时任务
+                        Spring-Boot Quick start
                     </div>
                 </div>
             </div>
@@ -294,251 +294,139 @@
                 
 
                 <span class="post-date">
-                    <i class="fa fa-clock-o fa-fw"></i>2019-04-20
+                    <i class="fa fa-clock-o fa-fw"></i>2019-04-21
                 </span>
             </div>
         </div>
         <hr>
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h2 id="create-project"><a href="#create-project" class="headerlink" title="create project"></a>create project</h2><p>使用IDEA创建一个scheduler-demo项目，这里可以使用spring initializr插件初始化spring boot</p>
-<p><img src="https://ws3.sinaimg.cn/large/006tNc79gy1g291m3ryxrj311n0u00yl.jpg" alt=""></p>
-<h2 id="EnableScheduling"><a href="#EnableScheduling" class="headerlink" title="@EnableScheduling"></a>@EnableScheduling</h2><p>注解EnableScheduling表示允许Spring Boot开启定时任务管理</p>
+                <h2 id="Create-Project"><a href="#Create-Project" class="headerlink" title="Create Project"></a>Create Project</h2><p>构建一个Spring Boot的项目非常方面，可以使用官方提供的Spring Initializr，打开<a href="https://start.spring.io/" target="_blank" rel="noopener">https://start.spring.io/</a>，输入项目基本信息即可构建一个项目</p>
+<p><img src="https://ws3.sinaimg.cn/large/006tNc79gy1g2a8x5z7kkj31pw0u0jxb.jpg" alt=""></p>
+<p>另外你还可以设置需要引入的依赖，点击set all，即可以选择需要引用的依赖</p>
+<p><img src="https://ws2.sinaimg.cn/large/006tNc79gy1g2a8yyuwhlj31qp0u00xt.jpg" alt=""></p>
+<p>最后点击生成，即可以得到一个压缩包，解压缩之后便可以得到一个Spring Boot项目</p>
+<p>如果你是用的IDEA，则IDEA内置了Spring Initializer，按照提示可以方便构建项目</p>
+<p><img src="https://ws1.sinaimg.cn/large/006tNc79gy1g2a91psir9j311n0u00yl.jpg" alt=""></p>
+<h2 id="Maven-Install"><a href="#Maven-Install" class="headerlink" title="Maven Install"></a>Maven Install</h2><p>下面来看下如何使用maven来构建Spring boot项目。</p>
+<p>利用maven来构建Spring boot 项目有两种方式</p>
+<ol>
+<li>继承spring-boot-starter-parent，使用Spring Initializer构建的项目都是采用这种方式</li>
+<li>import Spring-boot的pom文件</li>
+</ol>
+<p>下面看下以上两种方式pom文件的配置</p>
+<h3 id="inherits-spring-boot-starter-parent"><a href="#inherits-spring-boot-starter-parent" class="headerlink" title="inherits spring-boot-starter-parent"></a>inherits spring-boot-starter-parent</h3><pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
+    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+
+    &lt;groupId&gt;com.example&lt;/groupId&gt;
+    &lt;artifactId&gt;myproject&lt;/artifactId&gt;
+    &lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+
+    &lt;!-- Inherit defaults from Spring Boot --&gt;
+    &lt;parent&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+        &lt;version&gt;2.1.4.RELEASE&lt;/version&gt;
+    &lt;/parent&gt;
+
+&lt;/project&gt;
+</code></pre><h3 id="import-Spring-boot-pom"><a href="#import-Spring-boot-pom" class="headerlink" title="import Spring-boot pom"></a>import Spring-boot pom</h3><pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
+    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+
+    &lt;groupId&gt;com.example&lt;/groupId&gt;
+    &lt;artifactId&gt;myproject&lt;/artifactId&gt;
+    &lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+
+    &lt;dependencyManagement&gt;
+        &lt;dependencies&gt;
+            &lt;dependency&gt;
+                &lt;!-- Import dependency management from Spring Boot --&gt;
+                &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+                &lt;artifactId&gt;spring-boot-dependencies&lt;/artifactId&gt;
+                &lt;version&gt;2.1.4.RELEASE&lt;/version&gt;
+                &lt;type&gt;pom&lt;/type&gt;
+                &lt;scope&gt;import&lt;/scope&gt;
+            &lt;/dependency&gt;
+        &lt;/dependencies&gt;
+    &lt;/dependencyManagement&gt;
+
+&lt;/project&gt;
+</code></pre><h2 id="Install-Application"><a href="#Install-Application" class="headerlink" title="Install Application"></a>Install Application</h2><p>下面以一个web服务为例，描述如何启动一个Spring Boot项目</p>
+<p>首先生成一个Application类，Spring Boot的入口类</p>
 <pre><code>@SpringBootApplication
-@EnableScheduling
-public class SchedulerDemoApplication {
-
+public class Application{
     public static void main(String[] args) {
-        SpringApplication.run(SchedulerDemoApplication.class, args);
-    }
-}
-</code></pre><h2 id="Scheduled"><a href="#Scheduled" class="headerlink" title="@Scheduled"></a>@Scheduled</h2><p>@Scheduled用来生成一个定时任务</p>
-<p>@Scheduled的配置如下</p>
-<table>
-<thead>
-<tr>
-<th style="text-align:center">param</th>
-<th style="text-align:center">explain</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center">fixedDelay</td>
-<td style="text-align:center">两个定时任务之间的间隔，即前一个任务执行完后，延迟delay毫秒再执行下一个任务</td>
-</tr>
-<tr>
-<td style="text-align:center">fixedDelayString</td>
-<td style="text-align:center">与fixedDelay相同，只不过用string类型表示时间</td>
-</tr>
-<tr>
-<td style="text-align:center">fixedRate</td>
-<td style="text-align:center">固定周期执行任务，例如每隔10s执行一次任务</td>
-</tr>
-<tr>
-<td style="text-align:center">fixedRateString</td>
-<td style="text-align:center">与fixedRate相同，用string表示时间</td>
-</tr>
-<tr>
-<td style="text-align:center">cron</td>
-<td style="text-align:center">用cron表达式来管理定时任务</td>
-</tr>
-<tr>
-<td style="text-align:center">initialDelay</td>
-<td style="text-align:center">执行第一个定时任务的延迟时间，只对fixedDelay或fixedRate任务生效</td>
-</tr>
-<tr>
-<td style="text-align:center">initialDelayString</td>
-<td style="text-align:center">与initialDelay相同</td>
-</tr>
-<tr>
-<td style="text-align:center">zone</td>
-<td style="text-align:center">时区，默认使用server的时区</td>
-</tr>
-</tbody>
-</table>
-<h3 id="fixedDelay与fixedRate的区别"><a href="#fixedDelay与fixedRate的区别" class="headerlink" title="fixedDelay与fixedRate的区别"></a>fixedDelay与fixedRate的区别</h3><p>对于fixedDelay任务，后个任务一定需要在前一个任务执行完并且再过delay毫秒后才会执行。对于下面的例子来说，delay为5s，而任务执行需要5s，所有每隔10s任务才会执行一次</p>
-<pre><code>@Scheduled(fixedDelay = 5000)
-public void fixedDelayTask() throws Exception{
-    SimpleDateFormat dateFormat = new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm&quot;);
-    System.out.println(dateFormat.format(new Date()) + &quot;:&quot; + &quot; task of fixed delay&quot;);
-    Thread.sleep(5000);
-}
-</code></pre><p><img src="https://ws4.sinaimg.cn/large/006tNc79gy1g292hzkr0wj31700nqtcz.jpg" alt=""></p>
-<p>对于fixedRate任务，他们的执行是严格按照时间周期，即使上一个任务还未执行完毕，只要时间一到就会里面执行</p>
-<pre><code>@Scheduled(fixedRate = 5000,initialDelay = 5000)
-public void fixedRateTask() throws Exception{
-    SimpleDateFormat dateFormat = new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm:ss&quot;);
-    System.out.println(dateFormat.format(new Date()) + &quot;:&quot; + &quot; task of fixed rate&quot;);
-    Thread.sleep(5000);
-}
-</code></pre><p><img src="https://ws4.sinaimg.cn/large/006tNc79gy1g292nj7rxqj30u20rutca.jpg" alt=""></p>
-<h3 id="cron表达式"><a href="#cron表达式" class="headerlink" title="cron表达式"></a>cron表达式</h3><pre><code>@Scheduled(cron = &quot;[Seconds] [Minutes] [Hours] [Day of month] [Month] [Day of week]&quot;)
-</code></pre><ul>
-<li>second 取值在[0-59]，或者特殊字符 , - * /</li>
-<li>minute 取值在[0-59], 或者特殊字符, - * /</li>
-<li>hour 取值在[0-23],或者特殊字符, - * /</li>
-<li>day of month 每个月第几天，取值在[0-31],或者特殊字段, - * / ? </li>
-<li>month 取值[1-12]或者月份的英文描述，特殊字符为, - * /</li>
-<li>day of week 取值为[1-7]，1表示星期天，2表示星期一，以此类推，也可用英文描述的星期，例如SUN，特殊字符为, - * / #</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th style="text-align:center">特殊字符</th>
-<th style="text-align:center">含义</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center">*</td>
-<td style="text-align:center">表示任意值，若second为*，表示每秒都会触发该事件</td>
-</tr>
-<tr>
-<td style="text-align:center">,</td>
-<td style="text-align:center">表示列出枚举值，若minute为5,20 则表示第5分钟和第20分钟会触发事件</td>
-</tr>
-<tr>
-<td style="text-align:center">/</td>
-<td style="text-align:center">表示起始时间开始触发，然后每隔固定周期都会触发，例如minute为5/20，则在5分，25分，45分都会触发事件</td>
-</tr>
-<tr>
-<td style="text-align:center">-</td>
-<td style="text-align:center">表示取值范围，若minute为5-20，则表示从5分到20分，每分钟都会触发事件</td>
-</tr>
-<tr>
-<td style="text-align:center">?</td>
-<td style="text-align:center">只能用在每月第几天和星期两个域。表示不指定值，当2个子表达式其中之一被指定了值以后，为了避免冲突，需要将另一个子表达式的值设为”?”</td>
-</tr>
-<tr>
-<td style="text-align:center">L</td>
-<td style="text-align:center">表示最后，只能出现在week或者day of month中，若week为1L,表示在最后一个星期天</td>
-</tr>
-<tr>
-<td style="text-align:center">W</td>
-<td style="text-align:center">表示有效工作日(周一到周五),只能出现在day of month中</td>
-</tr>
-<tr>
-<td style="text-align:center">#</td>
-<td style="text-align:center">用于确定每个月第几个星期几，只能出现在day of month中，例如1#3 表示每个月第三个星期日</td>
-</tr>
-</tbody>
-</table>
-<h4 id="cron示例"><a href="#cron示例" class="headerlink" title="cron示例"></a>cron示例</h4><p>每天10点</p>
-<pre><code>0 0 10 * * *
-</code></pre><p>每隔5分钟</p>
-<pre><code>* */5 * * * *
-</code></pre><p>每天8点，8点半，9点，9点半，10点</p>
-<pre><code>* */30 8-10 * * *
-</code></pre><h2 id="自定义线程池来管理定时任务"><a href="#自定义线程池来管理定时任务" class="headerlink" title="自定义线程池来管理定时任务"></a>自定义线程池来管理定时任务</h2><p>自定义线程池配置，例如线程池size，线程池名称</p>
-<pre><code>@Configuration
-public class ScheduleConfig implements SchedulingConfigurer {
-    @Override
-    public void configureTasks(ScheduledTaskRegistrar scheduledTaskRegistrar) {
-        ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
-        taskScheduler.setPoolSize(10);
-        taskScheduler.setThreadNamePrefix(&quot;schedule-task-pool&quot;);
-        taskScheduler.initialize();
-
-        scheduledTaskRegistrar.setTaskScheduler(taskScheduler);
-    }
-}
-</code></pre><p>定义一个cron任务</p>
-<pre><code>@Scheduled(cron = &quot;*/5 * * * * *&quot;)
-public void cronTask(){
-    String name = Thread.currentThread().getName();
-    SimpleDateFormat dateFormat = new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm:ss&quot;);
-    System.out.println(String.format(&quot;%s: current thread %s&quot;, dateFormat.format(new Date()), name));
-}
-</code></pre><p>运行程序，可以得到如下的运行结果，可以看到此时定时任务是运行在自定义的线程池里        </p>
-<p><img src="https://ws1.sinaimg.cn/large/006tNc79gy1g29486h5y6j311a08amyp.jpg" alt=""></p>
-<h2 id="动态管理定时任务"><a href="#动态管理定时任务" class="headerlink" title="动态管理定时任务"></a>动态管理定时任务</h2><p>使用ThreadPoolTaskScheduler来生成定时任务，在通过维护定时任务的ScheduleFuture的map来实现动态管理定时任务</p>
-<h3 id="DynamicScheduleTaskManager"><a href="#DynamicScheduleTaskManager" class="headerlink" title="DynamicScheduleTaskManager"></a>DynamicScheduleTaskManager</h3><pre><code>@Component
-public class DynamicScheduleTaskManager {
-    private ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
-
-    private Map&lt;Integer, ScheduledFuture&gt; futureMap = new HashMap&lt;&gt;();
-
-    @PostConstruct
-    public void init(){
-        taskScheduler.initialize();
-    }
-
-    /**
-     * 增加定时任务，若任务已存在，则删除旧任务，更新新任务
-     * @param taskConfig
-     */
-    public void addOrUpdateTask(TaskConfig taskConfig){
-        int taskConfigId = taskConfig.getId();
-        if (futureMap.containsKey(taskConfigId)){
-            deleteTask(taskConfig);
-        }
-        ScheduledFuture&lt;?&gt; scheduledFuture = taskScheduler.schedule(() -&gt; {
-            SimpleDateFormat dateFormat = new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm:ss&quot;);
-            String timeFormat = dateFormat.format(new Date());
-            System.out.println(String.format(&quot;time:%s,process task,id:%d&quot;,timeFormat,taskConfigId));
-        }, new CronTrigger(taskConfig.getCron()));
-        futureMap.put(taskConfigId, scheduledFuture);
-    }
-
-    /**
-     * 删除任务
-     * @param taskConfig
-     */
-    public void deleteTask(TaskConfig taskConfig){
-        int taskConfigId = taskConfig.getId();
-        if (futureMap.containsKey(taskConfigId)){
-            ScheduledFuture scheduledFuture = futureMap.get(taskConfigId);
-            scheduledFuture.cancel(true);
-            System.out.println(&quot;delete task,id:&quot; + taskConfigId);
-        }
-    }
-}        
-
-TaskConfig
-
-@Getter
-@Setter
-public class TaskConfig {
-    /**
-     * id of task
-     */
-    private int id;
-
-    /**
-     * cron expression
-     */
-    private String cron;
-
-}
-</code></pre><h3 id="ScheduleController"><a href="#ScheduleController" class="headerlink" title="ScheduleController"></a>ScheduleController</h3><pre><code>@RestController
-@RequestMapping(produces = &quot;application/json; charset=utf-8&quot;)
-public class ScheduleController {
-
-    @Autowired
-    private DynamicScheduleTaskManager scheduleTaskManager;
-
-    @PostMapping(&quot;/add/task&quot;)
-    public String addTask(@RequestBody TaskConfig taskConfig){
-        scheduleTaskManager.addOrUpdateTask(taskConfig);
-        return &quot;success&quot;;
-    }
-
-    @PostMapping(&quot;/delete/task&quot;)
-    public void deleteTask(@RequestBody TaskConfig taskConfig){
-        scheduleTaskManager.deleteTask(taskConfig);
+        SpringApplication.run(Application.class,args);
     }
 }    
-</code></pre><h3 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h3><p>####1. 新增taskConfig</p>
-<p><img src="https://ws2.sinaimg.cn/large/006tNc79gy1g295imsq3uj31c80fwjt8.jpg" alt=""></p>
-<p>####2. 更新taskConfig</p>
-<p><img src="https://ws4.sinaimg.cn/large/006tNc79gy1g295kc5vt5j31c80e2myy.jpg" alt=""></p>
-<p>####3. 删除taskConfig<br><img src="https://ws3.sinaimg.cn/large/006tNc79gy1g295kx02yej31ck0es765.jpg" alt=""></p>
-<p>####4.输出</p>
-<p><img src="https://ws1.sinaimg.cn/large/006tNc79gy1g295nz4evhj31b80feq68.jpg" alt=""></p>
+</code></pre><p>@SpringBootApplication等价于@Configuration，@EnableAutoConfiguration,@ComponentScan三者合一    </p>
+<p>第二步就是生成一个Controller</p>
+<pre><code>@RestController
+public class DemoController {
+
+    @RequestMapping(&quot;/&quot;)
+    public String helloWorld() {
+        return &quot;Hello World&quot;;
+    }
+}
+</code></pre><p>@RestController注解用来告知Spring这是一个Restful的web Controller</p>
+<p>@RequestMapping注解提供路由信息</p>
+<p>下面就是启动项目了，首先需要在pom文件加入如下build插件，此时插件将生成一个可执行的jar</p>
+<pre><code>&lt;build&gt;
+    &lt;plugins&gt;
+        &lt;plugin&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+        &lt;/plugin&gt;
+    &lt;/plugins&gt;
+&lt;/build&gt;
+</code></pre><p>之后运行maven命令，即可以得到jar</p>
+<pre><code>mvn clean install
+</code></pre><p>得到可执行jar后，有两种启动方式  </p>
+<ol>
+<li>直接运行jar</li>
+<li>以Unix service的方式运行</li>
+</ol>
+<h3 id="start-with-jar"><a href="#start-with-jar" class="headerlink" title="start with jar"></a>start with jar</h3><p>直接运行jar比较简单，直接输入一下命令即可以</p>
+<pre><code>java -jar target/springbootDemo.jar
+</code></pre><h3 id="start-with-Unix-Service"><a href="#start-with-Unix-Service" class="headerlink" title="start with Unix Service"></a>start with Unix Service</h3><p>首先需要创建一个系统链接</p>
+<pre><code>sudo ln -s /www/demo/springbootDemo.jar /etc/init.d/myapp
+</code></pre><p>此时，即可以启动项目</p>
+<pre><code>service springbootDemo start
+</code></pre><p>运行成功之后，可以发现/var/run/springbootDemo/springbootDemo.pid这个文件，如果你想配置项目的相关配置，可以在jar的目录下，配置.conf的配置文件，例如</p>
+<pre><code>springbootDemo.conf
+
+LOG_FOLDER=/www/demo/log   //日志路径
+JAVA_OPTS=&quot;-Dfile.encoding=UTF-8 -Dspring.profiles.active=dev&quot;            
+</code></pre><h2 id="Spring-Active-Profile"><a href="#Spring-Active-Profile" class="headerlink" title="Spring Active Profile"></a>Spring Active Profile</h2><p>在实际的开发中，需要区分不同的部署环境，不同环境的配置是不一样的，例如dev，pre，pro环境，那么如何管理这些配置文件呢？</p>
+<p>Spring Boot默认会去寻找application.properties或者application.yml文件来作为配置文件，我们可以通过spring.profiles.active参数来指定加载对应的配置文件，例如</p>
+<pre><code>java -jar -Dspring.profiles.active=dev springbootDemo.jar
+</code></pre><p>则Spring Boot会去加载文件名为application-dev的配置文件</p>
+<p>###@ActiveProfiles</p>
+<p>在单元测试中，我们又可能需要加载配置文件，此时可以通过@ActiveProfiles注解来指定加载的配置文件</p>
+<pre><code>@ActiveProfiles(&quot;local&quot;)    
+</code></pre><p>注意@ActiveProfiles只能在/src/test/java中使用</p>
+<p>###@Profiles<br>@Profile声明的类，必须提供满足value属性中指定的条件，才会被注册到Spring容器中，例如</p>
+<pre><code>@Profile(&quot;dev&quot;)
+@RestController
+@RequestMapping(&quot;/test&quot;)
+public class TestController {
+
+    @GetMapping(&quot;/greet&quot;)
+    public String greet() {
+        return &quot;Hey there!&quot;;
+    }
+
+}
+</code></pre><p>如果指定spring.profiles.active=pro，则    TestController则不会被加载到Spring容器中</p>
 <h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
-<li><a href="https://cloud.tencent.com/info/9d5782f8b475dfa8c41968f11aaea733.html" target="_blank" rel="noopener">SpringBoot定时任务及Cron表达式详解</a></li>
-<li><a href="https://dzone.com/articles/running-on-time-with-springs-scheduled-tasks" target="_blank" rel="noopener">Running on Time With Spring’s Scheduled Tasks</a></li>
-<li><a href="https://www.callicoder.com/spring-boot-task-scheduling-with-scheduled-annotation/" target="_blank" rel="noopener">How to Schedule Tasks with Spring Boot</a></li>
+<li><a href="https://docs.spring.io/spring-boot/docs/current/reference/html/deployment-install.html" target="_blank" rel="noopener">Installing Spring Boot Applications</a></li>
+<li><a href="https://docs.spring.io/spring-boot/docs/current/reference/html/getting-started-installing-spring-boot.html#getting-started-maven-installation" target="_blank" rel="noopener">Installing Spring Boot</a></li>
+<li><a href="https://spldeolin.com/posts/profile-activeprofiles/" target="_blank" rel="noopener">Spring Boot中@ActiveProfiles和@Profile的区别</a></li>
 </ul>
 
             </div>
@@ -678,7 +566,7 @@ public class ScheduleController {
                     <span class="reprint-tip">Reprint please specify: </span>
                     <a href="http://yoursite.com" class="b-link-green">wbl</a>
                     <i class="fa fa-angle-right fa-lg fa-fw text-color"></i>
-                    <a href="/2019/04/20/spring-boot-ding-shi-ren-wu/" class="b-link-green">Spring-boot定时任务</a>
+                    <a href="/2019/04/21/spring-boot-quick-start/" class="b-link-green">Spring-Boot Quick start</a>
                 </p>
             </div>
         </div>
@@ -700,7 +588,7 @@ public class ScheduleController {
     <div class="row article-row">
         
         <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge left-badge text-color">Previous</div>
+            <div class="article-badge left-badge text-color">Current</div>
             <div class="card">
                 <a href="/2019/04/21/spring-boot-quick-start/">
                     <div class="card-image">
@@ -716,9 +604,55 @@ public class ScheduleController {
 
 另外你还可以设置需要引</div>
                     <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="fa fa-clock-o fa-fw icon-date"></i>2019-04-21
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-04-21
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fa fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Spring-Boot/" class="post-category" target="_blank">
+                                    Spring Boot
+                                </a>
+                            
+                            
                         </span>
+                    </div>
+                </div>
+
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Spring-Boot/" target="_blank">
+                        <span class="chip bg-color">Spring Boot</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">Next</div>
+            <div class="card">
+                <a href="/2019/04/20/spring-boot-ding-shi-ren-wu/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/12.jpg" class="responsive-img" alt="Spring-boot定时任务">
+                        
+                        <span class="card-title">Spring-boot定时任务</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary">create project使用IDEA创建一个scheduler-demo项目，这里可以使用spring initializr插件初始化spring boot
+
+@EnableScheduling注解EnableScheduling表示允</div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-04-20
+                            </span>
                         <span class="publish-author">
                             
                             <i class="fa fa-bookmark fa-fw icon-category"></i>
@@ -736,49 +670,6 @@ public class ScheduleController {
                     
                     <a href="/tags/Spring-Boot/" target="_blank">
                         <span class="chip bg-color">Spring Boot</span>
-                    </a>
-                    
-                </div>
-                
-            </div>
-        </div>
-        
-        
-        <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge right-badge text-color">Next</div>
-            <div class="card">
-                <a href="/2019/03/31/raft-xie-yi-zhi-ri-zhi-fu-zhi/">
-                    <div class="card-image">
-                        
-                        
-                        <img src="/medias/featureimages/10.jpg" class="responsive-img" alt="Raft协议之日志复制">
-                        
-                        <span class="card-title">Raft协议之日志复制</span>
-                    </div>
-                </a>
-                <div class="card-content article-content">
-                    <div class="summary">上篇Raft协议之Leader选举介绍了Leader选举的过程。Leader会处理来自客户端的请求，并将客户端更新操作以消息(Append Entries消息)的形式发送到集群中所有Follower节点。本文将介绍Raft协议日志复制的流程</div>
-                    <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-03-31
-                            </span>
-                        <span class="publish-author">
-                            
-                            <i class="fa fa-bookmark fa-fw icon-category"></i>
-                            
-                            <a href="/categories/Raft/" class="post-category" target="_blank">
-                                    Raft
-                                </a>
-                            
-                            
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="card-action article-tags">
-                    
-                    <a href="/tags/Raft/" target="_blank">
-                        <span class="chip bg-color">Raft</span>
                     </a>
                     
                 </div>
