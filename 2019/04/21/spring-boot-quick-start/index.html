@@ -573,6 +573,28 @@ public class TestController {
     </div>
 
     
+        <link rel="stylesheet" href="/libs/gitalk/gitalk.css">
+<link rel="stylesheet" href="/css/my-gitalk.css">
+
+<div class="card gitalk-card" data-aos="fade-up">
+    <div id="gitalk-container" class="card-content"></div>
+</div>
+
+<script src="/libs/gitalk/gitalk.min.js"></script>
+<script>
+    let gitalk = new Gitalk({
+        clientID: '2ce6d5b3bf1afe6d63e1',
+        clientSecret: '1adb94042a9ac66b08a7a774c10dfc1deb0cb0bd',
+        repo: 'blog-comments',
+        owner: 'BloodHunter',
+        admin: "BloodHunter",
+        id: '2019-04-21T14-20-51',
+        distractionFreeMode: false  // Facebook-like distraction free mode
+    });
+
+    gitalk.render('gitalk-container');
+</script>
+    
 
     
 
