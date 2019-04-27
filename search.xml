@@ -3,6 +3,29 @@
   
     
     <entry>
+      <title>Prometheus查询之Vector match</title>
+      <link href="/2019/04/27/prometheus-cha-xun-zhi-vector-match/"/>
+      <url>/2019/04/27/prometheus-cha-xun-zhi-vector-match/</url>
+      
+        <content type="html"><![CDATA[<h2 id="Vector-Match"><a href="#Vector-Match" class="headerlink" title="Vector Match"></a>Vector Match</h2><p>vector match的含义如下</p><blockquote><p>根据一定的规则，对两个vector的label进行匹配，如果匹配成功，则对两个vector进行运算</p></blockquote><p>vector match有两种类型，一个是one to one，一个是one to many或者many to one</p><h2 id="one-to-one"><a href="#one-to-one" class="headerlink" title="one to one"></a>one to one</h2><pre><code>&lt;vector expr&gt; &lt;bin-op&gt; ignoring(&lt;label list&gt;) &lt;vector expr&gt;&lt;vector expr&gt; &lt;bin-op&gt; on(&lt;label list&gt;) &lt;vector expr&gt;</code></pre><blockquote><p>bin-op 表示运算操作符，”+,-,/,*”等</p><p>ignoring 表示忽略某些label来关联两个vector</p><p>on 表示根据某些label来关联两个vector</p></blockquote><p>例如vector1{label1,label2,label3}, vector2{label2,label3}, 则</p><pre><code>ignoring(label1) 表示通过label2和label3对vector进行匹配on(label2) 表示通过label2对vector进行匹配</code></pre><p>下面以一个实际的例子来说明one to one 的vector match</p><p>原始数据如下</p><pre><code>#vector1method_code:http_errors:rate5m{method=&quot;get&quot;, code=&quot;500&quot;}  24method_code:http_errors:rate5m{method=&quot;get&quot;, code=&quot;404&quot;}  30method_code:http_errors:rate5m{method=&quot;put&quot;, code=&quot;501&quot;}  3method_code:http_errors:rate5m{method=&quot;post&quot;, code=&quot;500&quot;} 6method_code:http_errors:rate5m{method=&quot;post&quot;, code=&quot;404&quot;} 21#vector2method:http_requests:rate5m{method=&quot;get&quot;}  600method:http_requests:rate5m{method=&quot;del&quot;}  34method:http_requests:rate5m{method=&quot;post&quot;} 120</code></pre><p>查询语句如下</p><pre><code>method_code:http_errors:rate5m{code=&quot;500&quot;} / ignoring(code) method:http_requests:rate5m</code></pre><p>首先vector1的label有method，code，vector2的label有method，根据ignoring(code)可知，两个vector是根据method进行关联，可以得到下表所示的match结果</p><table><thead><tr><th>vector1</th><th>vector2</th></tr></thead><tbody><tr><td>method_code:http_errors:rate5m{method=”get”, code=”500”} 24</td><td>method:http_requests:rate5m{method=”get”}  600</td></tr><tr><td>method_code:http_errors:rate5m{method=”post”, code=”500”} 6</td><td>method:http_requests:rate5m{method=”post”} 120</td></tr></tbody></table><p>因此，查询结果如下所示：</p><pre><code>{method=&quot;get&quot;}  0.04            //  24 / 600{method=&quot;post&quot;} 0.05            //   6 / 120</code></pre><p>上述查询语句等价于</p><pre><code>method_code:http_errors:rate5m{code=&quot;500&quot;} / on(method) method:http_requests:rate5m</code></pre><h2 id="one-to-many-many-to-one"><a href="#one-to-many-many-to-one" class="headerlink" title="one to many/many to one"></a>one to many/many to one</h2><pre><code>&lt;vector expr&gt; &lt;bin-op&gt; ignoring(&lt;label list&gt;) group_left(&lt;label list&gt;) &lt;vector expr&gt;&lt;vector expr&gt; &lt;bin-op&gt; ignoring(&lt;label list&gt;) group_right(&lt;label list&gt;) &lt;vector expr&gt;&lt;vector expr&gt; &lt;bin-op&gt; on(&lt;label list&gt;) group_left(&lt;label list&gt;) &lt;vector expr&gt;&lt;vector expr&gt; &lt;bin-op&gt; on(&lt;label list&gt;) group_right(&lt;label list&gt;) &lt;vector expr&gt;    </code></pre><blockquote><p>group_left   表示many to one</p><p>group_right  表示one to many</p></blockquote><p>下面还是以实际数据来说明，原始数据如下：</p><pre><code>#vector1method_code:http_errors:rate5m{method=&quot;get&quot;, code=&quot;500&quot;}  24method_code:http_errors:rate5m{method=&quot;get&quot;, code=&quot;404&quot;}  30method_code:http_errors:rate5m{method=&quot;put&quot;, code=&quot;501&quot;}  3method_code:http_errors:rate5m{method=&quot;post&quot;, code=&quot;500&quot;} 6method_code:http_errors:rate5m{method=&quot;post&quot;, code=&quot;404&quot;} 21#vector2method:http_requests:rate5m{method=&quot;get&quot;}  600method:http_requests:rate5m{method=&quot;del&quot;}  34method:http_requests:rate5m{method=&quot;post&quot;} 120</code></pre><p>查询语句如下：</p><pre><code>method_code:http_errors:rate5m / ignoring(code) group_left method:http_requests:rate5m</code></pre><p>上述查询语句表示通过method对两个vector进行匹配，vector1存在两个method=get的metric，两个method=post的metric，vector2各存在一个method=get已经method的metric，所以match结果如下</p><table><thead><tr><th>vector1</th><th>vector2</th></tr></thead><tbody><tr><td>method_code:http_errors:rate5m{method=”get”, code=”500”}  24</td><td>method:http_requests:rate5m{method=”get”}  600</td></tr><tr><td>method_code:http_errors:rate5m{method=”get”, code=”404”}  30</td><td>method:http_requests:rate5m{method=”get”}  600</td></tr><tr><td>method_code:http_errors:rate5m{method=”post”, code=”500”} 6</td><td>method:http_requests:rate5m{method=”post”} 120</td></tr><tr><td>method_code:http_errors:rate5m{method=”post”, code=”404”} 21</td><td>method:http_requests:rate5m{method=”post”} 120</td></tr></tbody></table><p>查询结果如下</p><pre><code>{method=&quot;get&quot;, code=&quot;500&quot;}  0.04            //  24 / 600{method=&quot;get&quot;, code=&quot;404&quot;}  0.05            //  30 / 600{method=&quot;post&quot;, code=&quot;500&quot;} 0.05            //   6 / 120{method=&quot;post&quot;, code=&quot;404&quot;} 0.175           //  21 / 120</code></pre><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ol><li><p>对于one to one表达的是，vector1和vector2根据on或者ignoring中的label组成的值是唯一的，也就是说vector1和vector2根据label list，不存在两个相同的label value</p></li><li><p>对于group_left(label list)来说，vector1的label list组成的value可以有多个，而vector2的label list组成的value只能有一个，而group_right(label list)则相反，vector1的值只能有一个，而vector2的值可以有多个</p></li></ol>]]></content>
+      
+      
+      <categories>
+          
+          <category> 监控 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Prometheus </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
       <title>Spring-Boot Quick start</title>
       <link href="/2019/04/21/spring-boot-quick-start/"/>
       <url>/2019/04/21/spring-boot-quick-start/</url>
@@ -203,7 +226,7 @@
       
         <tags>
             
-            <tag> influxDB </tag>
+            <tag> InfluxDB </tag>
             
         </tags>
       
@@ -272,7 +295,7 @@
       
         <tags>
             
-            <tag> prometheus </tag>
+            <tag> Prometheus </tag>
             
         </tags>
       
