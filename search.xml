@@ -3,6 +3,29 @@
   
     
     <entry>
+      <title>Spring Boot启动流程初探</title>
+      <link href="/2019/04/27/spring-boot-qi-dong-liu-cheng-chu-tan/"/>
+      <url>/2019/04/27/spring-boot-qi-dong-liu-cheng-chu-tan/</url>
+      
+        <content type="html"><![CDATA[<p>刚接触Spring Boot的时候，相信大家都有接触过以下代码，这是Spring Boot的启动类，今天就来简单看下Spring Boot的启动流程</p><pre><code>@SpringBootApplicationpublic class Application {    public static void main(String[] args) {        SpringApplication.run(Application.class, args);    }}</code></pre><p>首先来看下SpringApplication.run()这个方法的真面目，</p><pre><code>public static ConfigurableApplicationContext run(Class&lt;?&gt;[] primarySources,        String[] args) {    return new SpringApplication(primarySources).run(args);}</code></pre><p>看源码可以发现这个方法主要做了两件事情</p><ol><li>初始化SpringApplication实例</li><li>调用run方法生成context</li></ol><p>下面分别来看下这两个流程，以下代码均属于2.1.4版本</p><h2 id="SpringApplication实例初始化"><a href="#SpringApplication实例初始化" class="headerlink" title="SpringApplication实例初始化"></a>SpringApplication实例初始化</h2><p>首先来看下SpringApplication初始化的流程</p><p><img src="https://ws1.sinaimg.cn/large/006tNc79gy1g2hl4nylaoj31k60hyq99.jpg" alt=""><br>可以看到整个流程分为了4步</p><ul><li><p>第一步，推断应用程序类型，Spring Boot的应有类型有REACTIVE，SERVLET，NONE<br><img src="https://ws4.sinaimg.cn/large/006tNc79gy1g2hla826qsj31gy0muq8p.jpg" alt=""><br><img src="https://ws1.sinaimg.cn/large/006tNc79gy1g2hlc9rwjxj31hd0u041q.jpg" alt=""></p></li><li><p>第二步，设置initializers，Spring Boot将会从META-INF/spring.factories中加载相应的ApplicationContextInitializer</p></li></ul><p><img src="https://ws1.sinaimg.cn/large/006tNc79gy1g2hlh5ese2j31jw0b2gof.jpg" alt=""></p><ul><li>第三步，设置listener，Spring Boot将会从META-INF/spring.factories中加载相应的ApplicationListener</li></ul><p><img src="https://ws2.sinaimg.cn/large/006tNc79gy1g2hliyjnwxj31e40jkwje.jpg" alt=""></p><ul><li>第四步，加载main方法的定义类<br><img src="https://ws2.sinaimg.cn/large/006tNc79gy1g2hll7v2ayj31ha0p878p.jpg" alt=""></li></ul><h2 id="SpringApplication-run"><a href="#SpringApplication-run" class="headerlink" title="SpringApplication.run()"></a>SpringApplication.run()</h2><p>下面再来看下run方法的具体实现</p><p><img src="https://ws4.sinaimg.cn/large/006tNc79gy1g2hmls8dcbj30tw13gtho.jpg" alt=""></p><ol><li>从META-INF/spring.factories中加载SpringApplicationRunListener<img src="https://ws4.sinaimg.cn/large/006tNc79gy1g2hmomy3vpj316s054wgb.jpg" alt=""></li><li>创建参数，即从run方法中传入args</li><li>设置程序运行所需的环境变量，SpringApplicationRunListener发送environmentPrepared的消息<img src="https://ws3.sinaimg.cn/large/006tNc79gy1g2hmrwro2ej31ii0pmaj3.jpg" alt=""></li><li>创建ApplicationContext</li><li>初始化ApplicationContext，并设置环境变量，SpringApplicationRunListener发送contextLoaded消息</li><li>refresh ApplicationContext</li><li>SpringApplicationRunListener发送started信息</li><li>完成最终的程序的启动</li><li>SpringApplicationRunListener发送starting消息</li></ol><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul><li>Spring Boot的启动流程主要分为两步，一是初始化SpringApplication，二是调用run()来加载上下文环境</li><li>Spring Boot的应有类型有三种，REACTIVE(响应式web服务)，SERVLET(基于servlet的web服务)，NONE(非web服务)</li><li><p>SpringApplication.run()完成默认的执行流程，如果用户需要扩展执行流程，可以先初始化SpringApplication，在通过其setXXX的方法来增加扩展，最后在调用run来完成初始化</p><pre><code>  SpringApplication app = new SpringApplication(Application.class)  app.setXXX  app.run(args)</code></pre></li></ul>]]></content>
+      
+      
+      <categories>
+          
+          <category> Spring Boot </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Spring Boot </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
       <title>Prometheus查询之Vector match</title>
       <link href="/2019/04/27/prometheus-cha-xun-zhi-vector-match/"/>
       <url>/2019/04/27/prometheus-cha-xun-zhi-vector-match/</url>

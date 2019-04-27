@@ -5,12 +5,10 @@
 
 <head><meta name="generator" content="Hexo 3.8.0">
     <meta charset="utf-8">
-    <meta name="keywords" content="Prometheus查询之Vector match, wbl">
-    <meta name="description" content="Vector Matchvector match的含义如下
-
-根据一定的规则，对两个vector的label进行匹配，如果匹配成功，则对两个vector进行运算
-
-vector match有两种类型，一个是one to one，一个是one">
+    <meta name="keywords" content="Spring Boot启动流程初探, wbl">
+    <meta name="description" content="刚接触Spring Boot的时候，相信大家都有接触过以下代码，这是Spring Boot的启动类，今天就来简单看下Spring Boot的启动流程
+@SpringBootApplication
+public class Applicati">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -18,7 +16,7 @@ vector match有两种类型，一个是one to one，一个是one">
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Prometheus查询之Vector match | wbl</title>
+    <title>Spring Boot启动流程初探 | wbl</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/font-awesome.min.css">
@@ -251,13 +249,13 @@ vector match有两种类型，一个是one to one，一个是one">
 
 
 
-<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/20.jpg')">
+<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/21.jpg')">
     <div class="container">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
                     <div class="description center-align post-title">
-                        Prometheus查询之Vector match
+                        Spring Boot启动流程初探
                     </div>
                 </div>
             </div>
@@ -277,8 +275,8 @@ vector match有两种类型，一个是one to one，一个是one">
             
             <div class="article-tag">
                 
-                <a href="/tags/Prometheus/" target="_blank">
-                    <span class="chip bg-color">Prometheus</span>
+                <a href="/tags/Spring-Boot/" target="_blank">
+                    <span class="chip bg-color">Spring Boot</span>
                 </a>
                 
             </div>
@@ -288,8 +286,8 @@ vector match有两种类型，一个是one to one，一个是one">
                 <span class="post-cate">
                     <i class="fa fa-bookmark fa-fw icon-category"></i>
                     
-                    <a href="/categories/监控/" class="post-category" target="_blank">
-                        监控
+                    <a href="/categories/Spring-Boot/" class="post-category" target="_blank">
+                        Spring Boot
                     </a>
                     
                 </span>
@@ -303,120 +301,62 @@ vector match有两种类型，一个是one to one，一个是one">
         <hr>
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h2 id="Vector-Match"><a href="#Vector-Match" class="headerlink" title="Vector Match"></a>Vector Match</h2><p>vector match的含义如下</p>
-<blockquote>
-<p>根据一定的规则，对两个vector的label进行匹配，如果匹配成功，则对两个vector进行运算</p>
-</blockquote>
-<p>vector match有两种类型，一个是one to one，一个是one to many或者many to one</p>
-<h2 id="one-to-one"><a href="#one-to-one" class="headerlink" title="one to one"></a>one to one</h2><pre><code>&lt;vector expr&gt; &lt;bin-op&gt; ignoring(&lt;label list&gt;) &lt;vector expr&gt;
-&lt;vector expr&gt; &lt;bin-op&gt; on(&lt;label list&gt;) &lt;vector expr&gt;
-</code></pre><blockquote>
-<p>bin-op 表示运算操作符，”+,-,/,*”等</p>
-<p>ignoring 表示忽略某些label来关联两个vector</p>
-<p>on 表示根据某些label来关联两个vector</p>
-</blockquote>
-<p>例如vector1{label1,label2,label3}, vector2{label2,label3}, 则</p>
-<pre><code>ignoring(label1) 表示通过label2和label3对vector进行匹配
-on(label2) 表示通过label2对vector进行匹配
-</code></pre><p>下面以一个实际的例子来说明one to one 的vector match</p>
-<p>原始数据如下</p>
-<pre><code>#vector1
-method_code:http_errors:rate5m{method=&quot;get&quot;, code=&quot;500&quot;}  24
-method_code:http_errors:rate5m{method=&quot;get&quot;, code=&quot;404&quot;}  30
-method_code:http_errors:rate5m{method=&quot;put&quot;, code=&quot;501&quot;}  3
-method_code:http_errors:rate5m{method=&quot;post&quot;, code=&quot;500&quot;} 6
-method_code:http_errors:rate5m{method=&quot;post&quot;, code=&quot;404&quot;} 21
-
-#vector2
-method:http_requests:rate5m{method=&quot;get&quot;}  600
-method:http_requests:rate5m{method=&quot;del&quot;}  34
-method:http_requests:rate5m{method=&quot;post&quot;} 120
-</code></pre><p>查询语句如下</p>
-<pre><code>method_code:http_errors:rate5m{code=&quot;500&quot;} / ignoring(code) method:http_requests:rate5m
-</code></pre><p>首先vector1的label有method，code，vector2的label有method，根据ignoring(code)可知，两个vector是根据method进行关联，可以得到下表所示的match结果</p>
-<table>
-<thead>
-<tr>
-<th>vector1</th>
-<th>vector2</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>method_code:http_errors:rate5m{method=”get”, code=”500”} 24</td>
-<td>method:http_requests:rate5m{method=”get”}  600</td>
-</tr>
-<tr>
-<td>method_code:http_errors:rate5m{method=”post”, code=”500”} 6</td>
-<td>method:http_requests:rate5m{method=”post”} 120</td>
-</tr>
-</tbody>
-</table>
-<p>因此，查询结果如下所示：</p>
-<pre><code>{method=&quot;get&quot;}  0.04            //  24 / 600
-{method=&quot;post&quot;} 0.05            //   6 / 120
-</code></pre><p>上述查询语句等价于</p>
-<pre><code>method_code:http_errors:rate5m{code=&quot;500&quot;} / on(method) method:http_requests:rate5m
-</code></pre><h2 id="one-to-many-many-to-one"><a href="#one-to-many-many-to-one" class="headerlink" title="one to many/many to one"></a>one to many/many to one</h2><pre><code>&lt;vector expr&gt; &lt;bin-op&gt; ignoring(&lt;label list&gt;) group_left(&lt;label list&gt;) &lt;vector expr&gt;
-&lt;vector expr&gt; &lt;bin-op&gt; ignoring(&lt;label list&gt;) group_right(&lt;label list&gt;) &lt;vector expr&gt;
-&lt;vector expr&gt; &lt;bin-op&gt; on(&lt;label list&gt;) group_left(&lt;label list&gt;) &lt;vector expr&gt;
-&lt;vector expr&gt; &lt;bin-op&gt; on(&lt;label list&gt;) group_right(&lt;label list&gt;) &lt;vector expr&gt;    
-</code></pre><blockquote>
-<p>group_left   表示many to one</p>
-<p>group_right  表示one to many</p>
-</blockquote>
-<p>下面还是以实际数据来说明，原始数据如下：</p>
-<pre><code>#vector1
-method_code:http_errors:rate5m{method=&quot;get&quot;, code=&quot;500&quot;}  24
-method_code:http_errors:rate5m{method=&quot;get&quot;, code=&quot;404&quot;}  30
-method_code:http_errors:rate5m{method=&quot;put&quot;, code=&quot;501&quot;}  3
-method_code:http_errors:rate5m{method=&quot;post&quot;, code=&quot;500&quot;} 6
-method_code:http_errors:rate5m{method=&quot;post&quot;, code=&quot;404&quot;} 21
-
-#vector2
-method:http_requests:rate5m{method=&quot;get&quot;}  600
-method:http_requests:rate5m{method=&quot;del&quot;}  34
-method:http_requests:rate5m{method=&quot;post&quot;} 120
-</code></pre><p>查询语句如下：</p>
-<pre><code>method_code:http_errors:rate5m / ignoring(code) group_left method:http_requests:rate5m
-</code></pre><p>上述查询语句表示通过method对两个vector进行匹配，vector1存在两个method=get的metric，两个method=post的metric，vector2各存在一个method=get已经method的metric，所以match结果如下</p>
-<table>
-<thead>
-<tr>
-<th>vector1</th>
-<th>vector2</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>method_code:http_errors:rate5m{method=”get”, code=”500”}  24</td>
-<td>method:http_requests:rate5m{method=”get”}  600</td>
-</tr>
-<tr>
-<td>method_code:http_errors:rate5m{method=”get”, code=”404”}  30</td>
-<td>method:http_requests:rate5m{method=”get”}  600</td>
-</tr>
-<tr>
-<td>method_code:http_errors:rate5m{method=”post”, code=”500”} 6</td>
-<td>method:http_requests:rate5m{method=”post”} 120</td>
-</tr>
-<tr>
-<td>method_code:http_errors:rate5m{method=”post”, code=”404”} 21</td>
-<td>method:http_requests:rate5m{method=”post”} 120</td>
-</tr>
-</tbody>
-</table>
-<p>查询结果如下</p>
-<pre><code>{method=&quot;get&quot;, code=&quot;500&quot;}  0.04            //  24 / 600
-{method=&quot;get&quot;, code=&quot;404&quot;}  0.05            //  30 / 600
-{method=&quot;post&quot;, code=&quot;500&quot;} 0.05            //   6 / 120
-{method=&quot;post&quot;, code=&quot;404&quot;} 0.175           //  21 / 120
-</code></pre><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ol>
-<li><p>对于one to one表达的是，vector1和vector2根据on或者ignoring中的label组成的值是唯一的，也就是说vector1和vector2根据label list，不存在两个相同的label value</p>
-</li>
-<li><p>对于group_left(label list)来说，vector1的label list组成的value可以有多个，而vector2的label list组成的value只能有一个，而group_right(label list)则相反，vector1的值只能有一个，而vector2的值可以有多个</p>
-</li>
+                <p>刚接触Spring Boot的时候，相信大家都有接触过以下代码，这是Spring Boot的启动类，今天就来简单看下Spring Boot的启动流程</p>
+<pre><code>@SpringBootApplication
+public class Application {
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
+}
+</code></pre><p>首先来看下SpringApplication.run()这个方法的真面目，</p>
+<pre><code>public static ConfigurableApplicationContext run(Class&lt;?&gt;[] primarySources,
+        String[] args) {
+    return new SpringApplication(primarySources).run(args);
+}
+</code></pre><p>看源码可以发现这个方法主要做了两件事情</p>
+<ol>
+<li>初始化SpringApplication实例</li>
+<li>调用run方法生成context</li>
 </ol>
+<p>下面分别来看下这两个流程，以下代码均属于2.1.4版本</p>
+<h2 id="SpringApplication实例初始化"><a href="#SpringApplication实例初始化" class="headerlink" title="SpringApplication实例初始化"></a>SpringApplication实例初始化</h2><p>首先来看下SpringApplication初始化的流程</p>
+<p><img src="https://ws1.sinaimg.cn/large/006tNc79gy1g2hl4nylaoj31k60hyq99.jpg" alt=""><br>可以看到整个流程分为了4步</p>
+<ul>
+<li><p>第一步，推断应用程序类型，Spring Boot的应有类型有REACTIVE，SERVLET，NONE<br><img src="https://ws4.sinaimg.cn/large/006tNc79gy1g2hla826qsj31gy0muq8p.jpg" alt=""><br><img src="https://ws1.sinaimg.cn/large/006tNc79gy1g2hlc9rwjxj31hd0u041q.jpg" alt=""></p>
+</li>
+<li><p>第二步，设置initializers，Spring Boot将会从META-INF/spring.factories中加载相应的ApplicationContextInitializer</p>
+</li>
+</ul>
+<p><img src="https://ws1.sinaimg.cn/large/006tNc79gy1g2hlh5ese2j31jw0b2gof.jpg" alt=""></p>
+<ul>
+<li>第三步，设置listener，Spring Boot将会从META-INF/spring.factories中加载相应的ApplicationListener</li>
+</ul>
+<p><img src="https://ws2.sinaimg.cn/large/006tNc79gy1g2hliyjnwxj31e40jkwje.jpg" alt=""></p>
+<ul>
+<li>第四步，加载main方法的定义类<br><img src="https://ws2.sinaimg.cn/large/006tNc79gy1g2hll7v2ayj31ha0p878p.jpg" alt=""></li>
+</ul>
+<h2 id="SpringApplication-run"><a href="#SpringApplication-run" class="headerlink" title="SpringApplication.run()"></a>SpringApplication.run()</h2><p>下面再来看下run方法的具体实现</p>
+<p><img src="https://ws4.sinaimg.cn/large/006tNc79gy1g2hmls8dcbj30tw13gtho.jpg" alt=""></p>
+<ol>
+<li>从META-INF/spring.factories中加载SpringApplicationRunListener<img src="https://ws4.sinaimg.cn/large/006tNc79gy1g2hmomy3vpj316s054wgb.jpg" alt=""></li>
+<li>创建参数，即从run方法中传入args</li>
+<li>设置程序运行所需的环境变量，SpringApplicationRunListener发送environmentPrepared的消息<img src="https://ws3.sinaimg.cn/large/006tNc79gy1g2hmrwro2ej31ii0pmaj3.jpg" alt=""></li>
+<li>创建ApplicationContext</li>
+<li>初始化ApplicationContext，并设置环境变量，SpringApplicationRunListener发送contextLoaded消息</li>
+<li>refresh ApplicationContext</li>
+<li>SpringApplicationRunListener发送started信息</li>
+<li>完成最终的程序的启动</li>
+<li>SpringApplicationRunListener发送starting消息</li>
+</ol>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>Spring Boot的启动流程主要分为两步，一是初始化SpringApplication，二是调用run()来加载上下文环境</li>
+<li>Spring Boot的应有类型有三种，REACTIVE(响应式web服务)，SERVLET(基于servlet的web服务)，NONE(非web服务)</li>
+<li><p>SpringApplication.run()完成默认的执行流程，如果用户需要扩展执行流程，可以先初始化SpringApplication，在通过其setXXX的方法来增加扩展，最后在调用run来完成初始化</p>
+<pre><code>  SpringApplication app = new SpringApplication(Application.class)
+  app.setXXX
+  app.run(args)
+</code></pre></li>
+</ul>
 
             </div>
             <hr>
@@ -555,7 +495,7 @@ method:http_requests:rate5m{method=&quot;post&quot;} 120
                     <span class="reprint-tip">Reprint please specify: </span>
                     <a href="http://yoursite.com" class="b-link-green">wbl</a>
                     <i class="fa fa-angle-right fa-lg fa-fw text-color"></i>
-                    <a href="/2019/04/27/prometheus-cha-xun-zhi-vector-match/" class="b-link-green">Prometheus查询之Vector match</a>
+                    <a href="/2019/04/27/spring-boot-qi-dong-liu-cheng-chu-tan/" class="b-link-green">Spring Boot启动流程初探</a>
                 </p>
             </div>
         </div>
@@ -577,7 +517,7 @@ method:http_requests:rate5m{method=&quot;post&quot;} 120
         repo: 'blog-comments',
         owner: 'BloodHunter',
         admin: "BloodHunter",
-        id: '2019-04-27T14-32-00',
+        id: '2019-04-27T22-23-51',
         distractionFreeMode: false  // Facebook-like distraction free mode
     });
 
@@ -599,7 +539,7 @@ method:http_requests:rate5m{method=&quot;post&quot;} 120
     <div class="row article-row">
         
         <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge left-badge text-color">Previous</div>
+            <div class="article-badge left-badge text-color">Current</div>
             <div class="card">
                 <a href="/2019/04/27/spring-boot-qi-dong-liu-cheng-chu-tan/">
                     <div class="card-image">
@@ -615,9 +555,9 @@ method:http_requests:rate5m{method=&quot;post&quot;} 120
 @SpringBootApplication
 public class Applicati</div>
                     <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="fa fa-clock-o fa-fw icon-date"></i>2019-04-27
-                        </span>
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-04-27
+                            </span>
                         <span class="publish-author">
                             
                             <i class="fa fa-bookmark fa-fw icon-category"></i>
@@ -630,6 +570,7 @@ public class Applicati</div>
                         </span>
                     </div>
                 </div>
+
                 
                 <div class="card-action article-tags">
                     
@@ -646,29 +587,31 @@ public class Applicati</div>
         <div class="article col s12 m6" data-aos="fade-up">
             <div class="article-badge right-badge text-color">Next</div>
             <div class="card">
-                <a href="/2019/04/21/spring-boot-quick-start/">
+                <a href="/2019/04/27/prometheus-cha-xun-zhi-vector-match/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/1.jpg" class="responsive-img" alt="Spring-Boot Quick start">
+                        <img src="/medias/featureimages/20.jpg" class="responsive-img" alt="Prometheus查询之Vector match">
                         
-                        <span class="card-title">Spring-Boot Quick start</span>
+                        <span class="card-title">Prometheus查询之Vector match</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
-                    <div class="summary">Create Project构建一个Spring Boot的项目非常方面，可以使用官方提供的Spring Initializr，打开https://start.spring.io/，输入项目基本信息即可构建一个项目
+                    <div class="summary">Vector Matchvector match的含义如下
 
-另外你还可以设置需要引</div>
+根据一定的规则，对两个vector的label进行匹配，如果匹配成功，则对两个vector进行运算
+
+vector match有两种类型，一个是one to one，一个是one</div>
                     <div class="publish-info">
                             <span class="publish-date">
-                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-04-21
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-04-27
                             </span>
                         <span class="publish-author">
                             
                             <i class="fa fa-bookmark fa-fw icon-category"></i>
                             
-                            <a href="/categories/Spring-Boot/" class="post-category" target="_blank">
-                                    Spring Boot
+                            <a href="/categories/监控/" class="post-category" target="_blank">
+                                    监控
                                 </a>
                             
                             
@@ -678,8 +621,8 @@ public class Applicati</div>
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/Spring-Boot/" target="_blank">
-                        <span class="chip bg-color">Spring Boot</span>
+                    <a href="/tags/Prometheus/" target="_blank">
+                        <span class="chip bg-color">Prometheus</span>
                     </a>
                     
                 </div>
