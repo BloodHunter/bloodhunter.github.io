@@ -5,10 +5,14 @@
 
 <head><meta name="generator" content="Hexo 3.8.0">
     <meta charset="utf-8">
-    <meta name="keywords" content="Spring Boot启动流程初探, wbl">
-    <meta name="description" content="刚接触Spring Boot的时候，相信大家都有接触过以下代码，这是Spring Boot的启动类，今天就来简单看下Spring Boot的启动流程
-@SpringBootApplication
-public class Applicati">
+    <meta name="keywords" content="Spring Boot启动流程扩展, wbl">
+    <meta name="description" content="Spring Boot启动可扩展流程通过上一篇Spring Boot启动流程详解，我们可知Spring Boot在以下几点可以进行扩展
+
+初始化器(Initializer)
+监听器(Listener)
+Runners
+
+下面依次来看下如何添">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -16,7 +20,7 @@ public class Applicati">
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Spring Boot启动流程初探 | wbl</title>
+    <title>Spring Boot启动流程扩展 | wbl</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/font-awesome.min.css">
@@ -249,13 +253,13 @@ public class Applicati">
 
 
 
-<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/21.jpg')">
+<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/20.jpg')">
     <div class="container">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
                     <div class="description center-align post-title">
-                        Spring Boot启动流程初探
+                        Spring Boot启动流程扩展
                     </div>
                 </div>
             </div>
@@ -294,73 +298,122 @@ public class Applicati">
                 
 
                 <span class="post-date">
-                    <i class="fa fa-clock-o fa-fw"></i>2019-04-27
+                    <i class="fa fa-clock-o fa-fw"></i>2019-05-02
                 </span>
             </div>
         </div>
         <hr>
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <p>刚接触Spring Boot的时候，相信大家都有接触过以下代码，这是Spring Boot的启动类，今天就来简单看下Spring Boot的启动流程</p>
-<pre><code>@SpringBootApplication
-public class Application {
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+                <h2 id="Spring-Boot启动可扩展流程"><a href="#Spring-Boot启动可扩展流程" class="headerlink" title="Spring Boot启动可扩展流程"></a>Spring Boot启动可扩展流程</h2><p>通过上一篇<a href="https://bloodhunter.github.io/2019/04/27/spring-boot-qi-dong-liu-cheng-chu-tan/" target="_blank" rel="noopener">Spring Boot启动流程详解</a>，我们可知Spring Boot在以下几点可以进行扩展</p>
+<ol>
+<li>初始化器(Initializer)</li>
+<li>监听器(Listener)</li>
+<li>Runners</li>
+</ol>
+<p>下面依次来看下如何添加扩展</p>
+<h2 id="Initializer"><a href="#Initializer" class="headerlink" title="Initializer"></a>Initializer</h2><p>Spring Boot在启动时会从META-INF/spring.factories文件中，加载<strong>ApplicationContextInitializer</strong>，下面是其定义</p>
+<pre><code>    public interface ApplicationContextInitializer&lt;C extends ConfigurableApplicationContext&gt; {
+        void initialize(ConfigurableApplicationContext configurableApplicationContext);
+    }
+</code></pre><p>下面，我们定义一个类来实现该接口        </p>
+<pre><code>@Slf4j
+public class CustomApplicationInitializer implements ApplicationContextInitializer {
+    @Override
+    public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+        log.info(&quot;自定义Initializer启动&quot;);
     }
 }
-</code></pre><p>首先来看下SpringApplication.run()这个方法的真面目，</p>
-<pre><code>public static ConfigurableApplicationContext run(Class&lt;?&gt;[] primarySources,
-        String[] args) {
-    return new SpringApplication(primarySources).run(args);
+</code></pre><p>加载自定义的initializer的方式有两种，一是在main方法中add initializer<img src="https://ws1.sinaimg.cn/large/006tNc79ly1g2n8eqhkiqj31ra0hcaf6.jpg" alt="">另一种则更符合Spring Boot style，在META-INF/spring.factories中增加自定义initializer的配置<img src="https://ws2.sinaimg.cn/large/006tNc79ly1g2n8fihib4j30mk070wex.jpg" alt=""></p>
+<pre><code>org.springframework.context.ApplicationContextInitializer=com.wbl.spingbootdemo.initializer.CustomApplicationInitializer
+</code></pre><p>启动Spring Boot则可以看到如下输出<img src="https://ws2.sinaimg.cn/large/006tNc79ly1g2n8hj5d8ej32120coq77.jpg" alt="">    </p>
+<h2 id="Listener"><a href="#Listener" class="headerlink" title="Listener"></a>Listener</h2><p>Spring Boot启动的时候会从META-INF/spring.factories文件中加载<strong>ApplicationListener</strong>,<br>下面是其定义</p>
+<pre><code>@FunctionalInterface
+public interface ApplicationListener&lt;E extends ApplicationEvent&gt; extends EventListener {
+    void onApplicationEvent(ApplicationEvent applicationEvent;
 }
-</code></pre><p>看源码可以发现这个方法主要做了两件事情</p>
+</code></pre><p>ApplicationListener实现了EventListener接口，这是JDK中定义的一个类，用来实现观察者模式。只不过ApplicationListener只监听ApplicationEvent事件<img src="https://ws3.sinaimg.cn/large/006tNc79ly1g2n8udsethj31ah0u0tfs.jpg" alt="">    </p>
+<p>下面实现一个自定的ApplicationListener，监听的几个事件都是继承SpringApplicationEvent的</p>
+<pre><code>@Slf4j
+public class CustomApplicationListener implements ApplicationListener {
+    @Override
+    public void onApplicationEvent(ApplicationEvent applicationEvent) {
+        if (applicationEvent instanceof ApplicationStartingEvent){
+            log.info(&quot;receive application starting event&quot;);
+        }
+
+        if (applicationEvent instanceof ApplicationStartedEvent){
+            log.info(&quot;receive application started event&quot;);
+        }
+
+        if (applicationEvent instanceof ApplicationEnvironmentPreparedEvent) {
+            log.info(&quot;receive application environment prepared event&quot;);
+        }
+
+        if (applicationEvent instanceof ApplicationPreparedEvent){
+            log.info(&quot;receive application application prepared event&quot;);
+        }
+
+        if (applicationEvent instanceof ApplicationContextInitializedEvent){
+            log.info(&quot;receive application context initialized event&quot;);
+        }
+
+        if (applicationEvent instanceof ApplicationReadyEvent){
+            log.info(&quot;receive application ready event&quot;);
+        }
+    }
+}
+</code></pre><p><img src="https://ws1.sinaimg.cn/large/006tNc79ly1g2n9w8x84aj31r80ewjzv.jpg" alt=""></p>
+<p>启动Spring Boot可以看到如下输出<img src="https://ws1.sinaimg.cn/large/006tNc79ly1g2naef3ayyj31xw0tund9.jpg" alt="">    </p>
+<p>总共监听到了以下事件</p>
 <ol>
-<li>初始化SpringApplication实例</li>
-<li>调用run方法生成context</li>
+<li>ApplicationEnvironmentPreparedEvent</li>
+<li>ApplicationContextInitializedEvent</li>
+<li>ApplicationPreparedEvent</li>
+<li>ApplicationStartedEvent</li>
+<li>ApplicationReadyEvent</li>
 </ol>
-<p>下面分别来看下这两个流程，以下代码均属于2.1.4版本</p>
-<h2 id="SpringApplication实例初始化"><a href="#SpringApplication实例初始化" class="headerlink" title="SpringApplication实例初始化"></a>SpringApplication实例初始化</h2><p>首先来看下SpringApplication初始化的流程</p>
-<p><img src="https://ws1.sinaimg.cn/large/006tNc79gy1g2hl4nylaoj31k60hyq99.jpg" alt=""><br>可以看到整个流程分为了4步</p>
-<ul>
-<li><p>第一步，推断应用程序类型，Spring Boot的应有类型有REACTIVE，SERVLET，NONE<br><img src="https://ws4.sinaimg.cn/large/006tNc79gy1g2hla826qsj31gy0muq8p.jpg" alt=""><br><img src="https://ws1.sinaimg.cn/large/006tNc79gy1g2hlc9rwjxj31hd0u041q.jpg" alt=""></p>
-</li>
-<li><p>第二步，设置initializers，Spring Boot将会从META-INF/spring.factories中加载相应的ApplicationContextInitializer</p>
-</li>
-</ul>
-<p><img src="https://ws1.sinaimg.cn/large/006tNc79gy1g2hlh5ese2j31jw0b2gof.jpg" alt=""></p>
-<ul>
-<li>第三步，设置listener，Spring Boot将会从META-INF/spring.factories中加载相应的ApplicationListener</li>
-</ul>
-<p><img src="https://ws2.sinaimg.cn/large/006tNc79gy1g2hliyjnwxj31e40jkwje.jpg" alt=""></p>
-<ul>
-<li>第四步，加载main方法的定义类<br><img src="https://ws2.sinaimg.cn/large/006tNc79gy1g2hll7v2ayj31ha0p878p.jpg" alt=""></li>
-</ul>
-<h2 id="SpringApplication-run"><a href="#SpringApplication-run" class="headerlink" title="SpringApplication.run()"></a>SpringApplication.run()</h2><p>下面再来看下run方法的具体实现</p>
-<p><img src="https://ws4.sinaimg.cn/large/006tNc79gy1g2hmls8dcbj30tw13gtho.jpg" alt=""></p>
+<p>而没有监听到的事件是ApplicationStartingEvent，这是因为在发送此事件时，日志对象还没有初始化成功，所有无法打印日志，如果使用System.out.println则可以看到输出</p>
+<h2 id="Runner"><a href="#Runner" class="headerlink" title="Runner"></a>Runner</h2><p>Runner的实现分为两种</p>
 <ol>
-<li>从META-INF/spring.factories中加载SpringApplicationRunListener<img src="https://ws4.sinaimg.cn/large/006tNc79gy1g2hmomy3vpj316s054wgb.jpg" alt=""></li>
-<li>创建参数，即从run方法中传入args</li>
-<li>设置程序运行所需的环境变量，SpringApplicationRunListener发送environmentPrepared的消息<img src="https://ws3.sinaimg.cn/large/006tNc79gy1g2hmrwro2ej31ii0pmaj3.jpg" alt=""></li>
-<li>创建ApplicationContext</li>
-<li>初始化ApplicationContext，并设置环境变量，SpringApplicationRunListener发送contextLoaded消息</li>
-<li>refresh ApplicationContext</li>
-<li>SpringApplicationRunListener发送started信息</li>
-<li>完成最终的程序的启动</li>
-<li>SpringApplicationRunListener发送starting消息</li>
+<li>ApplicationRunner</li>
+<li>CommandLineRunner</li>
 </ol>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
-<li>Spring Boot的启动流程主要分为两步，一是初始化SpringApplication，二是调用run()来加载上下文环境</li>
-<li>Spring Boot的应有类型有三种，REACTIVE(响应式web服务)，SERVLET(基于servlet的web服务)，NONE(非web服务)</li>
-<li><p>SpringApplication.run()完成默认的执行流程，如果用户需要扩展执行流程，可以先初始化SpringApplication，在通过其setXXX的方法来增加扩展，最后在调用run来完成初始化</p>
-<pre><code>  SpringApplication app = new SpringApplication(Application.class)
-  app.setXXX
-  app.run(args)
-</code></pre></li>
-</ul>
+<p>这两个实现本质上没有什么不同，除了接收参数不同</p>
+<p><img src="https://ws2.sinaimg.cn/large/006tNc79ly1g2nakvg24cj312w0iogob.jpg" alt=""><br><img src="https://ws4.sinaimg.cn/large/006tNc79ly1g2nalig576j30xg0ik76z.jpg" alt=""></p>
+<h3 id="ApplicationRunner"><a href="#ApplicationRunner" class="headerlink" title="ApplicationRunner"></a>ApplicationRunner</h3><p>下面实现了一个自定义的ApplicationRunner</p>
+<pre><code>@Service
+@Slf4j
+@Order(1)
+public class CustomApplicationRunner implements ApplicationRunner {
+    @Override
+    public void run(ApplicationArguments args) throws Exception {
+        log.info(&quot;启动自定义ApplicationRunner&quot;);
+    }
+}
+</code></pre><p>@Order用来决定Runner执行的顺序，数字越小，表示优先级越高，越先执行    </p>
+<h3 id="CommandLineRunner"><a href="#CommandLineRunner" class="headerlink" title="CommandLineRunner"></a>CommandLineRunner</h3><p>下面实现一个自定义的CommandLineRunner</p>
+<pre><code>@Service
+@Slf4j
+@Order(2)
+public class CustomCommandLineRunner implements CommandLineRunner {
+    @Override
+    public void run(String... args) throws Exception {
+        log.info(&quot;启动自定义CommandLineRunner&quot;);
+    }
+}    
+</code></pre><p>启动两个Runner可以看到如下输出<img src="https://ws3.sinaimg.cn/large/006tNc79ly1g2naylamacj31ii076adj.jpg" alt="">    </p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ol>
+<li>Initializer需要实现ApplicationContextInitializer接口</li>
+<li>Listener需要实现ApplicationListener</li>
+<li>Initializer和Listener可以在META-INF/spring.factories进行配置，以便Spring Boot加载</li>
+<li>Runner有ApplicationRunner和CommandLineRunner两种实现，两者除了接收参数不同外(一个接收ApplicationArguments，一个接收String[])，没有其他的区别</li>
+<li>@Order注解用来决定Runner的执行顺序</li>
+</ol>
 <h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
-<li><a href="https://juejin.im/post/5b8f05a5f265da43296c6102" target="_blank" rel="noopener">SpringBoot 应用程序启动过程探秘</a></li>
-<li><a href="https://juejin.im/post/5b3a24386fb9a024ed75ab36" target="_blank" rel="noopener">实战Spring Boot 2.0 Reactive编程系列</a></li>
-<li><a href="https://blog.csdn.net/dm_vincent/article/details/76735888" target="_blank" rel="noopener">Spring Boot启动过程源码分析</a>    </li>
+<li><a href="https://blog.csdn.net/dm_vincent/article/details/77151122" target="_blank" rel="noopener">Spring Boot 启动过程定制化</a></li>
+<li><a href="https://www.jianshu.com/p/85460c1d835a" target="_blank" rel="noopener">Spring Boot：定制自己的starter</a></li>
+<li><a href="https://www.cnblogs.com/gyjx2016/p/7479330.html" target="_blank" rel="noopener">springBoot之定制Banner</a></li>
 </ul>
 
             </div>
@@ -500,7 +553,7 @@ public class Application {
                     <span class="reprint-tip">Reprint please specify: </span>
                     <a href="http://yoursite.com" class="b-link-green">wbl</a>
                     <i class="fa fa-angle-right fa-lg fa-fw text-color"></i>
-                    <a href="/2019/04/27/spring-boot-qi-dong-liu-cheng-chu-tan/" class="b-link-green">Spring Boot启动流程初探</a>
+                    <a href="/2019/05/02/spring-boot-qi-dong-liu-cheng-kuo-zhan/" class="b-link-green">Spring Boot启动流程扩展</a>
                 </p>
             </div>
         </div>
@@ -522,7 +575,7 @@ public class Application {
         repo: 'blog-comments',
         owner: 'BloodHunter',
         admin: "BloodHunter",
-        id: '2019-04-27T22-23-51',
+        id: '2019-05-02T19-25-23',
         distractionFreeMode: false  // Facebook-like distraction free mode
     });
 
@@ -544,7 +597,7 @@ public class Application {
     <div class="row article-row">
         
         <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge left-badge text-color">Previous</div>
+            <div class="article-badge left-badge text-color">Current</div>
             <div class="card">
                 <a href="/2019/05/02/spring-boot-qi-dong-liu-cheng-kuo-zhan/">
                     <div class="card-image">
@@ -564,9 +617,55 @@ Runners
 
 下面依次来看下如何添</div>
                     <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="fa fa-clock-o fa-fw icon-date"></i>2019-05-02
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-05-02
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fa fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Spring-Boot/" class="post-category" target="_blank">
+                                    Spring Boot
+                                </a>
+                            
+                            
                         </span>
+                    </div>
+                </div>
+
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Spring-Boot/" target="_blank">
+                        <span class="chip bg-color">Spring Boot</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">Next</div>
+            <div class="card">
+                <a href="/2019/04/27/spring-boot-qi-dong-liu-cheng-chu-tan/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/21.jpg" class="responsive-img" alt="Spring Boot启动流程初探">
+                        
+                        <span class="card-title">Spring Boot启动流程初探</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary">刚接触Spring Boot的时候，相信大家都有接触过以下代码，这是Spring Boot的启动类，今天就来简单看下Spring Boot的启动流程
+@SpringBootApplication
+public class Applicati</div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-04-27
+                            </span>
                         <span class="publish-author">
                             
                             <i class="fa fa-bookmark fa-fw icon-category"></i>
@@ -584,53 +683,6 @@ Runners
                     
                     <a href="/tags/Spring-Boot/" target="_blank">
                         <span class="chip bg-color">Spring Boot</span>
-                    </a>
-                    
-                </div>
-                
-            </div>
-        </div>
-        
-        
-        <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge right-badge text-color">Next</div>
-            <div class="card">
-                <a href="/2019/04/27/prometheus-cha-xun-zhi-vector-match/">
-                    <div class="card-image">
-                        
-                        
-                        <img src="/medias/featureimages/20.jpg" class="responsive-img" alt="Prometheus查询之Vector match">
-                        
-                        <span class="card-title">Prometheus查询之Vector match</span>
-                    </div>
-                </a>
-                <div class="card-content article-content">
-                    <div class="summary">Vector Matchvector match的含义如下
-
-根据一定的规则，对两个vector的label进行匹配，如果匹配成功，则对两个vector进行运算
-
-vector match有两种类型，一个是one to one，一个是one</div>
-                    <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-04-27
-                            </span>
-                        <span class="publish-author">
-                            
-                            <i class="fa fa-bookmark fa-fw icon-category"></i>
-                            
-                            <a href="/categories/监控/" class="post-category" target="_blank">
-                                    监控
-                                </a>
-                            
-                            
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="card-action article-tags">
-                    
-                    <a href="/tags/Prometheus/" target="_blank">
-                        <span class="chip bg-color">Prometheus</span>
                     </a>
                     
                 </div>
