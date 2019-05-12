@@ -346,23 +346,23 @@ sudo service influxdb start
 </tr>
 </tbody>
 </table>
-<p>下面一张表，可以对应到InfluxDB的measurement中<br><img src="https://ws4.sinaimg.cn/large/006tKfTcgy1g08cg9a683j30su076q44.jpg" alt=""></p>
-<p><img src="https://ws1.sinaimg.cn/large/006tKfTcgy1g08chjy7isj30xk08st9w.jpg" alt=""></p>
+<p>下面一张表，可以对应到InfluxDB的measurement中<br><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tKfTcgy1g08cg9a683j30su076q44.jpg" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tKfTcgy1g08chjy7isj30xk08st9w.jpg" alt=""></p>
 <h2 id="InfluxDB-Quick-start"><a href="#InfluxDB-Quick-start" class="headerlink" title="InfluxDB Quick start"></a>InfluxDB Quick start</h2><pre><code>//1. 启动
 influxd
-</code></pre><p><img src="https://ws3.sinaimg.cn/large/006tKfTcgy1g08co9olscj327c0icaff.jpg" alt=""></p>
+</code></pre><p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tKfTcgy1g08co9olscj327c0icaff.jpg" alt=""></p>
 <pre><code>//2. 进入命令行
 influx -precision rfc3339
-</code></pre><p>-precision 用来指定时间戳的显示格式<br><img src="https://ws1.sinaimg.cn/large/006tKfTcgy1g08cpc9a2fj30x006yjsu.jpg" alt=""></p>
+</code></pre><p>-precision 用来指定时间戳的显示格式<br><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tKfTcgy1g08cpc9a2fj30x006yjsu.jpg" alt=""></p>
 <pre><code>//3. 查看database
 show databases;
-</code></pre><p><img src="https://ws4.sinaimg.cn/large/006tKfTcgy1g08crkttvjj310e09sjs2.jpg" alt=""></p>
+</code></pre><p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tKfTcgy1g08crkttvjj310e09sjs2.jpg" alt=""></p>
 <pre><code>//4. 使用database
 use media_quality
 
 //5. 查看measurement
 show measurements
-</code></pre><p><img src="https://ws4.sinaimg.cn/large/006tKfTcgy1g08cthchcvj30l609qmy4.jpg" alt=""></p>
+</code></pre><p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tKfTcgy1g08cthchcvj30l609qmy4.jpg" alt=""></p>
 <pre><code>//6. 查询数据
 select * from [measurement] where time &gt; now() - 5m limit 10
 </code></pre><h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>

@@ -404,9 +404,28 @@ influxd
 <td>25m</td>
 <td>缓存快照的大小，超过数值，engine会将数据写入到TSM文件中</td>
 </tr>
+<tr>
+<td>cache-snapshot-write-cold-duration</td>
+<td>10m</td>
+<td>当shard没有写入或删除数据，engine将cache的数据写入到TSM文件中的间隔</td>
+</tr>
+<tr>
+<td>compact-full-write-cold-duration</td>
+<td>4h</td>
+<td>当shard没有写入或删除数据时，engine压缩shard中所有TSM文件的间隔</td>
+</tr>
+<tr>
+<td>max-series-per-database</td>
+<td>1000000</td>
+<td>每个database允许的最大series的最大值，当database的series的数据量超过数值，将拒绝写入，并返回{“error”:”max series per database exceeded: <series>“}。设置为0表示对series的数量没有限制</series></td>
+</tr>
+<tr>
+<td>max-values-per-tag</td>
+<td>100000</td>
+<td>每个tag value所允许的最大数量。当tag的数量超过配置，influxdb会返回partial write 错误。对应已有的tag value写入不会失败，但是对于新建的tag value，写入会失败</td>
+</tr>
 </tbody>
 </table>
-<p>cache-snapshot-write-cold-duration|10m|当shard没有写入或删除数据，engine将cache的数据写入到TSM文件中的间隔<br>|compact-full-write-cold-duration|4h|当shard没有写入或删除数据时，engine压缩shard中所有TSM文件的间隔<br>|max-series-per-database|1000000|每个database允许的最大series的最大值，当database的series的数据量超过数值，将拒绝写入，并返回{“error”:”max series per database exceeded: <series>“}。设置为0表示对series的数量没有限制<br>|max-values-per-tag|100000|每个tag value所允许的最大数量。当tag的数量超过配置，influxdb会返回partial write 错误。对应已有的tag value写入不会失败，但是对于新建的tag value，写入会失败</series></p>
 <h2 id="查询配置-coordinator"><a href="#查询配置-coordinator" class="headerlink" title="查询配置[coordinator]"></a>查询配置[coordinator]</h2><table>
 <thead>
 <tr>

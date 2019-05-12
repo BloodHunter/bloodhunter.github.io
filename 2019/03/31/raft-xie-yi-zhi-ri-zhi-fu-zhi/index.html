@@ -309,7 +309,7 @@
 <li>Leader向客户端返回响应，并通知Follower节点该日志已被提交</li>
 <li>Follower收到消息时，才会认为该日志已被提交</li>
 </ol>
-<p><img src="https://ws4.sinaimg.cn/large/006tKfTcgy1g1m0wfu6bzj31em0eatbw.jpg" alt=""><br><img src="https://ws4.sinaimg.cn/large/006tKfTcgy1g1m149rhf4j31ok0e4dil.jpg" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tKfTcgy1g1m0wfu6bzj31em0eatbw.jpg" alt=""><br><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tKfTcgy1g1m149rhf4j31ok0e4dil.jpg" alt=""></p>
 <h2 id="日志一致性"><a href="#日志一致性" class="headerlink" title="日志一致性"></a>日志一致性</h2><p>当一个新的Leader被选举出来，它的日志可能会其他Follower不一致，这时候需要一个机制来保证日志的一致性。</p>
 <p>集群中每个节点都会维护一个本地log用于记录操作，另外，每个节点还会维护两个索引值，分别是commitIndex和lastApplied</p>
 <blockquote>

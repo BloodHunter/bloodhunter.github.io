@@ -300,13 +300,13 @@
         <div class="card-content article-card-content">
             <div id="articleContent">
                 <h2 id="Raft节点状态"><a href="#Raft节点状态" class="headerlink" title="Raft节点状态"></a>Raft节点状态</h2><p>Raft协议的工作模式是一个Leader和多个Follower节点的模式。在Raft协议中，每个节点都维护了一个状态机，该状态机有3种状态，Leader，Follower，Candidate，在任意时间，集群中的任意节点都处于这三个状态之一。</p>
-<p><img src="https://ws4.sinaimg.cn/large/006tKfTcgy1g1kyvbmbw1j30ua0fw3zt.jpg" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tKfTcgy1g1kyvbmbw1j30ua0fw3zt.jpg" alt=""></p>
 <h3 id="Leader"><a href="#Leader" class="headerlink" title="Leader"></a>Leader</h3><blockquote>
 <p>Leader节点的主要工作有两个，一个是处理所有client的请求，另一个是定期向Follower节点发送心跳信息。</p>
 <p>当收到客户端写入请求时，Leader节点会在本地追加一个日志，然后将其封装成消息发送到集群中的其他Follow节点。Follower节点收到对应消息对其进行响应。Leader如果收到超过半数节点的响应信息，则认为该条日志已被committed，可以对client返回响应</p>
 <p>定期向Follower发送心跳信息是为了防止集群其他Follower节点的选举计时器超时而导致触发新一轮选举</p>
 </blockquote>
-<p><img src="https://ws4.sinaimg.cn/large/006tKfTcgy1g1kx1bm3g3j30ra0jugmo.jpg" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tKfTcgy1g1kx1bm3g3j30ra0jugmo.jpg" alt=""></p>
 <h3 id="Follower"><a href="#Follower" class="headerlink" title="Follower"></a>Follower</h3><blockquote>
 <p>Follower节点不会处理任何请求，他们只是简单的响应来自Leader或者Candidate的请求。Follower会将client节点的请求重定向给集群的Leader节点</p>
 </blockquote>
@@ -337,7 +337,7 @@
 <li>A节点得到超过半数的选票，在term=1的任期中，A成为集群的Leader</li>
 <li>A节点成为Leader后，会定期向B,C节点发送心跳信息，防止B,C节点的选举计时器超时而触发新一轮选举，所以心跳超时时间要远小于选举超时时间</li>
 </ol>
-<p><img src="https://ws4.sinaimg.cn/large/006tKfTcgy1g1l00eqkbaj314x0u00xd.jpg" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tKfTcgy1g1l00eqkbaj314x0u00xd.jpg" alt=""></p>
 <h3 id="出现多个Candidate节点"><a href="#出现多个Candidate节点" class="headerlink" title="出现多个Candidate节点"></a>出现多个Candidate节点</h3><p>当出现多个Candidate同时发起选举，而每个Candidate都获取不到半数的选票，这种情况Raft情况会如何处理呢？</p>
 <p>假设集群有4个节点，其中节点A和节点B的选举计时器同时到期，切换为Candidate并向集群其他节点发起选举请求</p>
 <ol>
@@ -351,7 +351,7 @@
 <li>当B和C收到节点D的选举请求后，会将其选票投给D，由于节点A已经宕机，无法投票，但D节点仍获得超过半数的投票，成为新任期(term=6)的Leader，并开始向其他节点发送心跳信息</li>
 <li>当A节点恢复后，会收到来自D节点的心跳信息，改信息中携带的任期号(term=6)大于节点A当前记录的任期号(term=5),A节点切换为Follower</li>
 </ol>
-<p><img src="https://ws1.sinaimg.cn/large/006tKfTcgy1g1lxrmbw9ij31pa0iw42h.jpg" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tKfTcgy1g1lxrmbw9ij31pa0iw42h.jpg" alt=""></p>
 <p>在Raft协议中，当某个节点收到的消息中所携带的任期号大于当前节点记录的任期号，那么节点会自动切换为Follower，并且更新自身记录的任期号</p>
 <h2 id="Leader选举时间要求"><a href="#Leader选举时间要求" class="headerlink" title="Leader选举时间要求"></a>Leader选举时间要求</h2><p>通过上述几个例子，可以看到Leader选举对于时间的要求比较严格，一般要求整个集群的时间满足如下不等式</p>
 <pre><code>广播时间 &lt;&lt; 选举超时时间 &lt;&lt; 平均故障间隔时间

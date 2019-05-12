@@ -411,7 +411,7 @@ public Future&lt;RecordMetadata&gt; send(ProducerRecord&lt;K, V&gt; record, Call
 }
 </code></pre><p>doSend方法主要做了一下几件事情</p>
 <h4 id="1-确认topic的元数据是否可用"><a href="#1-确认topic的元数据是否可用" class="headerlink" title="1. 确认topic的元数据是否可用"></a>1. 确认topic的元数据是否可用</h4><pre><code>ClusterAndWaitTime clusterAndWaitTime = waitOnMetadata(record.topic(), record.partition(), maxBlockTimeMs);
-</code></pre><h4 id="2-对record的key和value进行序列化"><a href="#2-对record的key和value进行序列化" class="headerlink" title="2. 对record的key和value进行序列化"></a>2. 对record的key和value进行序列化</h4><p>kafka提供了需要的序列化的方法，用户也可以根据需要自定义序列化方法，只要实现Serializer接口即可<br><img src="https://ws4.sinaimg.cn/large/006tNc79gy1fyvqrc8es2j31zq0kwais.jpg" alt=""></p>
+</code></pre><h4 id="2-对record的key和value进行序列化"><a href="#2-对record的key和value进行序列化" class="headerlink" title="2. 对record的key和value进行序列化"></a>2. 对record的key和value进行序列化</h4><p>kafka提供了需要的序列化的方法，用户也可以根据需要自定义序列化方法，只要实现Serializer接口即可<br><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1fyvqrc8es2j31zq0kwais.jpg" alt=""></p>
 <h4 id="3-确定需要发送的partition"><a href="#3-确定需要发送的partition" class="headerlink" title="3. 确定需要发送的partition"></a>3. 确定需要发送的partition</h4><pre><code>int partition = partition(record, serializedKey, serializedValue, cluster);
 
 private int partition(ProducerRecord&lt;K, V&gt; record, byte[] serializedKey, byte[] serializedValue, Cluster cluster) {
@@ -457,10 +457,10 @@ private int nextValue(String topic) {
     // 对num进行自增操作
     return counter.getAndIncrement();
 }
-</code></pre><p>获取partition的流程图<br><img src="https://ws1.sinaimg.cn/large/006tNc79gy1fyvr5e6f0ij319i0nwn59.jpg" alt=""></p>
+</code></pre><p>获取partition的流程图<br><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1fyvr5e6f0ij319i0nwn59.jpg" alt=""></p>
 <h4 id="4-往RecordAccumulator追加record"><a href="#4-往RecordAccumulator追加record" class="headerlink" title="4. 往RecordAccumulator追加record"></a>4. 往RecordAccumulator追加record</h4><p>RecordAccumulator最重要的数据结构是batches，这是一个map，其中key是topicPartition，value是一个recordBatch的先进后出的队列, batchs的结构如下图所示。batchs每次从队尾append数据，从队头开始send数据</p>
 <pre><code>private final ConcurrentMap&lt;TopicPartition, Deque&lt;RecordBatch&gt;&gt; batches;
-</code></pre><p><img src="https://ws3.sinaimg.cn/large/006tNc79gy1fyvrv76ah2j30py0f4juz.jpg" alt=""></p>
+</code></pre><p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1fyvrv76ah2j30py0f4juz.jpg" alt=""></p>
 <pre><code>public RecordAppendResult append(TopicPartition tp,
                                  long timestamp,
                                  byte[] key,

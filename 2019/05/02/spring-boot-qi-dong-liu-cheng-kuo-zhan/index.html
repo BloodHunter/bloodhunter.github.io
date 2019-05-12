@@ -324,15 +324,15 @@ public class CustomApplicationInitializer implements ApplicationContextInitializ
         log.info(&quot;自定义Initializer启动&quot;);
     }
 }
-</code></pre><p>加载自定义的initializer的方式有两种，一是在main方法中add initializer<img src="https://ws1.sinaimg.cn/large/006tNc79ly1g2n8eqhkiqj31ra0hcaf6.jpg" alt="">另一种则更符合Spring Boot style，在META-INF/spring.factories中增加自定义initializer的配置<img src="https://ws2.sinaimg.cn/large/006tNc79ly1g2n8fihib4j30mk070wex.jpg" alt=""></p>
+</code></pre><p>加载自定义的initializer的方式有两种，一是在main方法中add initializer<img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79ly1g2n8eqhkiqj31ra0hcaf6.jpg" alt="">另一种则更符合Spring Boot style，在META-INF/spring.factories中增加自定义initializer的配置<img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79ly1g2n8fihib4j30mk070wex.jpg" alt=""></p>
 <pre><code>org.springframework.context.ApplicationContextInitializer=com.wbl.spingbootdemo.initializer.CustomApplicationInitializer
-</code></pre><p>启动Spring Boot则可以看到如下输出<img src="https://ws2.sinaimg.cn/large/006tNc79ly1g2n8hj5d8ej32120coq77.jpg" alt="">    </p>
+</code></pre><p>启动Spring Boot则可以看到如下输出<img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79ly1g2n8hj5d8ej32120coq77.jpg" alt="">    </p>
 <h2 id="Listener"><a href="#Listener" class="headerlink" title="Listener"></a>Listener</h2><p>Spring Boot启动的时候会从META-INF/spring.factories文件中加载<strong>ApplicationListener</strong>,<br>下面是其定义</p>
 <pre><code>@FunctionalInterface
 public interface ApplicationListener&lt;E extends ApplicationEvent&gt; extends EventListener {
     void onApplicationEvent(ApplicationEvent applicationEvent;
 }
-</code></pre><p>ApplicationListener实现了EventListener接口，这是JDK中定义的一个类，用来实现观察者模式。只不过ApplicationListener只监听ApplicationEvent事件<img src="https://ws3.sinaimg.cn/large/006tNc79ly1g2n8udsethj31ah0u0tfs.jpg" alt="">    </p>
+</code></pre><p>ApplicationListener实现了EventListener接口，这是JDK中定义的一个类，用来实现观察者模式。只不过ApplicationListener只监听ApplicationEvent事件<img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79ly1g2n8udsethj31ah0u0tfs.jpg" alt="">    </p>
 <p>下面实现一个自定的ApplicationListener，监听的几个事件都是继承SpringApplicationEvent的</p>
 <pre><code>@Slf4j
 public class CustomApplicationListener implements ApplicationListener {
@@ -363,8 +363,8 @@ public class CustomApplicationListener implements ApplicationListener {
         }
     }
 }
-</code></pre><p><img src="https://ws1.sinaimg.cn/large/006tNc79ly1g2n9w8x84aj31r80ewjzv.jpg" alt=""></p>
-<p>启动Spring Boot可以看到如下输出<img src="https://ws1.sinaimg.cn/large/006tNc79ly1g2naef3ayyj31xw0tund9.jpg" alt="">    </p>
+</code></pre><p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79ly1g2n9w8x84aj31r80ewjzv.jpg" alt=""></p>
+<p>启动Spring Boot可以看到如下输出<img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79ly1g2naef3ayyj31xw0tund9.jpg" alt="">    </p>
 <p>总共监听到了以下事件</p>
 <ol>
 <li>ApplicationEnvironmentPreparedEvent</li>
@@ -380,7 +380,7 @@ public class CustomApplicationListener implements ApplicationListener {
 <li>CommandLineRunner</li>
 </ol>
 <p>这两个实现本质上没有什么不同，除了接收参数不同</p>
-<p><img src="https://ws2.sinaimg.cn/large/006tNc79ly1g2nakvg24cj312w0iogob.jpg" alt=""><br><img src="https://ws4.sinaimg.cn/large/006tNc79ly1g2nalig576j30xg0ik76z.jpg" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79ly1g2nakvg24cj312w0iogob.jpg" alt=""><br><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79ly1g2nalig576j30xg0ik76z.jpg" alt=""></p>
 <h3 id="ApplicationRunner"><a href="#ApplicationRunner" class="headerlink" title="ApplicationRunner"></a>ApplicationRunner</h3><p>下面实现了一个自定义的ApplicationRunner</p>
 <pre><code>@Service
 @Slf4j
@@ -402,7 +402,7 @@ public class CustomCommandLineRunner implements CommandLineRunner {
         log.info(&quot;启动自定义CommandLineRunner&quot;);
     }
 }    
-</code></pre><p>启动两个Runner可以看到如下输出<img src="https://ws3.sinaimg.cn/large/006tNc79ly1g2naylamacj31ii076adj.jpg" alt="">    </p>
+</code></pre><p>启动两个Runner可以看到如下输出<img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79ly1g2naylamacj31ii076adj.jpg" alt="">    </p>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ol>
 <li>Initializer需要实现ApplicationContextInitializer接口</li>
 <li>Listener需要实现ApplicationListener</li>
@@ -597,47 +597,42 @@ public class CustomCommandLineRunner implements CommandLineRunner {
     <div class="row article-row">
         
         <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge left-badge text-color">Current</div>
+            <div class="article-badge left-badge text-color">Previous</div>
             <div class="card">
-                <a href="/2019/05/02/spring-boot-qi-dong-liu-cheng-kuo-zhan/">
+                <a href="/2019/05/03/git-rebase-reset-yi-ji-revert-ming-ling-fen-xi/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/20.jpg" class="responsive-img" alt="Spring Boot启动流程扩展">
+                        <img src="/medias/featureimages/9.jpg" class="responsive-img" alt="git rebase,reset以及revert命令分析">
                         
-                        <span class="card-title">Spring Boot启动流程扩展</span>
+                        <span class="card-title">git rebase,reset以及revert命令分析</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
-                    <div class="summary">Spring Boot启动可扩展流程通过上一篇Spring Boot启动流程详解，我们可知Spring Boot在以下几点可以进行扩展
+                    <div class="summary">基本概念在讲述命令的使用姿势之前，我们首先需要了解git仓库的组成。git仓库主要由三部分组成，分别是工作空间(workspace), 暂存区(stage), 本地仓库。
 
-初始化器(Initializer)
-监听器(Listener)
-Runners
-
-下面依次来看下如何添</div>
+工作空间(workspace): 通过git进行版本管理的目录和文</div>
                     <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-05-02
-                            </span>
+                        <span class="publish-date">
+                            <i class="fa fa-clock-o fa-fw icon-date"></i>2019-05-03
+                        </span>
                         <span class="publish-author">
                             
                             <i class="fa fa-bookmark fa-fw icon-category"></i>
                             
-                            <a href="/categories/Spring-Boot/" class="post-category" target="_blank">
-                                    Spring Boot
+                            <a href="/categories/Git/" class="post-category" target="_blank">
+                                    Git
                                 </a>
                             
                             
                         </span>
                     </div>
                 </div>
-
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/Spring-Boot/" target="_blank">
-                        <span class="chip bg-color">Spring Boot</span>
+                    <a href="/tags/Git/" target="_blank">
+                        <span class="chip bg-color">Git</span>
                     </a>
                     
                 </div>

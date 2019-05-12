@@ -5,10 +5,10 @@
 
 <head><meta name="generator" content="Hexo 3.8.0">
     <meta charset="utf-8">
-    <meta name="keywords" content="Spring-boot定时任务, wbl">
-    <meta name="description" content="create project使用IDEA创建一个scheduler-demo项目，这里可以使用spring initializr插件初始化spring boot
+    <meta name="keywords" content="git rebase,reset以及revert命令分析, wbl">
+    <meta name="description" content="基本概念在讲述命令的使用姿势之前，我们首先需要了解git仓库的组成。git仓库主要由三部分组成，分别是工作空间(workspace), 暂存区(stage), 本地仓库。
 
-@EnableScheduling注解EnableScheduling表示允">
+工作空间(workspace): 通过git进行版本管理的目录和文">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -16,7 +16,7 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Spring-boot定时任务 | wbl</title>
+    <title>git rebase,reset以及revert命令分析 | wbl</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/font-awesome.min.css">
@@ -249,13 +249,13 @@
 
 
 
-<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/12.jpg')">
+<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/9.jpg')">
     <div class="container">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
                     <div class="description center-align post-title">
-                        Spring-boot定时任务
+                        git rebase,reset以及revert命令分析
                     </div>
                 </div>
             </div>
@@ -275,8 +275,8 @@
             
             <div class="article-tag">
                 
-                <a href="/tags/Spring-Boot/" target="_blank">
-                    <span class="chip bg-color">Spring Boot</span>
+                <a href="/tags/Git/" target="_blank">
+                    <span class="chip bg-color">Git</span>
                 </a>
                 
             </div>
@@ -286,259 +286,100 @@
                 <span class="post-cate">
                     <i class="fa fa-bookmark fa-fw icon-category"></i>
                     
-                    <a href="/categories/Spring-Boot/" class="post-category" target="_blank">
-                        Spring Boot
+                    <a href="/categories/Git/" class="post-category" target="_blank">
+                        Git
                     </a>
                     
                 </span>
                 
 
                 <span class="post-date">
-                    <i class="fa fa-clock-o fa-fw"></i>2019-04-20
+                    <i class="fa fa-clock-o fa-fw"></i>2019-05-03
                 </span>
             </div>
         </div>
         <hr>
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h2 id="create-project"><a href="#create-project" class="headerlink" title="create project"></a>create project</h2><p>使用IDEA创建一个scheduler-demo项目，这里可以使用spring initializr插件初始化spring boot</p>
-<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1g291m3ryxrj311n0u00yl.jpg" alt=""></p>
-<h2 id="EnableScheduling"><a href="#EnableScheduling" class="headerlink" title="@EnableScheduling"></a>@EnableScheduling</h2><p>注解EnableScheduling表示允许Spring Boot开启定时任务管理</p>
-<pre><code>@SpringBootApplication
-@EnableScheduling
-public class SchedulerDemoApplication {
-
-    public static void main(String[] args) {
-        SpringApplication.run(SchedulerDemoApplication.class, args);
-    }
-}
-</code></pre><h2 id="Scheduled"><a href="#Scheduled" class="headerlink" title="@Scheduled"></a>@Scheduled</h2><p>@Scheduled用来生成一个定时任务</p>
-<p>@Scheduled的配置如下</p>
-<table>
-<thead>
-<tr>
-<th style="text-align:center">param</th>
-<th style="text-align:center">explain</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center">fixedDelay</td>
-<td style="text-align:center">两个定时任务之间的间隔，即前一个任务执行完后，延迟delay毫秒再执行下一个任务</td>
-</tr>
-<tr>
-<td style="text-align:center">fixedDelayString</td>
-<td style="text-align:center">与fixedDelay相同，只不过用string类型表示时间</td>
-</tr>
-<tr>
-<td style="text-align:center">fixedRate</td>
-<td style="text-align:center">固定周期执行任务，例如每隔10s执行一次任务</td>
-</tr>
-<tr>
-<td style="text-align:center">fixedRateString</td>
-<td style="text-align:center">与fixedRate相同，用string表示时间</td>
-</tr>
-<tr>
-<td style="text-align:center">cron</td>
-<td style="text-align:center">用cron表达式来管理定时任务</td>
-</tr>
-<tr>
-<td style="text-align:center">initialDelay</td>
-<td style="text-align:center">执行第一个定时任务的延迟时间，只对fixedDelay或fixedRate任务生效</td>
-</tr>
-<tr>
-<td style="text-align:center">initialDelayString</td>
-<td style="text-align:center">与initialDelay相同</td>
-</tr>
-<tr>
-<td style="text-align:center">zone</td>
-<td style="text-align:center">时区，默认使用server的时区</td>
-</tr>
-</tbody>
-</table>
-<h3 id="fixedDelay与fixedRate的区别"><a href="#fixedDelay与fixedRate的区别" class="headerlink" title="fixedDelay与fixedRate的区别"></a>fixedDelay与fixedRate的区别</h3><p>对于fixedDelay任务，后个任务一定需要在前一个任务执行完并且再过delay毫秒后才会执行。对于下面的例子来说，delay为5s，而任务执行需要5s，所有每隔10s任务才会执行一次</p>
-<pre><code>@Scheduled(fixedDelay = 5000)
-public void fixedDelayTask() throws Exception{
-    SimpleDateFormat dateFormat = new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm&quot;);
-    System.out.println(dateFormat.format(new Date()) + &quot;:&quot; + &quot; task of fixed delay&quot;);
-    Thread.sleep(5000);
-}
-</code></pre><p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1g292hzkr0wj31700nqtcz.jpg" alt=""></p>
-<p>对于fixedRate任务，他们的执行是严格按照时间周期，即使上一个任务还未执行完毕，只要时间一到就会里面执行</p>
-<pre><code>@Scheduled(fixedRate = 5000,initialDelay = 5000)
-public void fixedRateTask() throws Exception{
-    SimpleDateFormat dateFormat = new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm:ss&quot;);
-    System.out.println(dateFormat.format(new Date()) + &quot;:&quot; + &quot; task of fixed rate&quot;);
-    Thread.sleep(5000);
-}
-</code></pre><p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1g292nj7rxqj30u20rutca.jpg" alt=""></p>
-<h3 id="cron表达式"><a href="#cron表达式" class="headerlink" title="cron表达式"></a>cron表达式</h3><pre><code>@Scheduled(cron = &quot;[Seconds] [Minutes] [Hours] [Day of month] [Month] [Day of week]&quot;)
-</code></pre><ul>
-<li>second 取值在[0-59]，或者特殊字符 , - * /</li>
-<li>minute 取值在[0-59], 或者特殊字符, - * /</li>
-<li>hour 取值在[0-23],或者特殊字符, - * /</li>
-<li>day of month 每个月第几天，取值在[0-31],或者特殊字段, - * / ? </li>
-<li>month 取值[1-12]或者月份的英文描述，特殊字符为, - * /</li>
-<li>day of week 取值为[1-7]，1表示星期天，2表示星期一，以此类推，也可用英文描述的星期，例如SUN，特殊字符为, - * / #</li>
+                <h1 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h1><p>在讲述命令的使用姿势之前，我们首先需要了解git仓库的组成。git仓库主要由三部分组成，分别是工作空间(workspace), 暂存区(stage), 本地仓库。</p>
+<ul>
+<li>工作空间(workspace): 通过git进行版本管理的目录和文件</li>
+<li>暂存区(stage): 所有更新都会先放到暂存区，直到我们把更新提交到仓库中</li>
+<li>本地仓库: 存放在本地的版本库，<strong>HEAD指向当前本地仓库的最后一次提交</strong></li>
 </ul>
-<table>
-<thead>
-<tr>
-<th style="text-align:center">特殊字符</th>
-<th style="text-align:center">含义</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center">*</td>
-<td style="text-align:center">表示任意值，若second为*，表示每秒都会触发该事件</td>
-</tr>
-<tr>
-<td style="text-align:center">,</td>
-<td style="text-align:center">表示列出枚举值，若minute为5,20 则表示第5分钟和第20分钟会触发事件</td>
-</tr>
-<tr>
-<td style="text-align:center">/</td>
-<td style="text-align:center">表示起始时间开始触发，然后每隔固定周期都会触发，例如minute为5/20，则在5分，25分，45分都会触发事件</td>
-</tr>
-<tr>
-<td style="text-align:center">-</td>
-<td style="text-align:center">表示取值范围，若minute为5-20，则表示从5分到20分，每分钟都会触发事件</td>
-</tr>
-<tr>
-<td style="text-align:center">?</td>
-<td style="text-align:center">只能用在每月第几天和星期两个域。表示不指定值，当2个子表达式其中之一被指定了值以后，为了避免冲突，需要将另一个子表达式的值设为”?”</td>
-</tr>
-<tr>
-<td style="text-align:center">L</td>
-<td style="text-align:center">表示最后，只能出现在week或者day of month中，若week为1L,表示在最后一个星期天</td>
-</tr>
-<tr>
-<td style="text-align:center">W</td>
-<td style="text-align:center">表示有效工作日(周一到周五),只能出现在day of month中</td>
-</tr>
-<tr>
-<td style="text-align:center">#</td>
-<td style="text-align:center">用于确定每个月第几个星期几，只能出现在day of month中，例如1#3 表示每个月第三个星期日</td>
-</tr>
-</tbody>
-</table>
-<h4 id="cron示例"><a href="#cron示例" class="headerlink" title="cron示例"></a>cron示例</h4><p>每天10点</p>
-<pre><code>0 0 10 * * *
-</code></pre><p>每隔5分钟</p>
-<pre><code>* */5 * * * *
-</code></pre><p>每天8点，8点半，9点，9点半，10点</p>
-<pre><code>* */30 8-10 * * *
-</code></pre><h2 id="自定义线程池来管理定时任务"><a href="#自定义线程池来管理定时任务" class="headerlink" title="自定义线程池来管理定时任务"></a>自定义线程池来管理定时任务</h2><p>自定义线程池配置，例如线程池size，线程池名称</p>
-<pre><code>@Configuration
-public class ScheduleConfig implements SchedulingConfigurer {
-    @Override
-    public void configureTasks(ScheduledTaskRegistrar scheduledTaskRegistrar) {
-        ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
-        taskScheduler.setPoolSize(10);
-        taskScheduler.setThreadNamePrefix(&quot;schedule-task-pool&quot;);
-        taskScheduler.initialize();
-
-        scheduledTaskRegistrar.setTaskScheduler(taskScheduler);
-    }
-}
-</code></pre><p>定义一个cron任务</p>
-<pre><code>@Scheduled(cron = &quot;*/5 * * * * *&quot;)
-public void cronTask(){
-    String name = Thread.currentThread().getName();
-    SimpleDateFormat dateFormat = new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm:ss&quot;);
-    System.out.println(String.format(&quot;%s: current thread %s&quot;, dateFormat.format(new Date()), name));
-}
-</code></pre><p>运行程序，可以得到如下的运行结果，可以看到此时定时任务是运行在自定义的线程池里        </p>
-<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1g29486h5y6j311a08amyp.jpg" alt=""></p>
-<h2 id="动态管理定时任务"><a href="#动态管理定时任务" class="headerlink" title="动态管理定时任务"></a>动态管理定时任务</h2><p>使用ThreadPoolTaskScheduler来生成定时任务，在通过维护定时任务的ScheduleFuture的map来实现动态管理定时任务</p>
-<h3 id="DynamicScheduleTaskManager"><a href="#DynamicScheduleTaskManager" class="headerlink" title="DynamicScheduleTaskManager"></a>DynamicScheduleTaskManager</h3><pre><code>@Component
-public class DynamicScheduleTaskManager {
-    private ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
-
-    private Map&lt;Integer, ScheduledFuture&gt; futureMap = new HashMap&lt;&gt;();
-
-    @PostConstruct
-    public void init(){
-        taskScheduler.initialize();
-    }
-
-    /**
-     * 增加定时任务，若任务已存在，则删除旧任务，更新新任务
-     * @param taskConfig
-     */
-    public void addOrUpdateTask(TaskConfig taskConfig){
-        int taskConfigId = taskConfig.getId();
-        if (futureMap.containsKey(taskConfigId)){
-            deleteTask(taskConfig);
-        }
-        ScheduledFuture&lt;?&gt; scheduledFuture = taskScheduler.schedule(() -&gt; {
-            SimpleDateFormat dateFormat = new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm:ss&quot;);
-            String timeFormat = dateFormat.format(new Date());
-            System.out.println(String.format(&quot;time:%s,process task,id:%d&quot;,timeFormat,taskConfigId));
-        }, new CronTrigger(taskConfig.getCron()));
-        futureMap.put(taskConfigId, scheduledFuture);
-    }
-
-    /**
-     * 删除任务
-     * @param taskConfig
-     */
-    public void deleteTask(TaskConfig taskConfig){
-        int taskConfigId = taskConfig.getId();
-        if (futureMap.containsKey(taskConfigId)){
-            ScheduledFuture scheduledFuture = futureMap.get(taskConfigId);
-            scheduledFuture.cancel(true);
-            System.out.println(&quot;delete task,id:&quot; + taskConfigId);
-        }
-    }
-}        
-
-TaskConfig
-
-@Getter
-@Setter
-public class TaskConfig {
-    /**
-     * id of task
-     */
-    private int id;
-
-    /**
-     * cron expression
-     */
-    private String cron;
-
-}
-</code></pre><h3 id="ScheduleController"><a href="#ScheduleController" class="headerlink" title="ScheduleController"></a>ScheduleController</h3><pre><code>@RestController
-@RequestMapping(produces = &quot;application/json; charset=utf-8&quot;)
-public class ScheduleController {
-
-    @Autowired
-    private DynamicScheduleTaskManager scheduleTaskManager;
-
-    @PostMapping(&quot;/add/task&quot;)
-    public String addTask(@RequestBody TaskConfig taskConfig){
-        scheduleTaskManager.addOrUpdateTask(taskConfig);
-        return &quot;success&quot;;
-    }
-
-    @PostMapping(&quot;/delete/task&quot;)
-    public void deleteTask(@RequestBody TaskConfig taskConfig){
-        scheduleTaskManager.deleteTask(taskConfig);
-    }
-}    
-</code></pre><h3 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h3><p>####1. 新增taskConfig</p>
-<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1g295imsq3uj31c80fwjt8.jpg" alt=""></p>
-<p>####2. 更新taskConfig</p>
-<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1g295kc5vt5j31c80e2myy.jpg" alt=""></p>
-<p>####3. 删除taskConfig<br><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1g295kx02yej31ck0es765.jpg" alt=""></p>
-<p>####4.输出</p>
-<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1g295nz4evhj31b80feq68.jpg" alt=""></p>
-<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
-<li><a href="https://cloud.tencent.com/info/9d5782f8b475dfa8c41968f11aaea733.html" target="_blank" rel="noopener">SpringBoot定时任务及Cron表达式详解</a></li>
-<li><a href="https://dzone.com/articles/running-on-time-with-springs-scheduled-tasks" target="_blank" rel="noopener">Running on Time With Spring’s Scheduled Tasks</a></li>
-<li><a href="https://www.callicoder.com/spring-boot-task-scheduling-with-scheduled-annotation/" target="_blank" rel="noopener">How to Schedule Tasks with Spring Boot</a></li>
+<p>下图展示了文件如何在以上三个部分转换</p>
+<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20190512153125.png" alt=""></p>
+<h1 id="git-rebase"><a href="#git-rebase" class="headerlink" title="git rebase"></a>git rebase</h1><h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><blockquote>
+<p>rebase命令将某一个分支上的所有修改都转移至另一个分支上</p>
+</blockquote>
+<h2 id="操作示例"><a href="#操作示例" class="headerlink" title="操作示例"></a>操作示例</h2><p>从下图中我们可以看到两个分支master与branch1，他们有相同的祖先节点C1，表示这两个分支都是基于C1这次提交进行修改的<br><img src="https://ws4.sinaimg.cn/large/006tNc79ly1g2nubiqm38j30ra0ge0tg.jpg" alt=""> </p>
+<p>如果我们使用rebase命令合并两个分支，命令如下，示意图如图</p>
+<pre><code>git checkout branch1
+git rebase master
+</code></pre><p><img src="https://ws3.sinaimg.cn/large/006tNc79ly1g2ohtgx1kjj30vi0bkt9h.jpg" alt=""></p>
+<p>经过变基之后，在branch1的C3,C4提交将被删除，同时，在C2后面将生成C3’,C4’这两个提交，它们和C3，C4的提交内容一模一样，此时在合并branch1，即可以实行快进合并(fast-forword)<img src="https://ws1.sinaimg.cn/large/006tNc79ly1g2ohzhuogpj30x40bkgm9.jpg" alt=""></p>
+<h2 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h2><p>适合场景</p>
+<blockquote>
+<p>本地未提交至远程的分支上，例如从master上开出一个分支进行开发，开发过程中，其他人将一些提交合并到master分支，此时使用rebase，在进行merge，可以使master的变更历史沿着一条直线前进</p>
+</blockquote>
+<p>不适合场景</p>
+<blockquote>
+<p>已提交至远程仓库的分支上，若你push一个分支到远程仓库，此时其他人已经pull下这条分支进行开发，而你又执行rebase操作，则会使变更历史变得混乱。</p>
+</blockquote>
+<h1 id="git-reset"><a href="#git-reset" class="headerlink" title="git reset"></a>git reset</h1><h2 id="定义-1"><a href="#定义-1" class="headerlink" title="定义"></a>定义</h2><blockquote>
+<p>reset命令会移动HEAD到某个commit上</p>
+</blockquote>
+<p>git reset可以用来移除当前分支上的一些提交</p>
+<h2 id="操作示例-1"><a href="#操作示例-1" class="headerlink" title="操作示例"></a>操作示例</h2><p>git reset有三种模式，soft，mixed，hard</p>
+<ul>
+<li>soft：工作空间和暂停区的内容都不会改变</li>
+<li>mixed：默认模式，暂存区的内容将被指定的commit覆盖，而工作空间不受影响</li>
+<li>hard：暂存区和工作空间都被指定的commit覆盖</li>
+</ul>
+<p>下面通过实际操作来看这三种模式的区别，首先创建一个git仓库，并新增一个文件file.txt，对文件进行了两次提交，最终log如下图所示</p>
+<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20190512155537.png" alt=""></p>
+<p>此时file的内容为</p>
+<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20190512155711.png" alt=""></p>
+<p>下面使用soft模式移除v2提交</p>
+<pre><code>git reset --soft dd0d9dbf23b79991536be42cd158538b98ecce37
+</code></pre><p>此时log，git仓库状态以及file文件内容如下图所示<br><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20190512160451.png" alt=""></p>
+<p>可以看到file文件的内容没有被修改，说明工作空间内容不受影响。</p>
+<p>执行git diff可以看到结果为空，说明工作空间和暂存区的内容一致，暂存区也不受影响</p>
+<p>下面使用mixed模式移除提交<br><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20190512161515.png" alt=""></p>
+<p>下面使用hard模式移除提交<br><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20190512162048.png" alt=""></p>
+<h2 id="使用场景-1"><a href="#使用场景-1" class="headerlink" title="使用场景"></a>使用场景</h2><p>soft模式</p>
+<blockquote>
+<p>当你仅仅想修改commit msg，并想保留commit的内容时。</p>
+</blockquote>
+<p>mixed模式</p>
+<blockquote>
+<p>当你想在原来提交的基础上重新修改commit的内容时 </p>
+</blockquote>
+<p>hard模式<strong>(慎用)</strong></p>
+<blockquote>
+<p>当你想完全丢弃一些提交时</p>
+</blockquote>
+<h1 id="git-revert"><a href="#git-revert" class="headerlink" title="git revert"></a>git revert</h1><h2 id="定义-2"><a href="#定义-2" class="headerlink" title="定义"></a>定义</h2><blockquote>
+<p>git revert命令会撤销某次提交，但是该提交之前和之后的提交都不会被撤销。git会新生成一个提交来记录此次撤销</p>
+</blockquote>
+<h2 id="操作实例"><a href="#操作实例" class="headerlink" title="操作实例"></a>操作实例</h2><p>下图是操作前，log的状态<br><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20190512185754.png" alt=""></p>
+<p>可以看到总有了三次提交记录，此时我们通过revert操作，撤销v3这次提交</p>
+<pre><code>git revert c7c608e38a33c282aa3f08f857d4183b2f3c5575
+</code></pre><p>此时在支持git log，可以看到新增了一次提交，此次提交的影响是回滚了v3提交的操作<br><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20190512190059.png" alt=""></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ol>
+<li>git rebase和merge可以用来合并分支，只不过rebase可以master的提交历史始终沿着一条直线前进，使用rebase或者merge可以视情况而定，<strong>注意的是不要在已经push到远程仓库的分支上执行rebase操作</strong></li>
+<li>注意checkout与reset的区别，checkout某一个文件，会使文件从暂存区中移到工作空间中，checkout HEAD则是进行分支的切换。reset会删除提交历史，而checkout不会</li>
+<li>git revert是通过新生成一个提交来回滚之前提交造成的影响，<strong>它不会改变已有历史记录</strong></li>
+<li><strong>从安全性的角度来看 revert &gt; checkout &gt; reset</strong></li>
+</ol>
+<p>#参考文献</p>
+<ul>
+<li><a href="https://git-scm.com/book/zh/v2/Git-%E5%88%86%E6%94%AF-%E5%8F%98%E5%9F%BA" target="_blank" rel="noopener">Git 分支 - 变基</a></li>
+<li><a href="https://www.git-tower.com/learn/git/ebook/cn/command-line/advanced-topics/rebase" target="_blank" rel="noopener">Rebase 代替合并</a></li>
+<li><a href="http://gitbook.liuhui998.com/4_2.html" target="_blank" rel="noopener">rebase</a></li>
+<li><a href="https://www.cnblogs.com/jiangzhaowei/p/7879916.html" target="_blank" rel="noopener">git 仓库结构</a></li>
+<li><a href="https://www.jianshu.com/p/9299e32faa62" target="_blank" rel="noopener">git revert用法</a></li>
+<li><a href="https://github.com/geeeeeeeeek/git-recipes/wiki/5.2-%E4%BB%A3%E7%A0%81%E5%9B%9E%E6%BB%9A%EF%BC%9AReset%E3%80%81Checkout%E3%80%81Revert-%E7%9A%84%E9%80%89%E6%8B%A9" target="_blank" rel="noopener">代码回滚：Reset、Checkout、Revert 的选择</a></li>
 </ul>
 
             </div>
@@ -678,7 +519,7 @@ public class ScheduleController {
                     <span class="reprint-tip">Reprint please specify: </span>
                     <a href="http://yoursite.com" class="b-link-green">wbl</a>
                     <i class="fa fa-angle-right fa-lg fa-fw text-color"></i>
-                    <a href="/2019/04/20/spring-boot-ding-shi-ren-wu/" class="b-link-green">Spring-boot定时任务</a>
+                    <a href="/2019/05/03/git-rebase-reset-yi-ji-revert-ming-ling-fen-xi/" class="b-link-green">git rebase,reset以及revert命令分析</a>
                 </p>
             </div>
         </div>
@@ -700,7 +541,7 @@ public class ScheduleController {
         repo: 'blog-comments',
         owner: 'BloodHunter',
         admin: "BloodHunter",
-        id: '2019-04-20T13-22-14',
+        id: '2019-05-03T08-39-12',
         distractionFreeMode: false  // Facebook-like distraction free mode
     });
 
@@ -724,23 +565,70 @@ public class ScheduleController {
         <div class="article col s12 m6" data-aos="fade-up">
             <div class="article-badge left-badge text-color">Previous</div>
             <div class="card">
-                <a href="/2019/04/21/spring-boot-quick-start/">
+                <a href="/2019/05/12/osi-mo-xing-yu-tcp-ip-mo-xing/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/1.jpg" class="responsive-img" alt="Spring-Boot Quick start">
+                        <img src="/medias/featureimages/6.jpg" class="responsive-img" alt="OSI模型与TCP/IP模型">
                         
-                        <span class="card-title">Spring-Boot Quick start</span>
+                        <span class="card-title">OSI模型与TCP/IP模型</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
-                    <div class="summary">Create Project构建一个Spring Boot的项目非常方面，可以使用官方提供的Spring Initializr，打开https://start.spring.io/，输入项目基本信息即可构建一个项目
-
-另外你还可以设置需要引</div>
+                    <div class="summary">OSI模型与TCP/IP模型            OSI模型        TCP/IP模型        功能        协议        物理设备                应用层        应用层        文件传</div>
                     <div class="publish-info">
                         <span class="publish-date">
-                            <i class="fa fa-clock-o fa-fw icon-date"></i>2019-04-21
+                            <i class="fa fa-clock-o fa-fw icon-date"></i>2019-05-12
                         </span>
+                        <span class="publish-author">
+                            
+                            <i class="fa fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/计算机基础/" class="post-category" target="_blank">
+                                    计算机基础
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/计算机网路/" target="_blank">
+                        <span class="chip bg-color">计算机网路</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">Next</div>
+            <div class="card">
+                <a href="/2019/05/02/spring-boot-qi-dong-liu-cheng-kuo-zhan/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/20.jpg" class="responsive-img" alt="Spring Boot启动流程扩展">
+                        
+                        <span class="card-title">Spring Boot启动流程扩展</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary">Spring Boot启动可扩展流程通过上一篇Spring Boot启动流程详解，我们可知Spring Boot在以下几点可以进行扩展
+
+初始化器(Initializer)
+监听器(Listener)
+Runners
+
+下面依次来看下如何添</div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-05-02
+                            </span>
                         <span class="publish-author">
                             
                             <i class="fa fa-bookmark fa-fw icon-category"></i>
@@ -758,49 +646,6 @@ public class ScheduleController {
                     
                     <a href="/tags/Spring-Boot/" target="_blank">
                         <span class="chip bg-color">Spring Boot</span>
-                    </a>
-                    
-                </div>
-                
-            </div>
-        </div>
-        
-        
-        <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge right-badge text-color">Next</div>
-            <div class="card">
-                <a href="/2019/03/31/raft-xie-yi-zhi-ri-zhi-fu-zhi/">
-                    <div class="card-image">
-                        
-                        
-                        <img src="/medias/featureimages/10.jpg" class="responsive-img" alt="Raft协议之日志复制">
-                        
-                        <span class="card-title">Raft协议之日志复制</span>
-                    </div>
-                </a>
-                <div class="card-content article-content">
-                    <div class="summary">上篇Raft协议之Leader选举介绍了Leader选举的过程。Leader会处理来自客户端的请求，并将客户端更新操作以消息(Append Entries消息)的形式发送到集群中所有Follower节点。本文将介绍Raft协议日志复制的流程</div>
-                    <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-03-31
-                            </span>
-                        <span class="publish-author">
-                            
-                            <i class="fa fa-bookmark fa-fw icon-category"></i>
-                            
-                            <a href="/categories/Raft/" class="post-category" target="_blank">
-                                    Raft
-                                </a>
-                            
-                            
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="card-action article-tags">
-                    
-                    <a href="/tags/Raft/" target="_blank">
-                        <span class="chip bg-color">Raft</span>
                     </a>
                     
                 </div>

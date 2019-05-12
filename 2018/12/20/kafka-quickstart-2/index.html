@@ -316,13 +316,13 @@ cd kafka-0.10.2.0
 <pre><code>/usr/local/Cellar
 </code></pre><h2 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h2><h3 id="1-启动zookeeper"><a href="#1-启动zookeeper" class="headerlink" title="1. 启动zookeeper"></a>1. 启动zookeeper</h3><pre><code>cd /usr/local/Cellar/kafka/0.10.2.0/libexec/bin
 sh zookeeper-server-start.sh ../config/zookeeper.properties
-</code></pre><p><img src="https://ws4.sinaimg.cn/large/006tNbRwgy1fyfqs9ohd9j327o0patom.jpg" alt=""></p>
+</code></pre><p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNbRwgy1fyfqs9ohd9j327o0patom.jpg" alt=""></p>
 <h3 id="2-启动Kafka-Server"><a href="#2-启动Kafka-Server" class="headerlink" title="2. 启动Kafka Server"></a>2. 启动Kafka Server</h3><pre><code>sh kafka-server-start.sh ../config/server.properties
 </code></pre><h3 id="3-创建Topic"><a href="#3-创建Topic" class="headerlink" title="3. 创建Topic"></a>3. 创建Topic</h3><pre><code>sh kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic test
 </code></pre><h3 id="4-启动Producer"><a href="#4-启动Producer" class="headerlink" title="4. 启动Producer"></a>4. 启动Producer</h3><pre><code>sh kafka-console-producer.sh --broker-list localhost:9092 --topic test
-</code></pre><p><img src="https://ws3.sinaimg.cn/large/006tNbRwgy1fyfqzagbuvj31me07cwfr.jpg" alt="">    </p>
+</code></pre><p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNbRwgy1fyfqzagbuvj31me07cwfr.jpg" alt="">    </p>
 <h3 id="5-启动Consumer"><a href="#5-启动Consumer" class="headerlink" title="5. 启动Consumer"></a>5. 启动Consumer</h3><pre><code>sh kafka-console-consumer.sh --zookeeper localhost:2181 --topic test --from-beginning
-</code></pre><p><img src="https://ws3.sinaimg.cn/large/006tNbRwgy1fyfr1m23mqj327o08s0vr.jpg" alt=""></p>
+</code></pre><p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNbRwgy1fyfr1m23mqj327o08s0vr.jpg" alt=""></p>
 <p>对于新的kafka版本，可以使用如下的命令</p>
 <pre><code>sh kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test --from-beginning
 </code></pre><h2 id="kafka配置"><a href="#kafka配置" class="headerlink" title="kafka配置"></a>kafka配置</h2><h3 id="broker-配置"><a href="#broker-配置" class="headerlink" title="broker 配置"></a>broker 配置</h3><h4 id="基本配置"><a href="#基本配置" class="headerlink" title="基本配置"></a>基本配置</h4><table>
@@ -498,12 +498,12 @@ sh zookeeper-server-start.sh ../config/zookeeper.properties
 </table>
 <p>可以通过以下命令查看可管理的配置</p>
 <pre><code>sh kafka-config.sh --help
-</code></pre><p><img src="https://ws3.sinaimg.cn/large/006tNbRwgy1fyfuab7stej30u016pdod.jpg" alt="">    </p>
+</code></pre><p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNbRwgy1fyfuab7stej30u016pdod.jpg" alt="">    </p>
 <h4 id="describe"><a href="#describe" class="headerlink" title="describe"></a>describe</h4><pre><code>sh kafka-configs.sh --zookeeper localhost:2181 --describe --entity-type topics
-</code></pre><p><img src="https://ws3.sinaimg.cn/large/006tNbRwgy1fyftxq5ao7j320s04g0uv.jpg" alt=""></p>
+</code></pre><p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNbRwgy1fyftxq5ao7j320s04g0uv.jpg" alt=""></p>
 <h4 id="alter"><a href="#alter" class="headerlink" title="alter"></a>alter</h4><pre><code>sh kafka-configs.sh --zookeeper localhost:2181 --alter --entity-type topics --entity-name test --add-config retention.ms=600000
 </code></pre><p>这个时候在看topic test的配置，发现配置已修改</p>
-<p><img src="https://ws1.sinaimg.cn/large/006tNbRwgy1fyfu4kxpczj321o034wfw.jpg" alt="">    </p>
+<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNbRwgy1fyfu4kxpczj321o034wfw.jpg" alt="">    </p>
 <h3 id="kafka-console-consumer"><a href="#kafka-console-consumer" class="headerlink" title="kafka-console-consumer"></a>kafka-console-consumer</h3><p>启动一个consumer</p>
 <table>
 <thead>

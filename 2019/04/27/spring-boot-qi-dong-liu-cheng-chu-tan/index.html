@@ -320,27 +320,27 @@ public class Application {
 </ol>
 <p>下面分别来看下这两个流程，以下代码均属于2.1.4版本</p>
 <h2 id="SpringApplication实例初始化"><a href="#SpringApplication实例初始化" class="headerlink" title="SpringApplication实例初始化"></a>SpringApplication实例初始化</h2><p>首先来看下SpringApplication初始化的流程</p>
-<p><img src="https://ws1.sinaimg.cn/large/006tNc79gy1g2hl4nylaoj31k60hyq99.jpg" alt=""><br>可以看到整个流程分为了4步</p>
+<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1g2hl4nylaoj31k60hyq99.jpg" alt=""><br>可以看到整个流程分为了4步</p>
 <ul>
-<li><p>第一步，推断应用程序类型，Spring Boot的应有类型有REACTIVE，SERVLET，NONE<br><img src="https://ws4.sinaimg.cn/large/006tNc79gy1g2hla826qsj31gy0muq8p.jpg" alt=""><br><img src="https://ws1.sinaimg.cn/large/006tNc79gy1g2hlc9rwjxj31hd0u041q.jpg" alt=""></p>
+<li><p>第一步，推断应用程序类型，Spring Boot的应有类型有REACTIVE，SERVLET，NONE<br><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1g2hla826qsj31gy0muq8p.jpg" alt=""><br><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1g2hlc9rwjxj31hd0u041q.jpg" alt=""></p>
 </li>
 <li><p>第二步，设置initializers，Spring Boot将会从META-INF/spring.factories中加载相应的ApplicationContextInitializer</p>
 </li>
 </ul>
-<p><img src="https://ws1.sinaimg.cn/large/006tNc79gy1g2hlh5ese2j31jw0b2gof.jpg" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1g2hlh5ese2j31jw0b2gof.jpg" alt=""></p>
 <ul>
 <li>第三步，设置listener，Spring Boot将会从META-INF/spring.factories中加载相应的ApplicationListener</li>
 </ul>
-<p><img src="https://ws2.sinaimg.cn/large/006tNc79gy1g2hliyjnwxj31e40jkwje.jpg" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1g2hliyjnwxj31e40jkwje.jpg" alt=""></p>
 <ul>
-<li>第四步，加载main方法的定义类<br><img src="https://ws2.sinaimg.cn/large/006tNc79gy1g2hll7v2ayj31ha0p878p.jpg" alt=""></li>
+<li>第四步，加载main方法的定义类<br><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1g2hll7v2ayj31ha0p878p.jpg" alt=""></li>
 </ul>
 <h2 id="SpringApplication-run"><a href="#SpringApplication-run" class="headerlink" title="SpringApplication.run()"></a>SpringApplication.run()</h2><p>下面再来看下run方法的具体实现</p>
-<p><img src="https://ws4.sinaimg.cn/large/006tNc79gy1g2hmls8dcbj30tw13gtho.jpg" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1g2hmls8dcbj30tw13gtho.jpg" alt=""></p>
 <ol>
-<li>从META-INF/spring.factories中加载SpringApplicationRunListener<img src="https://ws4.sinaimg.cn/large/006tNc79gy1g2hmomy3vpj316s054wgb.jpg" alt=""></li>
+<li>从META-INF/spring.factories中加载SpringApplicationRunListener<img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1g2hmomy3vpj316s054wgb.jpg" alt=""></li>
 <li>创建参数，即从run方法中传入args</li>
-<li>设置程序运行所需的环境变量，SpringApplicationRunListener发送environmentPrepared的消息<img src="https://ws3.sinaimg.cn/large/006tNc79gy1g2hmrwro2ej31ii0pmaj3.jpg" alt=""></li>
+<li>设置程序运行所需的环境变量，SpringApplicationRunListener发送environmentPrepared的消息<img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1g2hmrwro2ej31ii0pmaj3.jpg" alt=""></li>
 <li>创建ApplicationContext</li>
 <li>初始化ApplicationContext，并设置环境变量，SpringApplicationRunListener发送contextLoaded消息</li>
 <li>refresh ApplicationContext</li>

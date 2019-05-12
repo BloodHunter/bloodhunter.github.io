@@ -5,10 +5,8 @@
 
 <head><meta name="generator" content="Hexo 3.8.0">
     <meta charset="utf-8">
-    <meta name="keywords" content="Spring-boot定时任务, wbl">
-    <meta name="description" content="create project使用IDEA创建一个scheduler-demo项目，这里可以使用spring initializr插件初始化spring boot
-
-@EnableScheduling注解EnableScheduling表示允">
+    <meta name="keywords" content="OSI模型与TCP/IP模型, wbl">
+    <meta name="description" content="OSI模型与TCP/IP模型            OSI模型        TCP/IP模型        功能        协议        物理设备                应用层        应用层        文件传">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -16,7 +14,7 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Spring-boot定时任务 | wbl</title>
+    <title>OSI模型与TCP/IP模型 | wbl</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/font-awesome.min.css">
@@ -249,13 +247,13 @@
 
 
 
-<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/12.jpg')">
+<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/6.jpg')">
     <div class="container">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
                     <div class="description center-align post-title">
-                        Spring-boot定时任务
+                        OSI模型与TCP/IP模型
                     </div>
                 </div>
             </div>
@@ -275,8 +273,8 @@
             
             <div class="article-tag">
                 
-                <a href="/tags/Spring-Boot/" target="_blank">
-                    <span class="chip bg-color">Spring Boot</span>
+                <a href="/tags/计算机网路/" target="_blank">
+                    <span class="chip bg-color">计算机网路</span>
                 </a>
                 
             </div>
@@ -286,260 +284,129 @@
                 <span class="post-cate">
                     <i class="fa fa-bookmark fa-fw icon-category"></i>
                     
-                    <a href="/categories/Spring-Boot/" class="post-category" target="_blank">
-                        Spring Boot
+                    <a href="/categories/计算机基础/" class="post-category" target="_blank">
+                        计算机基础
                     </a>
                     
                 </span>
                 
 
                 <span class="post-date">
-                    <i class="fa fa-clock-o fa-fw"></i>2019-04-20
+                    <i class="fa fa-clock-o fa-fw"></i>2019-05-12
                 </span>
             </div>
         </div>
         <hr>
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h2 id="create-project"><a href="#create-project" class="headerlink" title="create project"></a>create project</h2><p>使用IDEA创建一个scheduler-demo项目，这里可以使用spring initializr插件初始化spring boot</p>
-<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1g291m3ryxrj311n0u00yl.jpg" alt=""></p>
-<h2 id="EnableScheduling"><a href="#EnableScheduling" class="headerlink" title="@EnableScheduling"></a>@EnableScheduling</h2><p>注解EnableScheduling表示允许Spring Boot开启定时任务管理</p>
-<pre><code>@SpringBootApplication
-@EnableScheduling
-public class SchedulerDemoApplication {
+                <h2 id="OSI模型与TCP-IP模型"><a href="#OSI模型与TCP-IP模型" class="headerlink" title="OSI模型与TCP/IP模型"></a>OSI模型与TCP/IP模型</h2><table><br>    <tr><br>        <th>OSI模型</th><br>        <th>TCP/IP模型</th><br>        <th>功能</th><br>        <th>协议</th><br>        <th>物理设备</th><br>    </tr><br>    <tr><br>        <td>应用层</td><br>        <td rowspan="3">应用层</td><br>        <td>文件传输，电子邮件，虚拟终端</td><br>        <td>TFTP，HTTP，SNMP，FTP，SMTP，DNS，Telnet</td><br>        <td></td><br>    </tr><br>    <tr><br>        <td>表示层</td><br>        <td>数据格式化，数据加密</td><br>        <td>无协议</td><br>        <td></td><br>    </tr><br>    <tr><br>        <td>会话层</td><br>        <td>解除或建立与别的节点的联系</td><br>        <td>无协议</td><br>        <td></td><br>    </tr><br>    <tr><br>        <td>传输层</td><br>        <td>传输层</td><br>        <td>提供端到端的连接</td><br>        <td>TCP，UDP</td><br>        <td>四层交换机</td><br>    </tr><br>    <tr><br>        <td>网络层</td><br>        <td>网络层</td><br>        <td>为数据包选择路由</td><br>        <td>IP，ICMP，RIP，OSPF，BGP，IGMP，ARP，RARP</td><br>        <td>三层交换机，路由器</td><br>    </tr><br>    <tr><br>        <td>数据链路层</td><br>        <td>数据链路层</td><br>        <td>传输有地址的帧以及错误检测功能</td><br>        <td>SLIP，CSLIP，PPP</td><br>        <td>网桥，以太网交换机</td><br>    </tr><br>    <tr><br>        <td>物理层</td><br>        <td>物理层</td><br>        <td>以二进制数据形式在物理媒体上传输数据</td><br>        <td>ISO2110，IEEE802，IEEE802.2</td><br>        <td>中继器，集线器</td><br>    </tr><br></table>
 
-    public static void main(String[] args) {
-        SpringApplication.run(SchedulerDemoApplication.class, args);
-    }
-}
-</code></pre><h2 id="Scheduled"><a href="#Scheduled" class="headerlink" title="@Scheduled"></a>@Scheduled</h2><p>@Scheduled用来生成一个定时任务</p>
-<p>@Scheduled的配置如下</p>
-<table>
+<h2 id="协议概览"><a href="#协议概览" class="headerlink" title="协议概览"></a>协议概览</h2><table>
 <thead>
 <tr>
-<th style="text-align:center">param</th>
-<th style="text-align:center">explain</th>
+<th style="text-align:center">协议名称</th>
+<th>功能</th>
+<th style="text-align:center">所在层</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align:center">fixedDelay</td>
-<td style="text-align:center">两个定时任务之间的间隔，即前一个任务执行完后，延迟delay毫秒再执行下一个任务</td>
+<td style="text-align:center">TFTP</td>
+<td>Trivial File Transfer Protocol,简单文件传输协议，用来在客户端与服务机之间进行简单的文件传输，端口号69</td>
+<td style="text-align:center">应用层</td>
 </tr>
 <tr>
-<td style="text-align:center">fixedDelayString</td>
-<td style="text-align:center">与fixedDelay相同，只不过用string类型表示时间</td>
+<td style="text-align:center">HTTP</td>
+<td>HyperText Transfer Protocol,超文本传输协议</td>
+<td style="text-align:center">应用层</td>
 </tr>
 <tr>
-<td style="text-align:center">fixedRate</td>
-<td style="text-align:center">固定周期执行任务，例如每隔10s执行一次任务</td>
+<td style="text-align:center">SNMP</td>
+<td>Simple Network Management Protocol,简单网络管理协议，主要用于管理和监控网络设备</td>
+<td style="text-align:center">应用层</td>
 </tr>
 <tr>
-<td style="text-align:center">fixedRateString</td>
-<td style="text-align:center">与fixedRate相同，用string表示时间</td>
+<td style="text-align:center">FTP</td>
+<td>File Transfer Protocol，文件传输协议，用于将文件从一个主机复制到另一个主机</td>
+<td style="text-align:center">应用层</td>
 </tr>
 <tr>
-<td style="text-align:center">cron</td>
-<td style="text-align:center">用cron表达式来管理定时任务</td>
+<td style="text-align:center">SMTP</td>
+<td>Simple Mail Transfer Protoco，简单邮件传输协议</td>
+<td style="text-align:center">应用层</td>
 </tr>
 <tr>
-<td style="text-align:center">initialDelay</td>
-<td style="text-align:center">执行第一个定时任务的延迟时间，只对fixedDelay或fixedRate任务生效</td>
+<td style="text-align:center">DNS</td>
+<td>Domain Name System，域名系统，用来将域名解析为IP地址</td>
+<td style="text-align:center">应用层</td>
 </tr>
 <tr>
-<td style="text-align:center">initialDelayString</td>
-<td style="text-align:center">与initialDelay相同</td>
+<td style="text-align:center">TCP</td>
+<td>Transmission Control Protocol，传输控制协议，是一种面向连接，可靠的，基于字节流的传输层协议</td>
+<td style="text-align:center">传输层</td>
 </tr>
 <tr>
-<td style="text-align:center">zone</td>
-<td style="text-align:center">时区，默认使用server的时区</td>
+<td style="text-align:center">UDP</td>
+<td>User Datagram Protocol,用户数据报协议，是一种无连接，不可靠的传输协议</td>
+<td style="text-align:center">传输层</td>
+</tr>
+<tr>
+<td style="text-align:center">IP</td>
+<td>Internet Protocol，互联网协议，用来在目的主机和源主机之间传输数据</td>
+<td style="text-align:center">网络层</td>
+</tr>
+<tr>
+<td style="text-align:center">ICMP</td>
+<td>Internet Control Message Protocol，互联网控制消息协议，用于在IP协议中发送控制消息</td>
+<td style="text-align:center">网络层</td>
+</tr>
+<tr>
+<td style="text-align:center">RIP</td>
+<td>Routing Information Protocol，路由信息协议，通过不断的交换信息让路由器动态的适应网络连接的变化</td>
+<td style="text-align:center">网络层</td>
+</tr>
+<tr>
+<td style="text-align:center">OSPF</td>
+<td>Open Shortest Path First,开放式最短路径优先,是基于链路状态的路由协议</td>
+<td style="text-align:center">网络层</td>
+</tr>
+<tr>
+<td style="text-align:center">BGP</td>
+<td>Border Gateway Protocol，边界网关协议，是互联网上一个核心的去中心化自治路由协议</td>
+<td style="text-align:center">网络层</td>
+</tr>
+<tr>
+<td style="text-align:center">IGMP</td>
+<td>Internet Group Management Protocol，网路群组管理协议，是用于管理网路协议多播组成员的一种通信协议</td>
+<td style="text-align:center">网络层</td>
+</tr>
+<tr>
+<td style="text-align:center">ARP</td>
+<td>Address Resolution Protocol，地址解析协议，是一个通过解析网络层地址来找寻数据链路层地址的网络传输协议，即将IP地址转换为MAC地址</td>
+<td style="text-align:center">网络层</td>
+</tr>
+<tr>
+<td style="text-align:center">RARP</td>
+<td>逆地址解析协议，将MAC地址转换为IP地址</td>
+<td style="text-align:center">网络层</td>
+</tr>
+<tr>
+<td style="text-align:center">SLIP</td>
+<td>Serial Line Internet Protocol,串列线路互联网协议，已被PPP协议取代</td>
+<td style="text-align:center">数据链路层</td>
+</tr>
+<tr>
+<td style="text-align:center">CSLIP</td>
+<td>压缩的SLIP,可以提高SLIP的传输效率</td>
+<td style="text-align:center">数据链路层</td>
+</tr>
+<tr>
+<td style="text-align:center">PPP</td>
+<td>Point-to-Point Protocol,点对点协议,在两节点间创建直接的连接</td>
+<td style="text-align:center">数据链路层</td>
 </tr>
 </tbody>
 </table>
-<h3 id="fixedDelay与fixedRate的区别"><a href="#fixedDelay与fixedRate的区别" class="headerlink" title="fixedDelay与fixedRate的区别"></a>fixedDelay与fixedRate的区别</h3><p>对于fixedDelay任务，后个任务一定需要在前一个任务执行完并且再过delay毫秒后才会执行。对于下面的例子来说，delay为5s，而任务执行需要5s，所有每隔10s任务才会执行一次</p>
-<pre><code>@Scheduled(fixedDelay = 5000)
-public void fixedDelayTask() throws Exception{
-    SimpleDateFormat dateFormat = new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm&quot;);
-    System.out.println(dateFormat.format(new Date()) + &quot;:&quot; + &quot; task of fixed delay&quot;);
-    Thread.sleep(5000);
-}
-</code></pre><p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1g292hzkr0wj31700nqtcz.jpg" alt=""></p>
-<p>对于fixedRate任务，他们的执行是严格按照时间周期，即使上一个任务还未执行完毕，只要时间一到就会里面执行</p>
-<pre><code>@Scheduled(fixedRate = 5000,initialDelay = 5000)
-public void fixedRateTask() throws Exception{
-    SimpleDateFormat dateFormat = new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm:ss&quot;);
-    System.out.println(dateFormat.format(new Date()) + &quot;:&quot; + &quot; task of fixed rate&quot;);
-    Thread.sleep(5000);
-}
-</code></pre><p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1g292nj7rxqj30u20rutca.jpg" alt=""></p>
-<h3 id="cron表达式"><a href="#cron表达式" class="headerlink" title="cron表达式"></a>cron表达式</h3><pre><code>@Scheduled(cron = &quot;[Seconds] [Minutes] [Hours] [Day of month] [Month] [Day of week]&quot;)
-</code></pre><ul>
-<li>second 取值在[0-59]，或者特殊字符 , - * /</li>
-<li>minute 取值在[0-59], 或者特殊字符, - * /</li>
-<li>hour 取值在[0-23],或者特殊字符, - * /</li>
-<li>day of month 每个月第几天，取值在[0-31],或者特殊字段, - * / ? </li>
-<li>month 取值[1-12]或者月份的英文描述，特殊字符为, - * /</li>
-<li>day of week 取值为[1-7]，1表示星期天，2表示星期一，以此类推，也可用英文描述的星期，例如SUN，特殊字符为, - * / #</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th style="text-align:center">特殊字符</th>
-<th style="text-align:center">含义</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center">*</td>
-<td style="text-align:center">表示任意值，若second为*，表示每秒都会触发该事件</td>
-</tr>
-<tr>
-<td style="text-align:center">,</td>
-<td style="text-align:center">表示列出枚举值，若minute为5,20 则表示第5分钟和第20分钟会触发事件</td>
-</tr>
-<tr>
-<td style="text-align:center">/</td>
-<td style="text-align:center">表示起始时间开始触发，然后每隔固定周期都会触发，例如minute为5/20，则在5分，25分，45分都会触发事件</td>
-</tr>
-<tr>
-<td style="text-align:center">-</td>
-<td style="text-align:center">表示取值范围，若minute为5-20，则表示从5分到20分，每分钟都会触发事件</td>
-</tr>
-<tr>
-<td style="text-align:center">?</td>
-<td style="text-align:center">只能用在每月第几天和星期两个域。表示不指定值，当2个子表达式其中之一被指定了值以后，为了避免冲突，需要将另一个子表达式的值设为”?”</td>
-</tr>
-<tr>
-<td style="text-align:center">L</td>
-<td style="text-align:center">表示最后，只能出现在week或者day of month中，若week为1L,表示在最后一个星期天</td>
-</tr>
-<tr>
-<td style="text-align:center">W</td>
-<td style="text-align:center">表示有效工作日(周一到周五),只能出现在day of month中</td>
-</tr>
-<tr>
-<td style="text-align:center">#</td>
-<td style="text-align:center">用于确定每个月第几个星期几，只能出现在day of month中，例如1#3 表示每个月第三个星期日</td>
-</tr>
-</tbody>
-</table>
-<h4 id="cron示例"><a href="#cron示例" class="headerlink" title="cron示例"></a>cron示例</h4><p>每天10点</p>
-<pre><code>0 0 10 * * *
-</code></pre><p>每隔5分钟</p>
-<pre><code>* */5 * * * *
-</code></pre><p>每天8点，8点半，9点，9点半，10点</p>
-<pre><code>* */30 8-10 * * *
-</code></pre><h2 id="自定义线程池来管理定时任务"><a href="#自定义线程池来管理定时任务" class="headerlink" title="自定义线程池来管理定时任务"></a>自定义线程池来管理定时任务</h2><p>自定义线程池配置，例如线程池size，线程池名称</p>
-<pre><code>@Configuration
-public class ScheduleConfig implements SchedulingConfigurer {
-    @Override
-    public void configureTasks(ScheduledTaskRegistrar scheduledTaskRegistrar) {
-        ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
-        taskScheduler.setPoolSize(10);
-        taskScheduler.setThreadNamePrefix(&quot;schedule-task-pool&quot;);
-        taskScheduler.initialize();
-
-        scheduledTaskRegistrar.setTaskScheduler(taskScheduler);
-    }
-}
-</code></pre><p>定义一个cron任务</p>
-<pre><code>@Scheduled(cron = &quot;*/5 * * * * *&quot;)
-public void cronTask(){
-    String name = Thread.currentThread().getName();
-    SimpleDateFormat dateFormat = new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm:ss&quot;);
-    System.out.println(String.format(&quot;%s: current thread %s&quot;, dateFormat.format(new Date()), name));
-}
-</code></pre><p>运行程序，可以得到如下的运行结果，可以看到此时定时任务是运行在自定义的线程池里        </p>
-<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1g29486h5y6j311a08amyp.jpg" alt=""></p>
-<h2 id="动态管理定时任务"><a href="#动态管理定时任务" class="headerlink" title="动态管理定时任务"></a>动态管理定时任务</h2><p>使用ThreadPoolTaskScheduler来生成定时任务，在通过维护定时任务的ScheduleFuture的map来实现动态管理定时任务</p>
-<h3 id="DynamicScheduleTaskManager"><a href="#DynamicScheduleTaskManager" class="headerlink" title="DynamicScheduleTaskManager"></a>DynamicScheduleTaskManager</h3><pre><code>@Component
-public class DynamicScheduleTaskManager {
-    private ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
-
-    private Map&lt;Integer, ScheduledFuture&gt; futureMap = new HashMap&lt;&gt;();
-
-    @PostConstruct
-    public void init(){
-        taskScheduler.initialize();
-    }
-
-    /**
-     * 增加定时任务，若任务已存在，则删除旧任务，更新新任务
-     * @param taskConfig
-     */
-    public void addOrUpdateTask(TaskConfig taskConfig){
-        int taskConfigId = taskConfig.getId();
-        if (futureMap.containsKey(taskConfigId)){
-            deleteTask(taskConfig);
-        }
-        ScheduledFuture&lt;?&gt; scheduledFuture = taskScheduler.schedule(() -&gt; {
-            SimpleDateFormat dateFormat = new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm:ss&quot;);
-            String timeFormat = dateFormat.format(new Date());
-            System.out.println(String.format(&quot;time:%s,process task,id:%d&quot;,timeFormat,taskConfigId));
-        }, new CronTrigger(taskConfig.getCron()));
-        futureMap.put(taskConfigId, scheduledFuture);
-    }
-
-    /**
-     * 删除任务
-     * @param taskConfig
-     */
-    public void deleteTask(TaskConfig taskConfig){
-        int taskConfigId = taskConfig.getId();
-        if (futureMap.containsKey(taskConfigId)){
-            ScheduledFuture scheduledFuture = futureMap.get(taskConfigId);
-            scheduledFuture.cancel(true);
-            System.out.println(&quot;delete task,id:&quot; + taskConfigId);
-        }
-    }
-}        
-
-TaskConfig
-
-@Getter
-@Setter
-public class TaskConfig {
-    /**
-     * id of task
-     */
-    private int id;
-
-    /**
-     * cron expression
-     */
-    private String cron;
-
-}
-</code></pre><h3 id="ScheduleController"><a href="#ScheduleController" class="headerlink" title="ScheduleController"></a>ScheduleController</h3><pre><code>@RestController
-@RequestMapping(produces = &quot;application/json; charset=utf-8&quot;)
-public class ScheduleController {
-
-    @Autowired
-    private DynamicScheduleTaskManager scheduleTaskManager;
-
-    @PostMapping(&quot;/add/task&quot;)
-    public String addTask(@RequestBody TaskConfig taskConfig){
-        scheduleTaskManager.addOrUpdateTask(taskConfig);
-        return &quot;success&quot;;
-    }
-
-    @PostMapping(&quot;/delete/task&quot;)
-    public void deleteTask(@RequestBody TaskConfig taskConfig){
-        scheduleTaskManager.deleteTask(taskConfig);
-    }
-}    
-</code></pre><h3 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h3><p>####1. 新增taskConfig</p>
-<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1g295imsq3uj31c80fwjt8.jpg" alt=""></p>
-<p>####2. 更新taskConfig</p>
-<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1g295kc5vt5j31c80e2myy.jpg" alt=""></p>
-<p>####3. 删除taskConfig<br><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1g295kx02yej31ck0es765.jpg" alt=""></p>
-<p>####4.输出</p>
-<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1g295nz4evhj31b80feq68.jpg" alt=""></p>
-<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
-<li><a href="https://cloud.tencent.com/info/9d5782f8b475dfa8c41968f11aaea733.html" target="_blank" rel="noopener">SpringBoot定时任务及Cron表达式详解</a></li>
-<li><a href="https://dzone.com/articles/running-on-time-with-springs-scheduled-tasks" target="_blank" rel="noopener">Running on Time With Spring’s Scheduled Tasks</a></li>
-<li><a href="https://www.callicoder.com/spring-boot-task-scheduling-with-scheduled-annotation/" target="_blank" rel="noopener">How to Schedule Tasks with Spring Boot</a></li>
-</ul>
 
             </div>
             <hr>
@@ -678,7 +545,7 @@ public class ScheduleController {
                     <span class="reprint-tip">Reprint please specify: </span>
                     <a href="http://yoursite.com" class="b-link-green">wbl</a>
                     <i class="fa fa-angle-right fa-lg fa-fw text-color"></i>
-                    <a href="/2019/04/20/spring-boot-ding-shi-ren-wu/" class="b-link-green">Spring-boot定时任务</a>
+                    <a href="/2019/05/12/osi-mo-xing-yu-tcp-ip-mo-xing/" class="b-link-green">OSI模型与TCP/IP模型</a>
                 </p>
             </div>
         </div>
@@ -700,7 +567,7 @@ public class ScheduleController {
         repo: 'blog-comments',
         owner: 'BloodHunter',
         admin: "BloodHunter",
-        id: '2019-04-20T13-22-14',
+        id: '2019-05-12T19-21-31',
         distractionFreeMode: false  // Facebook-like distraction free mode
     });
 
@@ -722,42 +589,41 @@ public class ScheduleController {
     <div class="row article-row">
         
         <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge left-badge text-color">Previous</div>
+            <div class="article-badge left-badge text-color">Current</div>
             <div class="card">
-                <a href="/2019/04/21/spring-boot-quick-start/">
+                <a href="/2019/05/12/osi-mo-xing-yu-tcp-ip-mo-xing/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/1.jpg" class="responsive-img" alt="Spring-Boot Quick start">
+                        <img src="/medias/featureimages/6.jpg" class="responsive-img" alt="OSI模型与TCP/IP模型">
                         
-                        <span class="card-title">Spring-Boot Quick start</span>
+                        <span class="card-title">OSI模型与TCP/IP模型</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
-                    <div class="summary">Create Project构建一个Spring Boot的项目非常方面，可以使用官方提供的Spring Initializr，打开https://start.spring.io/，输入项目基本信息即可构建一个项目
-
-另外你还可以设置需要引</div>
+                    <div class="summary">OSI模型与TCP/IP模型            OSI模型        TCP/IP模型        功能        协议        物理设备                应用层        应用层        文件传</div>
                     <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="fa fa-clock-o fa-fw icon-date"></i>2019-04-21
-                        </span>
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-05-12
+                            </span>
                         <span class="publish-author">
                             
                             <i class="fa fa-bookmark fa-fw icon-category"></i>
                             
-                            <a href="/categories/Spring-Boot/" class="post-category" target="_blank">
-                                    Spring Boot
+                            <a href="/categories/计算机基础/" class="post-category" target="_blank">
+                                    计算机基础
                                 </a>
                             
                             
                         </span>
                     </div>
                 </div>
+
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/Spring-Boot/" target="_blank">
-                        <span class="chip bg-color">Spring Boot</span>
+                    <a href="/tags/计算机网路/" target="_blank">
+                        <span class="chip bg-color">计算机网路</span>
                     </a>
                     
                 </div>
@@ -769,27 +635,29 @@ public class ScheduleController {
         <div class="article col s12 m6" data-aos="fade-up">
             <div class="article-badge right-badge text-color">Next</div>
             <div class="card">
-                <a href="/2019/03/31/raft-xie-yi-zhi-ri-zhi-fu-zhi/">
+                <a href="/2019/05/03/git-rebase-reset-yi-ji-revert-ming-ling-fen-xi/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/10.jpg" class="responsive-img" alt="Raft协议之日志复制">
+                        <img src="/medias/featureimages/9.jpg" class="responsive-img" alt="git rebase,reset以及revert命令分析">
                         
-                        <span class="card-title">Raft协议之日志复制</span>
+                        <span class="card-title">git rebase,reset以及revert命令分析</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
-                    <div class="summary">上篇Raft协议之Leader选举介绍了Leader选举的过程。Leader会处理来自客户端的请求，并将客户端更新操作以消息(Append Entries消息)的形式发送到集群中所有Follower节点。本文将介绍Raft协议日志复制的流程</div>
+                    <div class="summary">基本概念在讲述命令的使用姿势之前，我们首先需要了解git仓库的组成。git仓库主要由三部分组成，分别是工作空间(workspace), 暂存区(stage), 本地仓库。
+
+工作空间(workspace): 通过git进行版本管理的目录和文</div>
                     <div class="publish-info">
                             <span class="publish-date">
-                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-03-31
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-05-03
                             </span>
                         <span class="publish-author">
                             
                             <i class="fa fa-bookmark fa-fw icon-category"></i>
                             
-                            <a href="/categories/Raft/" class="post-category" target="_blank">
-                                    Raft
+                            <a href="/categories/Git/" class="post-category" target="_blank">
+                                    Git
                                 </a>
                             
                             
@@ -799,8 +667,8 @@ public class ScheduleController {
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/Raft/" target="_blank">
-                        <span class="chip bg-color">Raft</span>
+                    <a href="/tags/Git/" target="_blank">
+                        <span class="chip bg-color">Git</span>
                     </a>
                     
                 </div>

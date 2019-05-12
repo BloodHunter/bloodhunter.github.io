@@ -302,7 +302,7 @@
             <div id="articleContent">
                 <h2 id="Retention-Policy"><a href="#Retention-Policy" class="headerlink" title="Retention Policy"></a>Retention Policy</h2><p>RP表示数据保留策略，策略包含数据保留时长，备份个数等信息。InfluxDB为每个database默认创建了一个默认的RP，名称为autogen，默认数据保留时间为永久。</p>
 <h3 id="查看RP"><a href="#查看RP" class="headerlink" title="查看RP"></a>查看RP</h3><pre><code>show retention policies
-</code></pre><p><img src="https://ws2.sinaimg.cn/large/006tKfTcgy1g14lvppooxj311808sjtd.jpg" alt="">    </p>
+</code></pre><p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tKfTcgy1g14lvppooxj311808sjtd.jpg" alt="">    </p>
 <h3 id="新建RP"><a href="#新建RP" class="headerlink" title="新建RP"></a>新建RP</h3><pre><code>CREATE RETENTION POLICY &lt;retention_policy_name&gt; ON &lt;database_name&gt; DURATION &lt;duration&gt; REPLICATION &lt;n&gt; [SHARD DURATION &lt;duration&gt;] [DEFAULT]
 </code></pre><table>
 <thead>

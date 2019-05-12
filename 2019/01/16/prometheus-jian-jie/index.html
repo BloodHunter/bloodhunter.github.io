@@ -312,7 +312,7 @@
 <li>有多种的可视化图形界面(目前推荐使用Grafana展示数据)</li>
 </ol>
 <p>prometheus的架构如下图所示</p>
-<p><img src="https://ws3.sinaimg.cn/large/006tNc79gy1fzbvfyy503j31ae0r60yu.jpg" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1fzbvfyy503j31ae0r60yu.jpg" alt=""></p>
 <p>prometheus的主要工作流程如下</p>
 <ol>
 <li>prometheus serve定期从job pull metric，或者接收来自Pushgateway的metrics</li>
@@ -384,12 +384,12 @@ response_time_count=3 总共采集了3条数据
 <li>Histogram 需要通过 \<basename>_bucket 计算 quantile, 而 Summary 直接存储了 quantile 的值。</basename></li>
 </ul>
 <h2 id="Prometheus实例演示"><a href="#Prometheus实例演示" class="headerlink" title="Prometheus实例演示"></a>Prometheus实例演示</h2><h3 id="启动prometheus"><a href="#启动prometheus" class="headerlink" title="启动prometheus"></a>启动prometheus</h3><pre><code>./prometheus --config.file=&quot;prometheus.yml&quot;
-</code></pre><p>启动成功之后可以在localhost:9090上查看对应的metric<br><img src="https://ws4.sinaimg.cn/large/006tNc79gy1fzbx49z7fqj327w0ra78w.jpg" alt=""></p>
+</code></pre><p>启动成功之后可以在localhost:9090上查看对应的metric<br><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1fzbx49z7fqj327w0ra78w.jpg" alt=""></p>
 <h3 id="查看对应的指标"><a href="#查看对应的指标" class="headerlink" title="查看对应的指标"></a>查看对应的指标</h3><p>在输入框中输入指标名称，即可看到对应指标的值</p>
-<p><img src="https://ws2.sinaimg.cn/large/006tNc79gy1fzbx6jtpt3j327i0mu428.jpg" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1fzbx6jtpt3j327i0mu428.jpg" alt=""></p>
 <h3 id="可视化指标"><a href="#可视化指标" class="headerlink" title="可视化指标"></a>可视化指标</h3><p>选择graph标签页，即可将对应的数据可视化，例如查看http请求code为200的QPS</p>
 <pre><code>rate(promhttp_metric_handler_requests_total{code=&quot;200&quot;}[1m])
-</code></pre><p><img src="https://ws3.sinaimg.cn/large/006tNc79gy1fzbxac8hggj31ww0u0jva.jpg" alt=""></p>
+</code></pre><p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/006tNc79gy1fzbxac8hggj31ww0u0jva.jpg" alt=""></p>
 <h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
 <li><a href="https://prometheus.io/docs/introduction/overview/" target="_blank" rel="noopener">https://prometheus.io/docs/introduction/overview/</a></li>
 <li><a href="https://prometheus.io/docs/practices/histograms/" target="_blank" rel="noopener">https://prometheus.io/docs/practices/histograms/</a></li>
