@@ -5,11 +5,9 @@
 
 <head><meta name="generator" content="Hexo 3.8.0">
     <meta charset="utf-8">
-    <meta name="keywords" content="数据链路层协议设计与实现(1), wbl">
-    <meta name="description" content="数据链路层功能数据链路层在TCP/IP协议模型里，位于第二层，它从网络层获取一个分组(packet)，并将其打包成一帧(frame)，然后发送给物理层。
-当然数据链路层要做的不仅仅就只有这些，它要实现的功能还有许多，例如
-
-向网路层提供一个">
+    <meta name="keywords" content="数据链路层协议设计与实现(2), wbl">
+    <meta name="description" content="捎带确认在上一篇数据链路层协议设计与实现(1)中，我们看到的几个协议，对于信道的利用率都不高，原因在于数据基本都是单向传输。对于停等协议和自动重传协议来说，其实数据已经是双向传输的，但是反向传输的都是ACK，这样利用率也不高。
+针对上述的情">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -17,7 +15,7 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>数据链路层协议设计与实现(1) | wbl</title>
+    <title>数据链路层协议设计与实现(2) | wbl</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/font-awesome.min.css">
@@ -250,13 +248,13 @@
 
 
 
-<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/19.jpg')">
+<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/12.jpg')">
     <div class="container">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
                     <div class="description center-align post-title">
-                        数据链路层协议设计与实现(1)
+                        数据链路层协议设计与实现(2)
                     </div>
                 </div>
             </div>
@@ -302,260 +300,315 @@
         <hr>
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h2 id="数据链路层功能"><a href="#数据链路层功能" class="headerlink" title="数据链路层功能"></a>数据链路层功能</h2><p>数据链路层在TCP/IP协议模型里，位于第二层，它从网络层获取一个分组(packet)，并将其打包成一帧(frame)，然后发送给物理层。</p>
-<p>当然数据链路层要做的不仅仅就只有这些，它要实现的功能还有许多，例如</p>
-<ol>
-<li>向网路层提供一个定义良好的服务接口</li>
-<li>处理传输过程中的错误</li>
-<li>调节数据流，确保接收方不会被发送方的数据给淹没</li>
-</ol>
-<p>下面逐步由简单的场景到复杂场景构建对应的协议</p>
-<h2 id="接口定义"><a href="#接口定义" class="headerlink" title="接口定义"></a>接口定义</h2><p>后续实现的协议均实现了以下接口</p>
-<pre><code>public interface Protocol {
-
-    int MAX_SEQ = 7;
-
-    /**
-     * 等待一个事件发生
-     * @return
-     */
-    default EventType waitForEvent(){
-        int i = ThreadLocalRandom.current().nextInt(EventType.values().length);
-        return EventType.values()[i];
-    }
-
-    /**
-     * 从网络层收到数据
-     * @return
-     */
-    default Packet fromNetworkLayer(){
-        return new Packet();
-    }
-
-    /**
-     * 向网络层发送数据
-     * @param packet 分组
-     */
-    default void toNetworkLayer(Packet packet){
-
-    }
-
-    /**
-     * 从物理层收到一帧
-     * @return
-     */
-    default Frame fromPhysicalLayer(){
-        return new Frame();
-    }
-
-    /**
-     * 发送一帧到物理层
-     * @param frame
-     */
-    default void toPhysicalLayer(Frame frame){
-
-    }
-
-    /**
-     * 启动定时器
-     * @param seq 帧号
-     */
-    default void startTimer(int seq){
-
-    }
-
-    /**
-     * 停止定时器
-     * @param seq 帧号
-     */
-    default void stopTimer(int seq){
-
-    }
-
-    /**
-     * 网络层允许接收数据
-     */
-    default void enableNetworkLayer(){
-
-    }
-
-    /**
-     * 网络层不允许接收数据
-     */
-    default void disableNetworkLayer(){
-
-    }
-
-    /**
-     * 帧号自增
-     * @param seq 帧号
-     * @return
-     */
-    default int inc(int seq){
-        if (seq &lt; MAX_SEQ){
-            return seq + 1;
-        }else{
-            return 0;
-        }
-    }
-
-    /**
-     * 协议具体实现
-     */
-    void protocol();
-}
-</code></pre><h2 id="无限制的单工协议"><a href="#无限制的单工协议" class="headerlink" title="无限制的单工协议"></a>无限制的单工协议</h2><h3 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h3><ol>
-<li>数据只能单向传输</li>
-<li>传输方和接收方的网路层总是处于就绪状态，处理时间可以被忽略</li>
-<li>接收方的缓存空间无限大</li>
-<li>信道传输的数据永远不会丢失或者损坏</li>
-</ol>
-<h3 id="协议实现"><a href="#协议实现" class="headerlink" title="协议实现"></a>协议实现</h3><p>对于发送方来说，由于网路层处理数据的时间可以被忽略，同时数据不会损坏或者丢失，同时接收方的缓存空间无限大，无需考虑流控制，因此发送方只需不断的从网络层获取数据，然后发送给物理层即可</p>
-<pre><code>protected void sender(){
-    while (true){
-        //1. 从网络层(上层)获取数据
-        Packet packet = fromNetworkLayer();
-
-        //2. 生成一帧
-        Frame frame = new Frame();
-        frame.setPacket(packet);
-
-        //3. 向物理层(下层)发送数据
-        toPhysicalLayer(frame);
-    }
-}
-</code></pre><p>对于接收方来说，由于缓存空间无限大，也无需考虑数据损坏丢失的情况，因此接收方只需要等待发送方发送的数据到来，然后发送给网络层即可  </p>
-<pre><code>protected void receiver(){
-    while (true){
-        //1. 从物理层获取一帧
-        Frame frame = fromPhysicalLayer();
-
-        //2. 获取需要向网络层传输的数据
-        Packet packet = frame.getPacket();
-
-        //3. 想网络层发送数据
-        toNetworkLayer(packet);
-    }
-} 
-</code></pre><h2 id="停等协议"><a href="#停等协议" class="headerlink" title="停等协议"></a>停等协议</h2><h3 id="应用场景-1"><a href="#应用场景-1" class="headerlink" title="应用场景"></a>应用场景</h3><p>在实际应用场景中，接收方的缓存空间不可能无限大，用来存储所有进来的帧，并且按序发送给上层，因此我们需要考虑流控制问题</p>
-<ol>
-<li>数据只能单向传输</li>
-<li>接收方缓存空间有限，网络层处理数据需要时间</li>
-<li>信道传输的数据永远不会丢失或者损坏</li>
-</ol>
-<h3 id="协议实现-1"><a href="#协议实现-1" class="headerlink" title="协议实现"></a>协议实现</h3><p>停等协议主要解决的是如何避免发送方用超过接收方处理能力的大量数据来淹没接收方。解决的方式也比较简单，发送方根据接收方的反馈信息来发送数据。每当接收方收到一帧数据，并处理完该数据之后，会向发送方发送一个哑帧，用于告诉发送方可以发送下一帧了。</p>
-<p>因此，对于发送方来说，在发送一帧之后，必须等到接收方发过来的确认，才可以发送下一帧</p>
-<pre><code>while (true){
-    //1. 从网络层(上层)获取数据
-    Packet packet = fromNetworkLayer();
-
-    //2. 生成一帧
+                <h2 id="捎带确认"><a href="#捎带确认" class="headerlink" title="捎带确认"></a>捎带确认</h2><p>在上一篇<a href="https://bloodhunter.github.io/2019/06/02/shu-ju-lian-lu-ceng-xie-yi-she-ji-yu-shi-xian-1/" target="_blank" rel="noopener">数据链路层协议设计与实现(1)</a>中，我们看到的几个协议，对于信道的利用率都不高，原因在于数据基本都是单向传输。对于停等协议和自动重传协议来说，其实数据已经是双向传输的，但是反向传输的都是ACK，这样利用率也不高。</p>
+<p>针对上述的情况，更好的做法是使用捎带确认的方式，将ACK和将要发送的数据放在一帧里面一起发送，这样可以减少发送的帧数。</p>
+<p>使用捎带确认有个问题需要解决。因为我们无法预期下次发送的数据是在什么时候，如果很久都没有数据要发送，这样会导致ACK超时，从而使发送方重发。为了避免等待过长的时间，需要设置一个ACK定时器。当定时器超时，则单独发送ACK，而不是继续等待下次发送的数据。</p>
+<h2 id="滑动窗口协议"><a href="#滑动窗口协议" class="headerlink" title="滑动窗口协议"></a>滑动窗口协议</h2><p>滑动窗口协议是双向协议，信道两端既是发送方又是接收方，可以提高信道的利用率。</p>
+<p>滑动窗口的本质在于任一时刻，发送方都保留一组序号，表示发送方可以发送的帧号，即认为这些帧落在了<strong>发送窗口</strong>中，同理，接收方也维护一组序号，表示可以接收的帧，认为这些帧落在了<strong>接收窗口</strong>中。</p>
+<p>接收窗口和发送窗口不必有一样的上下界，甚至不需要有一样的大小。下面分别来看下几种滑动窗口协议。</p>
+<p>协议的基本接口定义可以参见上篇<a href="https://bloodhunter.github.io/2019/06/02/shu-ju-lian-lu-ceng-xie-yi-she-ji-yu-shi-xian-1/" target="_blank" rel="noopener">数据链路层协议设计与实现(1)</a></p>
+<h2 id="1位滑动窗口协议"><a href="#1位滑动窗口协议" class="headerlink" title="1位滑动窗口协议"></a>1位滑动窗口协议</h2><p>顾名思义，1位滑动窗口协议的发送窗口和接收窗口大小都为1</p>
+<pre><code>public void protocol() {
     Frame frame = new Frame();
-    frame.setPacket(packet);
-
-    //3. 向物理层(下层)发送数据
-    toPhysicalLayer(frame);
-
-    //4. 等待receiver发送帧已收到的事件
-    waitForEvent();
-}
-</code></pre><p>对于接收方来说，在处理完一帧之后，需要向发送方发送一个确认，表示其可以继续发送下一帧</p>
-<pre><code>protected void receiver(){
-    // 告知sender帧已经收到的信号
-    Frame frameHasReceived = new Frame();
-    while (true){
-        //1. 等待sender发送数据
-        waitForEvent();
-
-        //2. 从物理层获取一帧
-        Frame frame = fromPhysicalLayer();
-
-        //3. 获取需要向网络层传输的数据
-        Packet packet = frame.getPacket();
-
-        //4. 想网络层发送数据
-        toNetworkLayer(packet);
-
-        //5. 告诉sender帧已经收到，可以发送下一帧
-        toPhysicalLayer(frameHasReceived);
-    }
-}
-</code></pre><h2 id="自动重复请求协议"><a href="#自动重复请求协议" class="headerlink" title="自动重复请求协议"></a>自动重复请求协议</h2><p>在实际生活中，信道传输的数据必然会出现丢失或者损坏的情况。数据链路层的职责就是将数据有序准确地发送给网络层。</p>
-<p>那么如何解决这个问题呢？接收方在收到一帧之后，需要向发送方发送一个ACK，表明这一帧已经收到。同时     发送方需要设置一个定时器，如果在一定时间内没有收到ACK，则重复发送该帧。</p>
-<p>由于接收方可能会收到一些重复的帧，因此接收方需要一种方式来区分某一帧是第一次收到的帧，还是重传的帧。解决这个问题的方式，就是在每一帧上加一个序列号。接收方通过检查帧号来区分新帧和重复帧。</p>
-<p>序列号只需要一位就够了(0,1)。在任何时刻，接收方保存一个期望收到的序列号(exceptSeq)。如果收到的帧包含错误的序列号，则被认为是一个重复的帧而拒绝处理；如果包含正确的帧，则发送给网络层，同时期望收到的序列号模2增1(0 变成 1，1 变成 0)</p>
-<pre><code>（seq + 1） mod 2
-</code></pre><h3 id="协议实现-2"><a href="#协议实现-2" class="headerlink" title="协议实现"></a>协议实现</h3><p>对于发送方来说，它需要考虑三种情形</p>
-<ol>
-<li>ACK完好无损地到达</li>
-<li>ACK被损坏</li>
-<li>定时器过期</li>
-</ol>
-<p>只有收到一个正确的ACK，发送方才会发送下一帧，否则则重复发送之前那一帧</p>
-<pre><code>protected void sender(){
-    // 初始化，从网络层获取数据
-    Packet packet = fromNetworkLayer();
-
-    //初始化序列号
-    int nextSendSeq = 0;
-    Frame frame = new Frame();
-    while (true){
-        int seq = nextSendSeq;
-        frame.setPacket(packet);
-        frame.setSeq(seq);
-
-        //启动定时器
-        startTimer(seq);
-        //向物理层发送数据
-        toPhysicalLayer(frame);
-        //等待事件(只有FRAME_ARRIVAL事件)到来
-        EventType event = waitForEvent();
-        //从receiver收到一帧
-        if (event == FRAME_ARRIVAL){
-            frame = fromPhysicalLayer();
-            /* 如果ACK与之前发送的序列号相同，则表示receiver已正确收到该帧
-            如果序列号不一致，则会重复发送之前的一帧
-             */
-            if (frame.getAck() == seq){
-                //停止定时器
-                stopTimer(seq);
-                // 继续从网络层获取数据
-                packet = fromNetworkLayer();
-                // 序列号自增
-                nextSendSeq = inc(seq);
-            }
-        }
-    }
-}
-</code></pre><p>对于接收方来说，每收到一帧需要检查该帧的帧号是否与期望收到的帧号相同，若相同则处理，若不同则忽略</p>
-<pre><code>protected void receiver(){
-    Frame frame = new Frame();
-    // receiver期待收到的帧号
+    // 当前正在发送的帧的序列号
+    int currentSeq = 0;
+    // 期望收到的帧的序列号
     int exceptSeq = 0;
+    Packet packet = fromNetworkLayer();
+    frame.setSeq(currentSeq);
+    frame.setPacket(packet);
+    frame.setAck(1 - exceptSeq);
+    toPhysicalLayer(frame);
+    startTimer(frame.getSeq());
     while (true){
-        //等待收到一帧的事件
         EventType event = waitForEvent();
         if (event == FRAME_ARRIVAL){
-            //从物理层获取数据
             frame = fromPhysicalLayer();
-            // 如果收到的帧号是期望收到
+            //对于发送方来说，如果收到一个正确的ACK
+            if (frame.getAck() == currentSeq){
+                stopTimer(currentSeq);
+                packet = fromNetworkLayer();
+                currentSeq = inc(currentSeq);
+            }
+
+            //对于接收方来说，如果收到了期望收到的帧
             if (frame.getSeq() == exceptSeq){
-                //将收到的数据发送到网路层
                 toNetworkLayer(frame.getPacket());
-                //期望收到的序列号自增
                 exceptSeq = inc(exceptSeq);
             }
-            //向sender发送ACK(无论是否收到正确的帧都需要发送ACK，sender只有收到ACK才知道该发哪一帧)
-            frame.setKind(FrameKind.ACK);
+
+            frame.setPacket(packet);
+            frame.setSeq(currentSeq);
             frame.setAck(1 - exceptSeq);
+
             toPhysicalLayer(frame);
+            startTimer(currentSeq);
         }
     }
-}        
+}
+</code></pre><h2 id="回退n帧协议"><a href="#回退n帧协议" class="headerlink" title="回退n帧协议"></a>回退n帧协议</h2><p>在上述的协议中都默认有一个假设，一个帧到达接收方所需的时间加上ACK返回的时间是可以忽略不计的。然而事实却不是如此。如果发送方在ACK到来之后，才发送下一帧，那么信道大部分时间都处于空闲状态。例如，从A端到B端的时间是250ms，那么实际上发送一帧的时间需要(250 + 250)=500ms，因为一帧发送过去需要250ms，ACK返回回来需要250ms</p>
+<p>所以更好的方式是，在等待ACK返回的这段时间里，可以多发送几帧，也就是把发送窗口设置大一点。</p>
+<p>回退n帧协议的本质是，发送窗口为n，接收窗口为1，发送方会保存已经发送的帧，当接收方没有收到期望的帧时，发送方会重新发送之前已经发送的帧</p>
+<pre><code>发送窗口size = 2^n - 1
+ 接收窗口size = 1
+
+ public static final int MAX_SEQ = 7;
+
+// 发送窗口，用来保存发送方发送过的帧
+private Packet[] packets = new Packet[MAX_SEQ + 1];
+public void protocol() {
+    // 发送方正打算发送帧的帧号
+    int nextSeq = 0;
+    // 接收方期望收到帧的帧号
+    int exceptSeq = 0;
+    // 发送方期望收到的ACK
+    int exceptAck = 0;
+
+    // 当前发送窗口的size，MAX_SEQ - currentWindowSize表示空闲窗口的大小
+    int currentWindowSize = 0;
+
+    while (true){
+        EventType event = waitForEvent();
+        switch (event){
+            case NETWORK_LAYER_READY:
+                Packet packet = fromNetworkLayer();
+                sendData(nextSeq,exceptSeq,packet);
+                currentWindowSize = currentWindowSize + 1;
+                nextSeq = inc(nextSeq);
+                break;
+            case FRAME_ARRIVAL:
+                Frame frame = fromPhysicalLayer();
+                // 接收方收到了期望的帧
+                if (frame.getSeq() == exceptSeq){
+                    //将数据发送到网络层
+                    toNetworkLayer(frame.getPacket());
+                    // 期望收到下一帧
+                    exceptSeq = inc(exceptSeq);
+                }
+                // 如果收到ACK为n，则帧号为n-1,n-2，……的帧接收方也必然收到了(不然不会发送为帧号为n的帧号)
+                while (between(exceptAck,frame.getAck(),nextSeq)){
+                    //释放发送窗口
+                    currentWindowSize = currentWindowSize - 1;
+                    stopTimer(exceptAck);
+                    exceptAck = inc(exceptAck);
+                }
+                break;
+            case CSKSUM_ERROR:
+                break;
+            case TIMEOUT:
+                // 当超时，从期望收到的ACK开始回退
+                nextSeq = exceptAck;
+                for (int i = 1; i &lt;= currentWindowSize; i++){
+                    sendData(nextSeq, exceptAck, packets[nextSeq]);
+                    nextSeq = inc(nextSeq);
+                }
+                break;
+            default:
+        }
+        if (currentWindowSize &lt; MAX_SEQ){
+            enableNetworkLayer();
+        }else {
+            disableNetworkLayer();
+        }
+    }
+}
+
+/**
+ * 发送一帧
+ * @param nextSeq 当前发送帧的帧号
+ * @param exceptSeq 期望收到帧的帧号
+ * @param packet 分组
+ */
+private void sendData(int nextSeq, int exceptSeq, Packet packet){
+    Frame frame = new Frame();
+    frame.setSeq(nextSeq);
+    /*假设期望收到帧的帧号为n，那么表示n-1帧(前一帧)肯定是收到了，所有ack=n-1,
+    又因为帧号是在[0,7]之间循环，n的前一帧 = (n + MAX_SEQ) % (MAX_SEQ + 1)
+     */
+    int ack = (exceptSeq + MAX_SEQ) % (MAX_SEQ + 1);
+    frame.setAck(ack);
+    frame.setPacket(packet);
+    packets[nextSeq] = packet;
+    toPhysicalLayer(frame);
+    startTimer(nextSeq);
+}
+
+/**
+ * 可以释放发送窗口空间的情况
+ * 归根结底需要满足 exceptAck &lt;= currentAck &lt; nextSeq，只不过因为帧号是循坏的，所以需要考虑几种情况
+ * 帧号循环: 0123456701234567
+ * @param exceptAck 期望收到的ACK
+ * @param currentAck 当前收到的ACK
+ * @param nextSeq 当前准备发送帧的帧号
+ * @return
+ */
+private boolean between(int exceptAck, int currentAck, int nextSeq){
+    boolean condition1 = exceptAck &lt;= currentAck &amp;&amp; currentAck &lt; nextSeq;
+    boolean condition2 = nextSeq &lt; exceptAck &amp;&amp; exceptAck &lt;= currentAck;
+    boolean condition3 = currentAck &lt; nextSeq &amp;&amp; nextSeq &lt; exceptAck;
+
+    return condition1 || condition2 || condition3;
+}
+</code></pre><h2 id="选择性重传协议"><a href="#选择性重传协议" class="headerlink" title="选择性重传协议"></a>选择性重传协议</h2><p>如果信道可靠性较高，错误发生的情况较少，那么可以使用回退n帧的协议。但是如果错误发生的比较频繁，大量重传，会导致带宽的浪费。</p>
+<p>选择性重传协议的本质在于，保存已收到的帧(即使不是期望收到的帧号)，也就是接收窗口大于1。当收到期望的帧时，就是之前收到的帧一起发送给网络层。</p>
+<pre><code>public class SelectRepeatProtocol implements Protocol {
+public static final int MAX_SEQ = 7;
+public static final int WINDOW_SIZE = 4;
+
+/**
+ * 用来保存已发送的数据
+ */
+private Packet[] sendPackets = new Packet[WINDOW_SIZE];
+/**
+ * 用来保存已接收的数据
+ */
+private Packet[] receivePackets = new Packet[WINDOW_SIZE];
+/**
+ * 用来标记接收窗口被占用的情况，为true，表示第index位已经被占用
+ */
+private boolean[] arrivals = new boolean[WINDOW_SIZE];
+
+/**
+ * 是否已经发送了NAK
+ */
+private boolean noNak = true;
+
+@Override
+public void protocol() {
+    // 正在发送帧的帧号
+    int nextSeq = 0;
+    // 接收方期望收到帧的帧号
+    int exceptSeq = 0;
+    // 发送方期望收到ACK
+    int exceptAck = 0;
+    // 当前发送窗口大小，表示发送方已经发送了多少帧
+    int sendWindowSize = 0;
+    // 接收窗口的上限边界
+    int upper = WINDOW_SIZE;
+
+    while (true){
+        EventType event = waitForEvent();
+        switch (event){
+            case NETWORK_LAYER_READY:
+                // 从网络层获取数据
+                Packet packet = fromNetworkLayer();
+                // 保存将要发送的数据保
+                sendPackets[nextSeq % WINDOW_SIZE] = packet;
+                sendFrame(DATA,nextSeq,exceptSeq,sendPackets);
+                // 帧号自增
+                nextSeq = inc(nextSeq);
+                // 发送窗口size自增
+                sendWindowSize = sendWindowSize + 1;
+                break;
+            case FRAME_ARRIVAL:
+                Frame frame = fromPhysicalLayer();
+                // 收到的是数据帧
+                if (frame.getKind() == DATA){
+                    /**
+                     * 1. 收到的不是期望的帧
+                     * 2. 还没有发送过NAK
+                     * 同时满足这两个条件，则发送NAK，让发送方重发接收方期望收到的帧
+                     */
+                    if (frame.getSeq() != exceptSeq &amp;&amp; noNak){
+                        sendFrame(NAK,0,exceptSeq,sendPackets);
+                    }else {
+                        // 启动ack定时器，一段时间内，没有反向数据发送，则为ACK单独发送一帧
+                        startAckTimer();
+                    }
+                    // 收到的帧在接收窗口中并且是第一次收到
+                    if (between(exceptSeq,frame.getSeq(),upper) &amp;&amp; !arrivals[frame.getSeq() % WINDOW_SIZE]){
+                        // 标记这一帧已经收到
+                        arrivals[frame.getSeq() % WINDOW_SIZE] = true;
+                        // 保存这一帧
+                        receivePackets[frame.getSeq() % WINDOW_SIZE] = frame.getPacket();
+                        //如果接收方期望的帧已经收到，则将接收窗口之前收到的帧一起发送给网络层
+                        while (arrivals[exceptSeq % WINDOW_SIZE]){
+                            toNetworkLayer(receivePackets[exceptSeq % WINDOW_SIZE]);
+                            noNak = true;
+                            //重置标记位
+                            arrivals[exceptSeq % WINDOW_SIZE] = false;
+                            exceptSeq = inc(exceptSeq);
+                            // 接收窗口的上限往前移一位
+                            upper = inc(upper);
+                            startAckTimer();
+                        }
+                    }
+                }
+
+                // 如果收到NAK，并且丢失帧位于发送窗口中，重发丢失的那一帧
+                if (frame.getKind() == NAK &amp;&amp; between(exceptAck, (frame.getAck() + 1) % (MAX_SEQ + 1),nextSeq)){
+                    sendFrame(DATA,(frame.getAck() + 1) % (MAX_SEQ + 1),exceptSeq,sendPackets);
+                }
+
+                // 释放发送窗口
+                while (between(exceptAck, frame.getAck(),nextSeq)){
+                    stopTimer(exceptAck % WINDOW_SIZE);
+                    exceptAck = inc(exceptAck);
+                    sendWindowSize = sendWindowSize - 1;
+                }
+
+                break;
+            case CSKSUM_ERROR:
+                // 收到损坏的帧，若没有发送过NAK，则发送NAK
+                if (noNak){
+                    sendFrame(NAK,0,exceptSeq,sendPackets);
+                }
+            case TIMEOUT:
+
+                break;
+            case ACK_TIMEOUT:
+                // 没有等到反向的流量进行捎带确认，则单独发送ACK
+                sendFrame(ACK,0,exceptSeq,sendPackets);
+                break;
+            default:
+        }
+    }
+}
+
+/**
+ * 发送一帧
+ * @param kind 帧类型，数据帧，NAK
+ * @param seq 帧号
+ * @param exceptSeq 期望收到的帧号
+ * @param packets 网络分组数据
+ */
+private void sendFrame(FrameKind kind,int seq,int exceptSeq,Packet[] packets){
+    Frame frame = new Frame();
+    if (kind == DATA){
+        frame.setPacket(packets[seq % WINDOW_SIZE]);
+    }
+    frame.setSeq(seq);
+    frame.setAck((exceptSeq + MAX_SEQ) % (MAX_SEQ + 1));
+    if (kind == NAK){
+        noNak = false;
+    }
+    if (kind == DATA){
+        startTimer(seq % WINDOW_SIZE);
+    }
+    stopAckTimer();
+}
+
+/**
+ * 检测帧号是否在窗口之中，需要满足
+ * 窗口下边界 &lt; 检测帧号  &lt; 窗口上边界
+ * 由于帧号是循坏的，因此需要分别考虑几种情况
+ * @param except 窗口下边界
+ * @param current 检测帧号
+ * @param next 窗口上边界
+ * @return
+ */
+private boolean between(int except, int current, int next){
+    boolean condition1 = except &lt;= current &amp;&amp; current &lt; next;
+    boolean condition2 = next &lt; except &amp;&amp; except &lt;= current;
+    boolean condition3 = current &lt; next &amp;&amp; next &lt; except;
+
+    return condition1 || condition2 || condition3;
+}
+}
 </code></pre><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ol>
-<li>数据链路层协议需要有错误控制以及流量控制的功能</li>
-<li>通过接收方通过发送ACK来告知发送方数据已经收到，可以发送下一帧</li>
-<li>接收方可以通过序列号来区分新帧和重复帧   </li>
+<li>滑动窗口协议是双向协议，可以提供信道的利用率</li>
+<li>发送窗口和接收窗口的上下界不一定相同</li>
+<li>在信道错误率较高的情况下，不适合使用回退n帧协议          </li>
 </ol>
 
             </div>
@@ -695,7 +748,7 @@
                     <span class="reprint-tip">Reprint please specify: </span>
                     <a href="http://yoursite.com" class="b-link-green">wbl</a>
                     <i class="fa fa-angle-right fa-lg fa-fw text-color"></i>
-                    <a href="/2019/06/02/shu-ju-lian-lu-ceng-xie-yi-she-ji-yu-shi-xian-1/" class="b-link-green">数据链路层协议设计与实现(1)</a>
+                    <a href="/2019/06/02/shu-ju-lian-lu-ceng-xie-yi-she-ji-yu-shi-xian-2/" class="b-link-green">数据链路层协议设计与实现(2)</a>
                 </p>
             </div>
         </div>
@@ -717,7 +770,7 @@
         repo: 'blog-comments',
         owner: 'BloodHunter',
         admin: "BloodHunter",
-        id: '2019-06-02T14-55-10',
+        id: '2019-06-02T16-04-15',
         distractionFreeMode: false  // Facebook-like distraction free mode
     });
 
@@ -741,21 +794,26 @@
         <div class="article col s12 m6" data-aos="fade-up">
             <div class="article-badge left-badge text-color">Previous</div>
             <div class="card">
-                <a href="/2019/06/02/shu-ju-lian-lu-ceng-xie-yi-she-ji-yu-shi-xian-2/">
+                <a href="/2019/06/15/linux-io-mo-xing/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/12.jpg" class="responsive-img" alt="数据链路层协议设计与实现(2)">
+                        <img src="/medias/featureimages/4.jpg" class="responsive-img" alt="Linux IO模型">
                         
-                        <span class="card-title">数据链路层协议设计与实现(2)</span>
+                        <span class="card-title">Linux IO模型</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
-                    <div class="summary">捎带确认在上一篇数据链路层协议设计与实现(1)中，我们看到的几个协议，对于信道的利用率都不高，原因在于数据基本都是单向传输。对于停等协议和自动重传协议来说，其实数据已经是双向传输的，但是反向传输的都是ACK，这样利用率也不高。
-针对上述的情</div>
+                    <div class="summary">网络数据接收流程计算机接收网络数据的流程如下
+
+数据通过网线到达计算机
+网卡接收到达的网络数据，将数据写入内核缓冲区
+网卡向CPU发送一个中断信号，告知接收到数据
+CPU收到中断信号后，先将数据由内核拷贝到用户空间
+CPU唤醒对应进程，通知</div>
                     <div class="publish-info">
                         <span class="publish-date">
-                            <i class="fa fa-clock-o fa-fw icon-date"></i>2019-06-02
+                            <i class="fa fa-clock-o fa-fw icon-date"></i>2019-06-15
                         </span>
                         <span class="publish-author">
                             
@@ -785,20 +843,23 @@
         <div class="article col s12 m6" data-aos="fade-up">
             <div class="article-badge right-badge text-color">Next</div>
             <div class="card">
-                <a href="/2019/05/12/osi-mo-xing-yu-tcp-ip-mo-xing/">
+                <a href="/2019/06/02/shu-ju-lian-lu-ceng-xie-yi-she-ji-yu-shi-xian-1/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/6.jpg" class="responsive-img" alt="OSI模型与TCP/IP模型">
+                        <img src="/medias/featureimages/19.jpg" class="responsive-img" alt="数据链路层协议设计与实现(1)">
                         
-                        <span class="card-title">OSI模型与TCP/IP模型</span>
+                        <span class="card-title">数据链路层协议设计与实现(1)</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
-                    <div class="summary">OSI模型与TCP/IP模型OSI模型TCP/IP模型功能协议物理设备应用层应用层文件传输，电子邮件，虚拟终端TFTP，HTTP，SNMP，FTP，SMTP，DNS，Telnet表示层数据格式化，数据加密无协议会话层解除或建立与别的节点的联</div>
+                    <div class="summary">数据链路层功能数据链路层在TCP/IP协议模型里，位于第二层，它从网络层获取一个分组(packet)，并将其打包成一帧(frame)，然后发送给物理层。
+当然数据链路层要做的不仅仅就只有这些，它要实现的功能还有许多，例如
+
+向网路层提供一个</div>
                     <div class="publish-info">
                             <span class="publish-date">
-                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-05-12
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-06-02
                             </span>
                         <span class="publish-author">
                             
@@ -815,8 +876,8 @@
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/计算机网路/" target="_blank">
-                        <span class="chip bg-color">计算机网路</span>
+                    <a href="/tags/计算机网络/" target="_blank">
+                        <span class="chip bg-color">计算机网络</span>
                     </a>
                     
                 </div>
