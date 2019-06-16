@@ -5,14 +5,9 @@
 
 <head><meta name="generator" content="Hexo 3.8.0">
     <meta charset="utf-8">
-    <meta name="keywords" content="Linux IO模型, wbl">
-    <meta name="description" content="网络数据接收流程计算机接收网络数据的流程如下
-
-数据通过网线到达计算机
-网卡接收到达的网络数据，将数据写入内核缓冲区
-网卡向CPU发送一个中断信号，告知接收到数据
-CPU收到中断信号后，先将数据由内核拷贝到用户空间
-CPU唤醒对应进程，通知">
+    <meta name="keywords" content="初探Select,Poll,Epoll, wbl">
+    <meta name="description" content="在一个高性能的网络服务中，一个进程往往需要同时处理多个socket。在上一篇博客Linux IO模型中提到的IO多路复用模型就是为了解决这个问题的。
+Select，Poll，EPoll是IO多路复用的三种机制，下面来具体看下三者之间的联系和">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -20,7 +15,7 @@ CPU唤醒对应进程，通知">
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Linux IO模型 | wbl</title>
+    <title>初探Select,Poll,Epoll | wbl</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/font-awesome.min.css">
@@ -253,13 +248,13 @@ CPU唤醒对应进程，通知">
 
 
 
-<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/4.jpg')">
+<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/10.jpg')">
     <div class="container">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
                     <div class="description center-align post-title">
-                        Linux IO模型
+                        初探Select,Poll,Epoll
                     </div>
                 </div>
             </div>
@@ -298,56 +293,60 @@ CPU唤醒对应进程，通知">
                 
 
                 <span class="post-date">
-                    <i class="fa fa-clock-o fa-fw"></i>2019-06-15
+                    <i class="fa fa-clock-o fa-fw"></i>2019-06-16
                 </span>
             </div>
         </div>
         <hr>
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h2 id="网络数据接收流程"><a href="#网络数据接收流程" class="headerlink" title="网络数据接收流程"></a>网络数据接收流程</h2><p>计算机接收网络数据的流程如下</p>
+                <p>在一个高性能的网络服务中，一个进程往往需要同时处理多个socket。在上一篇博客<a href="">Linux IO模型</a>中提到的IO多路复用模型就是为了解决这个问题的。</p>
+<p>Select，Poll，EPoll是IO多路复用的三种机制，下面来具体看下三者之间的联系和区别</p>
+<h2 id="Select"><a href="#Select" class="headerlink" title="Select"></a>Select</h2><p>刚刚也说了IO多路复用模型是为了监视多个socket，显而易见，最简单的做法就是为维护一个socket列表，表示进程需要监视的socket。如果列表中的socket都没有数据，那么进程将被挂起；如果有<strong>一个以上</strong>的socket接收到数据，那么就唤起进程，进程遍历socket列表以便找出接收到数据的socket。</p>
+<pre><code>int fds[] =  存放需要监听的socket;
+while(1){
+     //1. 检测是否有socket接收到数据
+    int n = select(..., fds, ...)
+    //2. 遍历列表，找出接收到数据的socket
+    for(int i=0; i &lt; fds.count; i++){
+        if(FD_ISSET(fds[i], ...)){
+            //fds[i]的数据处理
+        }
+    }
+}
+</code></pre><p>可以看到select的工作机制很简单，主要是两步</p>
 <ol>
-<li>数据通过网线到达计算机</li>
-<li>网卡接收到达的网络数据，将数据写入内核缓冲区</li>
-<li>网卡向CPU发送一个中断信号，告知接收到数据</li>
-<li>CPU收到中断信号后，先将数据由内核拷贝到用户空间</li>
-<li>CPU唤醒对应进程，通知它处理数据<br><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20190615211757.png" alt=""></li>
+<li>监视socket列表，如果收到数据则返回，否则阻塞进程</li>
+<li>遍历socket列表，找出接收到数据的socket</li>
 </ol>
-<p>通过上图，我们可以知道，对于一次IO访问(以read为例)，它会经历两个阶段</p>
+<p>因此我们可以知道select的效率不高，原因是显而易见的，select每次都要遍历列表才知道哪些socket接收到数据。另一方面，一个进程能够监视的文件描述符(fds)有限制，最大一般是1024，也就是说select最多只能同时监视1024个socket</p>
+<pre><code>//select函数定义
+int select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout);    
+</code></pre><p>总结一下，select存在的问题</p>
 <ol>
-<li>等待数据的到来</li>
-<li>将数据从内核拷贝到用户空间</li>
+<li>被监控的fds集合大小被限制了1024，不够用</li>
+<li>fds集合需要从用户空间拷贝到内核空间的问题，耗费性能</li>
+<li>需要遍历fds集合才能知道有数据接收的fds列表    </li>
 </ol>
-<p>根据不同阶段不同操作，Linux设计了4种不同的IO的模型。</p>
-<h2 id="4种IO模型"><a href="#4种IO模型" class="headerlink" title="4种IO模型"></a>4种IO模型</h2><h3 id="阻塞IO-Blocking-IO"><a href="#阻塞IO-Blocking-IO" class="headerlink" title="阻塞IO(Blocking IO)"></a>阻塞IO(Blocking IO)</h3><p>对于阻塞IO，当进程调用recefrom这个系统调用，就进入了第一阶段，进程将被阻塞。当数据接收完成之后，内核开始拷贝数据，此时进入第二阶段。当数据拷贝完毕之后，将通知来处理数据。</p>
-<blockquote>
-<p>阻塞IO的特点就是在两个阶段进程都被阻塞了<br><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20190615203851.png" alt=""></p>
-</blockquote>
-<h3 id="非阻塞IO-Nonblocking-IO"><a href="#非阻塞IO-Nonblocking-IO" class="headerlink" title="非阻塞IO(Nonblocking IO)"></a>非阻塞IO(Nonblocking IO)</h3><p>对于非阻塞IO，当进程调用recefrom系统调用时，此时若数据还没准备好，内核会返回一个ERROR，告知进程数据还没ready。进程收到结果之后，便知数据还未到达，于是它继续发送recefrom系统调用，直到数据ready，进入第二阶段</p>
-<blockquote>
-<p>非阻塞IO的非阻塞是指在第一阶段进程没有被阻塞，可以收到系统调用结果</p>
-<p>非阻塞IO在第一阶段采用的轮询的方式，不断询问内核数据是否ready<br><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20190615205127.png" alt=""></p>
-</blockquote>
-<h3 id="IO多路复用-IO-multiplexing"><a href="#IO多路复用-IO-multiplexing" class="headerlink" title="IO多路复用(IO multiplexing)"></a>IO多路复用(IO multiplexing)</h3><p>IO多路复用也就是常说的select，poll，epoll方式，是指进程可以同时处理多个网络IO请求。</p>
-<p>当进程调用select时，进程将会被阻塞，直到select管理的socket中，有一个以上的socket接收到数据，此时进程将被唤醒，同时它遍历所有socket对象，以便确定是哪个socket接收到数据。关于select，poll，epoll的区别将在下一篇博客中进行分析。</p>
-<blockquote>
-<p>IO多路复用在两个阶段都是被阻塞的，与阻塞IO相比，唯一的区别是它可以处理多个IO连接<br><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20190615205744.png" alt=""></p>
-</blockquote>
-<h3 id="异步IO-Asynchronous-IO"><a href="#异步IO-Asynchronous-IO" class="headerlink" title="异步IO(Asynchronous IO)"></a>异步IO(Asynchronous IO)</h3><p>对于异步IO，进程发起recefrom的系统调用后，会立即收到返回结果，此时进程可以继续处理其他事情。当内核把数据接收完毕，同时拷贝到用户空间后，便发出一个signal给进程，通知进程来处理数据。</p>
-<blockquote>
-<p>异步IO在两个阶段都没有被阻塞<br><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20190615210451.png" alt=""></p>
-</blockquote>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ol>
-<li>对于一次IO请求来说，都需要经历两个阶段，一是等待数据到来，二是等到内核把数据拷贝到用户空间</li>
-<li>阻塞IO，非阻塞IO，IO多路复用都可以归类于同步IO，因为他们在第一个阶段或者第二阶段都会被阻塞，而异步IO在两个阶段都不会被阻塞</li>
-<li><p>以吃饭为例子，可以对上述模型进行类比</p>
-<pre><code> 阻塞IO：我到饭店吃饭，点完餐之后就在餐桌上干等，之后饭做好我去拿
- 非阻塞IO：点完餐之后，我每隔一段时间就去厨房问厨师饭是否做好，知道厨师告诉饭做好了
- 异步IO：类似于点外卖，我告诉店家我要吃什么，店家做好之后直接把饭送到家里，在这段时间我可以干其他事情
-</code></pre></li>
+<h2 id="Poll"><a href="#Poll" class="headerlink" title="Poll"></a>Poll</h2><p>Poll是为解决select的第一个问题</p>
+<pre><code>int poll (struct pollfd *fds, unsigned int nfds, int timeout);
+</code></pre><p>poll不在用三个fds集合，而是使用一个pollfd的指针，指针指向了需要监视的fds，因此poll并没有最大数据量限制，但是它的性能同样不高，因为它没有解决select的第二，第三个问题。</p>
+<h2 id="EPoll"><a href="#EPoll" class="headerlink" title="EPoll"></a>EPoll</h2><p>Epoll解决了select遗漏的第2，3个问题，主要的思路有两点</p>
+<ol>
+<li>功能分离，select中维护等待队列(socket列表)和阻塞进程两个步骤结合在一起了，对于频繁调用select的进程来说，socket列表变化的可能性很小，基本固定，并不需要每次都修改。EPoll将两个操作分开。<img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20190616170617.png" alt=""></li>
+<li>维护就绪列表，select低效的另一个原因在于程序不知道哪些socket收到数据，只能一个个遍历。如果内核维护一个“就绪列表”，引用收到数据的 socket，就能避免遍历。</li>
 </ol>
+<h3 id="EPoll操作流程"><a href="#EPoll操作流程" class="headerlink" title="EPoll操作流程"></a>EPoll操作流程</h3><p>EPoll操作中涉及三个接口</p>
+<pre><code>int epoll_create(int size)
+int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event)；
+int epoll_wait(int epfd, struct epoll_event * events, int maxevents, int timeout);
+</code></pre><ol>
+<li>epoll_create创建了eventpoll对象，用来维护就绪列表</li>
+<li>epoll_ctl用来维护监视列表，可以添加或删除所要监听的 socket</li>
+<li>当调用epoll_wait时，如果就绪列表中存在socket，则直接返回，如果没有，则阻塞进程</li>
+</ol>
+<p>可以看到epoll高效原因，主要是维护了两个队列，一个是监视队列，一个是就绪队列。监视队列解决了select中fds频繁拷贝的问题，就绪队列解决了select中需要遍历列表才能知道哪个socket接收到数据的问题</p>
 <h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
-<li><a href="https://www.jianshu.com/p/486b0965c296" target="_blank" rel="noopener">聊聊Linux 五种IO模型</a></li>
 <li><a href="https://mp.weixin.qq.com/s/MzrhaWMwrFxKT7YZvd68jw" target="_blank" rel="noopener">epoll的本质</a></li>
 <li><a href="https://segmentfault.com/a/1190000003063859" target="_blank" rel="noopener">Linux IO模式及 select、poll、epoll详解</a>        </li>
 <li><a href="https://cloud.tencent.com/developer/article/1005481" target="_blank" rel="noopener">大话 Select、Poll、Epoll</a></li>
@@ -490,7 +489,7 @@ CPU唤醒对应进程，通知">
                     <span class="reprint-tip">Reprint please specify: </span>
                     <a href="http://yoursite.com" class="b-link-green">wbl</a>
                     <i class="fa fa-angle-right fa-lg fa-fw text-color"></i>
-                    <a href="/2019/06/15/linux-io-mo-xing/" class="b-link-green">Linux IO模型</a>
+                    <a href="/2019/06/16/chu-tan-select-poll-epoll/" class="b-link-green">初探Select,Poll,Epoll</a>
                 </p>
             </div>
         </div>
@@ -512,7 +511,7 @@ CPU唤醒对应进程，通知">
         repo: 'blog-comments',
         owner: 'BloodHunter',
         admin: "BloodHunter",
-        id: '2019-06-15T20-21-12',
+        id: '2019-06-16T15-43-10',
         distractionFreeMode: false  // Facebook-like distraction free mode
     });
 
@@ -534,7 +533,7 @@ CPU唤醒对应进程，通知">
     <div class="row article-row">
         
         <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge left-badge text-color">Previous</div>
+            <div class="article-badge left-badge text-color">Current</div>
             <div class="card">
                 <a href="/2019/06/16/chu-tan-select-poll-epoll/">
                     <div class="card-image">
@@ -549,9 +548,9 @@ CPU唤醒对应进程，通知">
                     <div class="summary">在一个高性能的网络服务中，一个进程往往需要同时处理多个socket。在上一篇博客Linux IO模型中提到的IO多路复用模型就是为了解决这个问题的。
 Select，Poll，EPoll是IO多路复用的三种机制，下面来具体看下三者之间的联系和</div>
                     <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="fa fa-clock-o fa-fw icon-date"></i>2019-06-16
-                        </span>
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-06-16
+                            </span>
                         <span class="publish-author">
                             
                             <i class="fa fa-bookmark fa-fw icon-category"></i>
@@ -564,6 +563,7 @@ Select，Poll，EPoll是IO多路复用的三种机制，下面来具体看下三
                         </span>
                     </div>
                 </div>
+
                 
                 <div class="card-action article-tags">
                     
@@ -580,21 +580,26 @@ Select，Poll，EPoll是IO多路复用的三种机制，下面来具体看下三
         <div class="article col s12 m6" data-aos="fade-up">
             <div class="article-badge right-badge text-color">Next</div>
             <div class="card">
-                <a href="/2019/06/02/shu-ju-lian-lu-ceng-xie-yi-she-ji-yu-shi-xian-2/">
+                <a href="/2019/06/15/linux-io-mo-xing/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/12.jpg" class="responsive-img" alt="数据链路层协议设计与实现(2)">
+                        <img src="/medias/featureimages/4.jpg" class="responsive-img" alt="Linux IO模型">
                         
-                        <span class="card-title">数据链路层协议设计与实现(2)</span>
+                        <span class="card-title">Linux IO模型</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
-                    <div class="summary">捎带确认在上一篇数据链路层协议设计与实现(1)中，我们看到的几个协议，对于信道的利用率都不高，原因在于数据基本都是单向传输。对于停等协议和自动重传协议来说，其实数据已经是双向传输的，但是反向传输的都是ACK，这样利用率也不高。
-针对上述的情</div>
+                    <div class="summary">网络数据接收流程计算机接收网络数据的流程如下
+
+数据通过网线到达计算机
+网卡接收到达的网络数据，将数据写入内核缓冲区
+网卡向CPU发送一个中断信号，告知接收到数据
+CPU收到中断信号后，先将数据由内核拷贝到用户空间
+CPU唤醒对应进程，通知</div>
                     <div class="publish-info">
                             <span class="publish-date">
-                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-06-02
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-06-15
                             </span>
                         <span class="publish-author">
                             
