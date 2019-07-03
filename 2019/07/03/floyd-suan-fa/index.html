@@ -5,11 +5,10 @@
 
 <head><meta name="generator" content="Hexo 3.8.0">
     <meta charset="utf-8">
-    <meta name="keywords" content="迪杰斯特拉算法, wbl">
-    <meta name="description" content="算法概述迪杰斯特拉算法解决了如何在一个图中，计算某一个节点到图中其他所有节点的最短路径。如果将全国所有城市当做节点，连接两个城市的铁路当做线，那么迪杰斯特拉算法可以求出，厦门到全国其他城市的最省时的出行路线。
-维基百科中的专业描述
-
-算法的">
+    <meta name="keywords" content="Floyd算法, wbl">
+    <meta name="description" content="算法概述弗洛伊德算法，是解决任意两点间的最短路径的一种算法。它的时间复杂度为 O(N^3）空间复杂度为 O(N^2)。
+算法描述弗洛伊德算法其实采用的是动态规划
+设F(i,j,k)表示节点i到节点j只以(1,k)之间的节点作为中间节点的最短">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -17,7 +16,7 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>迪杰斯特拉算法 | wbl</title>
+    <title>Floyd算法 | wbl</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/font-awesome.min.css">
@@ -250,13 +249,13 @@
 
 
 
-<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/7.jpg')">
+<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/10.jpg')">
     <div class="container">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
                     <div class="description center-align post-title">
-                        迪杰斯特拉算法
+                        Floyd算法
                     </div>
                 </div>
             </div>
@@ -295,86 +294,90 @@
                 
 
                 <span class="post-date">
-                    <i class="fa fa-clock-o fa-fw"></i>2019-06-19
+                    <i class="fa fa-clock-o fa-fw"></i>2019-07-03
                 </span>
             </div>
         </div>
         <hr>
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h2 id="算法概述"><a href="#算法概述" class="headerlink" title="算法概述"></a>算法概述</h2><p>迪杰斯特拉算法解决了如何在一个图中，计算某一个节点到图中其他所有节点的最短路径。如果将全国所有城市当做节点，连接两个城市的铁路当做线，那么迪杰斯特拉算法可以求出，厦门到全国其他城市的最省时的出行路线。</p>
-<p>维基百科中的专业描述</p>
-<blockquote>
-<p>算法的输入包含了一个有权重的有向图 G，以及G中的一个来源顶点 S。我们以 V 表示 G 中所有顶点的集合。每一个图中的边，都是两个顶点所形成的有序元素对。(u, v) 表示从顶点 u 到 v 有路径相连。我们以 E 表示G中所有边的集合，而边的权重则由权重函数 w: E → [0, ∞] 定义。因此，w(u, v) 就是从顶点 u 到顶点 v 的非负权重（weight）。边的权重可以想像成两个顶点之间的距离。任两点间路径的权重，就是该路径上所有边的权重总和。已知 V 中有顶点 s 及 t，Dijkstra 算法可以找到 s 到 t 的最低权重路径(例如，最短路径)。这个算法也可以在一个图中，找到从一个顶点 s 到任何其他顶点的最短路径。</p>
-</blockquote>
-<h2 id="算法描述"><a href="#算法描述" class="headerlink" title="算法描述"></a>算法描述</h2><ol>
-<li>将图中的顶点分为两个部分，一个是已知最短路径的顶点，记为集合P，一个是暂时还未知最短路径的顶点，记为集合Q。数组ds[i]，表示源点到顶点i的最短路径,数组e[i][j]表示顶点i到j的距离</li>
-<li>初始时，集合P中只有源点S，ds[0]=0，然后从集合Q中，找到离源点S最近的顶点u，并将u加入到集合P中。然后判断所有以u为起点的边，假设存在边uv，如果e[s][u] + e[u][v] &lt; e[s][v], 则更新源点S到顶点v的最短路径</li>
-<li>重复步骤2，直到集合Q为空，算法结束</li>
+                <h2 id="算法概述"><a href="#算法概述" class="headerlink" title="算法概述"></a>算法概述</h2><p>弗洛伊德算法，是解决任意两点间的最短路径的一种算法。它的时间复杂度为 O(N^3）空间复杂度为 O(N^2)。</p>
+<h2 id="算法描述"><a href="#算法描述" class="headerlink" title="算法描述"></a>算法描述</h2><p>弗洛伊德算法其实采用的是动态规划</p>
+<p>设F(i,j,k)表示节点i到节点j只以(1,k)之间的节点作为中间节点的最短路径，那么</p>
+<ol>
+<li><p>如果最短路径进过k</p>
+<pre><code> F(i,j,k) = F(i,k,k-1) + F(k,j,k-1)
+</code></pre></li>
+<li><p>如果最短路径不经过k</p>
+<pre><code> F(i,j,k) = F(i,j,k-1)
+</code></pre></li>
 </ol>
-<h2 id="算法示例"><a href="#算法示例" class="headerlink" title="算法示例"></a>算法示例</h2><ol>
-<li>初始时，集合P={1},Q={2,3,4,5,6}, ds={0,-,-,-,-,-},-表示距离无穷大</li>
-<li>在Q中找到离顶点1最近的点，可以看到是顶点2，于是P={1,2}, Q={3,4,5,6} ds={0,1,12,-,-,-}</li>
-<li>更新所有以顶点2为起点的边(e[2][3],e[2][4])，因为e[1][2] + e[2][3] &lt; e[1][3]，所以更新ds[3]=10, 同理e[1][2] + e[2][4] &lt; e[1][4], 所以更新ds[4]=4</li>
-<li>在Q中找到离顶点2最近的点，可以看到是顶点4，于是P={1,2,4}, Q={3,5,6},在更新所有以顶点4为起点的边</li>
-<li>重复上述过程</li>
-</ol>
-<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20190621001657.png" alt=""></p>
-<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><pre><code>package com.wbl;
-
-import java.util.Arrays;
-import java.util.stream.StreamSupport;
-
-/**
- * @author wbl
- * @date 2019-06-30
- */
-public class Dijkstra {
-    public int[] dijkstra(int[][] edge){
-        int[] ds = new int[edge.length];
-        //初始化最短路径，这里假设都是计算从顶点1到其他顶点的最短路径
-        for (int i = 1; i &lt; ds.length; i++){
-            ds[i] = Integer.MAX_VALUE;
+<p>所以最短路径为两者之间的最小值</p>
+<pre><code>F(i,j,k) = min[F(i,k,k-1) + F(k,j,k-1), F(i,j,k-1)]
+</code></pre><p>公式看起来很复杂，但是代码写起来很简单</p>
+<p>首先，如果任意两个节点之间不允许经过第三个点，那么节点间的最短路径就是初始路径。</p>
+<p>现在我们放松条件，允许经过1个节点，例如节点1，那么对于节点i到节点j的最短路径，只需要判断</p>
+<pre><code>e[i][1] + e[1][j] &lt; e[i][j]
+</code></pre><p>代码如下</p>
+<pre><code>//经过节点1
+for(int i =1; i &lt;= n; i++){
+    for(int j=1; j&lt;=n; j++){
+        if(e[i][1] + e[1][j] &lt; e[i][j]){
+            e[i][j] = e[i][1] + e[1][j]
         }
-        //用来标志以找到最短路径的顶点，若flag[i] = 1，则表示已经找到由源点到顶点i的最短路径
-        int[] flag = new int[edge.length];
-        for (int i = 0; i &lt; edge.length; i++){
-            int minIndex = 0;
-            int minValue = Integer.MAX_VALUE;
-            // 找到离已知顶点最近的顶点，minIndex表示该顶点
-            for (int j = 0; j &lt; edge.length; j++){
-                if (flag[j] == 0 &amp;&amp; ds[j] &lt; minValue){
-                    minValue = ds[j];
-                    minIndex = j;
+    }
+}    
+</code></pre><p>接下来继续求在只允许经过1和2号两个节点的情况下任意两点之间的最短路程。如何做呢？我们需要在只允许经过1号节点时任意两点的最短路程的结果下，再判断如果经过2号节点是否可以使得节点i到节点j之间的路程变得更短。即判断 e[i][2]+e[2][j]是否比 e[i][j]要小</p>
+<pre><code>//经过节点2
+for(int i =1; i &lt;= n; i++){
+    for(int j=1; j&lt;=n; j++){
+        if(e[i][2] + e[2][j] &lt; e[i][j]){
+            e[i][j] = e[i][1] + e[1][j]
+        }
+    }
+}    
+</code></pre><p>以此类推，最后允许经过所有的节点，即可求出两两节点间的最短路径了</p>
+<pre><code>for(k=1;k&lt;=n;k++)
+    for(i=1;i&lt;=n;i++)
+        for(j=1;j&lt;=n;j++)
+            if(e[i][j]&gt;e[i][k]+e[k][j])
+                 e[i][j]=e[i][k]+e[k][j];
+</code></pre><p>这段代码的基本思想就是：最开始只允许经过节点1进行中转，接下来只允许经过节点1和节点2进行中转……允许经过1~n所有节点进行中转，求任意两点之间的最短路程。也就是从节点i到节点j只经过前k号点的最短路程，这样也就对应到上述的公式中了                 </p>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><pre><code>public class Floyd {
+
+    private static final Integer INF = Integer.MAX_VALUE;
+
+    public void floyd(int[][] edge){
+        for (int k = 0; k &lt; edge.length; k++){
+            for (int i = 0; i &lt; edge.length; i++){
+                for (int j = 0; j &lt; edge.length; j++){
+                    if (edge[i][k] &lt; INF &amp;&amp; edge[k][j] &lt; INF &amp;&amp;
+                    edge[i][k] + edge[k][j] &lt; edge[i][j]){
+                        edge[i][j] = edge[i][k] + edge[k][j];
+                    }
                 }
             }
-            flag[minIndex] = 1;
-            for (int k = 0; k &lt; edge.length; k++){
-                // 收敛源点到各个顶点的距离
-                if (edge[minIndex][k]&gt;0 &amp;&amp; ds[minIndex] + edge[minIndex][k] &lt; ds[k]){
-                    ds[k] = ds[minIndex] + edge[minIndex][k];
-                }
-            }
         }
-        return ds;
     }
 
     public static void main(String[] args) {
-        int [][] edge = new int[][]{
-                {0,1,12,-1,-1,-1},
-                {-1,0,9,3,-1,-1},
-                {-1,-1,0,-1,5,-1},
-                {-1,-1,4,0,13,15},
-                {-1,-1,-1,-1,0,4},
-                {-1,-1,-1,-1,-1,0},
+        int[][] edge = new int[][]{
+                {0,2,6,4},
+                {INF,0,3,INF},
+                {7,INF,0,1},
+                {5,INF,12,0}
         };
-        Dijkstra dijkstra = new Dijkstra();
-        System.out.println(Arrays.toString(dijkstra.dijkstra(edge)));
+
+        Floyd floyd = new Floyd();
+        floyd.floyd(edge);
+        for (int i  = 0; i &lt; edge.length; i++){
+            System.out.println(Arrays.toString(edge[i]));
+        }
     }
 }
 </code></pre><h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ol>
-<li><a href="https://wiki.jikexueyuan.com/project/easy-learn-algorithm/dijkstra.html" target="_blank" rel="noopener">Dijkstra 最短路算法</a></li>
-<li><a href="https://zh.wikipedia.org/wiki/%E6%88%B4%E5%85%8B%E6%96%AF%E7%89%B9%E6%8B%89%E7%AE%97%E6%B3%95" target="_blank" rel="noopener">戴克斯特拉算法</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/Floyd-Warshall%E7%AE%97%E6%B3%95" target="_blank" rel="noopener">Floyd-Warshall算法</a></li>
+<li><a href="http://wiki.jikexueyuan.com/project/easy-learn-algorithm/floyd.html" target="_blank" rel="noopener">只有五行的 Floyd 最短路算法</a>    </li>
 </ol>
 
             </div>
@@ -514,7 +517,7 @@ public class Dijkstra {
                     <span class="reprint-tip">Reprint please specify: </span>
                     <a href="http://yoursite.com" class="b-link-green">wbl</a>
                     <i class="fa fa-angle-right fa-lg fa-fw text-color"></i>
-                    <a href="/2019/06/19/di-jie-si-te-la-suan-fa/" class="b-link-green">迪杰斯特拉算法</a>
+                    <a href="/2019/07/03/floyd-suan-fa/" class="b-link-green">Floyd算法</a>
                 </p>
             </div>
         </div>
@@ -536,7 +539,7 @@ public class Dijkstra {
         repo: 'blog-comments',
         owner: 'BloodHunter',
         admin: "BloodHunter",
-        id: '2019-06-19T23-25-23',
+        id: '2019-07-03T23-31-56',
         distractionFreeMode: false  // Facebook-like distraction free mode
     });
 
@@ -558,7 +561,7 @@ public class Dijkstra {
     <div class="row article-row">
         
         <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge left-badge text-color">Previous</div>
+            <div class="article-badge left-badge text-color">Current</div>
             <div class="card">
                 <a href="/2019/07/03/floyd-suan-fa/">
                     <div class="card-image">
@@ -574,9 +577,56 @@ public class Dijkstra {
 算法描述弗洛伊德算法其实采用的是动态规划
 设F(i,j,k)表示节点i到节点j只以(1,k)之间的节点作为中间节点的最短</div>
                     <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="fa fa-clock-o fa-fw icon-date"></i>2019-07-03
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-07-03
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fa fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/计算机基础/" class="post-category" target="_blank">
+                                    计算机基础
+                                </a>
+                            
+                            
                         </span>
+                    </div>
+                </div>
+
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/算法/" target="_blank">
+                        <span class="chip bg-color">算法</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">Next</div>
+            <div class="card">
+                <a href="/2019/06/19/di-jie-si-te-la-suan-fa/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/7.jpg" class="responsive-img" alt="迪杰斯特拉算法">
+                        
+                        <span class="card-title">迪杰斯特拉算法</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary">算法概述迪杰斯特拉算法解决了如何在一个图中，计算某一个节点到图中其他所有节点的最短路径。如果将全国所有城市当做节点，连接两个城市的铁路当做线，那么迪杰斯特拉算法可以求出，厦门到全国其他城市的最省时的出行路线。
+维基百科中的专业描述
+
+算法的</div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-06-19
+                            </span>
                         <span class="publish-author">
                             
                             <i class="fa fa-bookmark fa-fw icon-category"></i>
@@ -594,50 +644,6 @@ public class Dijkstra {
                     
                     <a href="/tags/算法/" target="_blank">
                         <span class="chip bg-color">算法</span>
-                    </a>
-                    
-                </div>
-                
-            </div>
-        </div>
-        
-        
-        <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge right-badge text-color">Next</div>
-            <div class="card">
-                <a href="/2019/06/16/chu-tan-select-poll-epoll/">
-                    <div class="card-image">
-                        
-                        
-                        <img src="/medias/featureimages/10.jpg" class="responsive-img" alt="初探Select,Poll,Epoll">
-                        
-                        <span class="card-title">初探Select,Poll,Epoll</span>
-                    </div>
-                </a>
-                <div class="card-content article-content">
-                    <div class="summary">在一个高性能的网络服务中，一个进程往往需要同时处理多个socket。在上一篇博客Linux IO模型中提到的IO多路复用模型就是为了解决这个问题的。
-Select，Poll，EPoll是IO多路复用的三种机制，下面来具体看下三者之间的联系和</div>
-                    <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-06-16
-                            </span>
-                        <span class="publish-author">
-                            
-                            <i class="fa fa-bookmark fa-fw icon-category"></i>
-                            
-                            <a href="/categories/计算机基础/" class="post-category" target="_blank">
-                                    计算机基础
-                                </a>
-                            
-                            
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="card-action article-tags">
-                    
-                    <a href="/tags/计算机网络/" target="_blank">
-                        <span class="chip bg-color">计算机网络</span>
                     </a>
                     
                 </div>

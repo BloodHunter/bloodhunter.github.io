@@ -3,6 +3,29 @@
   
     
     <entry>
+      <title>Floyd算法</title>
+      <link href="/2019/07/03/floyd-suan-fa/"/>
+      <url>/2019/07/03/floyd-suan-fa/</url>
+      
+        <content type="html"><![CDATA[<h2 id="算法概述"><a href="#算法概述" class="headerlink" title="算法概述"></a>算法概述</h2><p>弗洛伊德算法，是解决任意两点间的最短路径的一种算法。它的时间复杂度为 O(N^3）空间复杂度为 O(N^2)。</p><h2 id="算法描述"><a href="#算法描述" class="headerlink" title="算法描述"></a>算法描述</h2><p>弗洛伊德算法其实采用的是动态规划</p><p>设F(i,j,k)表示节点i到节点j只以(1,k)之间的节点作为中间节点的最短路径，那么</p><ol><li><p>如果最短路径进过k</p><pre><code> F(i,j,k) = F(i,k,k-1) + F(k,j,k-1)</code></pre></li><li><p>如果最短路径不经过k</p><pre><code> F(i,j,k) = F(i,j,k-1)</code></pre></li></ol><p>所以最短路径为两者之间的最小值</p><pre><code>F(i,j,k) = min[F(i,k,k-1) + F(k,j,k-1), F(i,j,k-1)]</code></pre><p>公式看起来很复杂，但是代码写起来很简单</p><p>首先，如果任意两个节点之间不允许经过第三个点，那么节点间的最短路径就是初始路径。</p><p>现在我们放松条件，允许经过1个节点，例如节点1，那么对于节点i到节点j的最短路径，只需要判断</p><pre><code>e[i][1] + e[1][j] &lt; e[i][j]</code></pre><p>代码如下</p><pre><code>//经过节点1for(int i =1; i &lt;= n; i++){    for(int j=1; j&lt;=n; j++){        if(e[i][1] + e[1][j] &lt; e[i][j]){            e[i][j] = e[i][1] + e[1][j]        }    }}    </code></pre><p>接下来继续求在只允许经过1和2号两个节点的情况下任意两点之间的最短路程。如何做呢？我们需要在只允许经过1号节点时任意两点的最短路程的结果下，再判断如果经过2号节点是否可以使得节点i到节点j之间的路程变得更短。即判断 e[i][2]+e[2][j]是否比 e[i][j]要小</p><pre><code>//经过节点2for(int i =1; i &lt;= n; i++){    for(int j=1; j&lt;=n; j++){        if(e[i][2] + e[2][j] &lt; e[i][j]){            e[i][j] = e[i][1] + e[1][j]        }    }}    </code></pre><p>以此类推，最后允许经过所有的节点，即可求出两两节点间的最短路径了</p><pre><code>for(k=1;k&lt;=n;k++)    for(i=1;i&lt;=n;i++)        for(j=1;j&lt;=n;j++)            if(e[i][j]&gt;e[i][k]+e[k][j])                 e[i][j]=e[i][k]+e[k][j];</code></pre><p>这段代码的基本思想就是：最开始只允许经过节点1进行中转，接下来只允许经过节点1和节点2进行中转……允许经过1~n所有节点进行中转，求任意两点之间的最短路程。也就是从节点i到节点j只经过前k号点的最短路程，这样也就对应到上述的公式中了                 </p><h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><pre><code>public class Floyd {    private static final Integer INF = Integer.MAX_VALUE;    public void floyd(int[][] edge){        for (int k = 0; k &lt; edge.length; k++){            for (int i = 0; i &lt; edge.length; i++){                for (int j = 0; j &lt; edge.length; j++){                    if (edge[i][k] &lt; INF &amp;&amp; edge[k][j] &lt; INF &amp;&amp;                    edge[i][k] + edge[k][j] &lt; edge[i][j]){                        edge[i][j] = edge[i][k] + edge[k][j];                    }                }            }        }    }    public static void main(String[] args) {        int[][] edge = new int[][]{                {0,2,6,4},                {INF,0,3,INF},                {7,INF,0,1},                {5,INF,12,0}        };        Floyd floyd = new Floyd();        floyd.floyd(edge);        for (int i  = 0; i &lt; edge.length; i++){            System.out.println(Arrays.toString(edge[i]));        }    }}</code></pre><h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ol><li><a href="https://zh.wikipedia.org/wiki/Floyd-Warshall%E7%AE%97%E6%B3%95" target="_blank" rel="noopener">Floyd-Warshall算法</a></li><li><a href="http://wiki.jikexueyuan.com/project/easy-learn-algorithm/floyd.html" target="_blank" rel="noopener">只有五行的 Floyd 最短路算法</a>    </li></ol>]]></content>
+      
+      
+      <categories>
+          
+          <category> 计算机基础 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 算法 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
       <title>迪杰斯特拉算法</title>
       <link href="/2019/06/19/di-jie-si-te-la-suan-fa/"/>
       <url>/2019/06/19/di-jie-si-te-la-suan-fa/</url>
