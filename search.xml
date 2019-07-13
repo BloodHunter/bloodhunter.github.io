@@ -3,6 +3,29 @@
   
     
     <entry>
+      <title>DHCP协议原理及实现流程</title>
+      <link href="/2019/07/13/dhcp-xie-yi-yuan-li-ji-shi-xian-liu-cheng/"/>
+      <url>/2019/07/13/dhcp-xie-yi-yuan-li-ji-shi-xian-liu-cheng/</url>
+      
+        <content type="html"><![CDATA[<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>DHCP(Dynamic Host Configuration Protocol) 动态主机配置协议，简单来说，DHCP主要功能是为自动为每一个Host分配IP协议。DHCP协议是在DHCP客户端和DHCP服务端之间运行的，客户端请求IP地址，服务端分配IP地址</p><h2 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h2><h3 id="1-发现阶段"><a href="#1-发现阶段" class="headerlink" title="1. 发现阶段"></a>1. 发现阶段</h3><p>即DHCP客户端寻找DHCP服务端的过程。首先，客户端广播DHCP Discover消息来寻找DHCP服务器，也就是向地址255.255.255.255发送特定的广播消息。网络中所有安装了TCP/IP协议的主机都会收到这个消息，但是只有DHCP服务器会响应</p><h3 id="2-提供阶段"><a href="#2-提供阶段" class="headerlink" title="2. 提供阶段"></a>2. 提供阶段</h3><p>即DHCP服务端提供IP地址的阶段。DHCP服务端收到DHCP discover消息后，它会从尚未出租的IP地址中挑选一个分配给客户端，它会发送一个包含分配的IP地址信息和其他配置信息的DHCP offer消息给客户端。</p><h3 id="3-选择阶段"><a href="#3-选择阶段" class="headerlink" title="3. 选择阶段"></a>3. 选择阶段</h3><p>即DHCP客户端选择某台DHCP服务端提供的IP地址阶段。如果有多台DHCP服务端向客户端发送offer消息，客户端只接受第一个收到的DHCP offer消息，同时DHCP客户端会广播发送DHCP Request请求信息，信息中包含了它选择的DHCP服务端的IP地址。</p><h3 id="4-确认阶段"><a href="#4-确认阶段" class="headerlink" title="4. 确认阶段"></a>4. 确认阶段</h3><p>即DHCP服务端确认IP地址的阶段。当DHCP服务端收到DHCP Request消息时，它就向客户端发送一个DHCP ack消息，告诉客户端他可以使用这个IP地址，然后客户端会将TCP/IP协议与网卡绑定。</p><h3 id="5-重新登录"><a href="#5-重新登录" class="headerlink" title="5. 重新登录"></a>5. 重新登录</h3><p>DHCP客户端每次重新登录网络之后，不需要再次发送discover消息，而是直接发送包含上次所分配的IP地址的Request消息，当DHCP服务端收到这个消息，如果这个IP地址可以继续被使用，则向客户端发送ack消息，如果不可用(可能已经分配给其他主机了)，此时DHCP服务端则发送一个NACK的消息给客户端。客户端收到NACK消息，则必须重新发起discover流程，来重新申请IP</p><h3 id="6-更新租约"><a href="#6-更新租约" class="headerlink" title="6. 更新租约"></a>6. 更新租约</h3><p>DHCP服务器向DHCP客户端分配的IP地址一般都有一个租借期限，超过期限之后，服务端将回收这个IP地址。如果DHCP客户端要延长其IP租约，则在租约过半时，DHCP客户端会自动向DHCP服务端发送更新租约的消息。</p><p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20190713224619.png" alt=""></p><p>##总结<br>|消息|作用|<br>|—|—|<br>|DHCP DISCOVER|客户端广播寻找DHCP服务端<br>|DHCP OFFER|DHCP服务端为客户端分配IP地址<br>|DHCP REQUEST|DHCP客户端向服务端确认IP地址<br>|DHCP ACK|服务端告知客户端可以使用分配的IP地址<br>|DHCP NAK|服务端告知客户端不可以使用该IP地址<br>|DHCP RELEASE|客户端向服务端更新租约</p><h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ol><li><a href="https://tools.ietf.org/html/rfc2131" target="_blank" rel="noopener">DHCP</a></li><li><a href="https://blog.csdn.net/wuruixn/article/details/8282554" target="_blank" rel="noopener">DHCP协议原理及其实现流程</a></li><li><a href="https://jiayu0x.com/2015/03/22/DHCP-protocol-and-offensive-and-defensive/" target="_blank" rel="noopener">DHCP 协议原理与攻防简介</a></li></ol>]]></content>
+      
+      
+      <categories>
+          
+          <category> 计算机基础 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 计算机网络 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
       <title>网路层之IP协议</title>
       <link href="/2019/07/07/wang-lu-ceng-zhi-ip-xie-yi/"/>
       <url>/2019/07/07/wang-lu-ceng-zhi-ip-xie-yi/</url>
