@@ -5,8 +5,16 @@
 
 <head><meta name="generator" content="Hexo 3.8.0">
     <meta charset="utf-8">
-    <meta name="keywords" content="DHCP协议原理及实现流程, wbl">
-    <meta name="description" content="简介DHCP(Dynamic Host Configuration Protocol) 动态主机配置协议，简单来说，DHCP主要功能是为自动为每一个Host分配IP协议。DHCP协议是在DHCP客户端和DHCP服务端之间运行的，客户端请求I">
+    <meta name="keywords" content="TCP与UDP协议, wbl">
+    <meta name="description" content="UDP(User Data Protocol)
+UDP是位于传输层中的协议
+UDP是一个无连接的协议，也就意味着UDP是不可靠的
+UDP不考虑错误控制，流控制
+
+UDP HeaderUDP的头部固定只有8字节
+
+
+源端口和目标端口都是2字节">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -14,7 +22,7 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>DHCP协议原理及实现流程 | wbl</title>
+    <title>TCP与UDP协议 | wbl</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/font-awesome.min.css">
@@ -247,13 +255,13 @@
 
 
 
-<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/9.jpg')">
+<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/5.jpg')">
     <div class="container">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
                     <div class="description center-align post-title">
-                        DHCP协议原理及实现流程
+                        TCP与UDP协议
                     </div>
                 </div>
             </div>
@@ -292,26 +300,148 @@
                 
 
                 <span class="post-date">
-                    <i class="fa fa-clock-o fa-fw"></i>2019-07-13
+                    <i class="fa fa-clock-o fa-fw"></i>2019-07-22
                 </span>
             </div>
         </div>
         <hr>
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>DHCP(Dynamic Host Configuration Protocol) 动态主机配置协议，简单来说，DHCP主要功能是为自动为每一个Host分配IP协议。DHCP协议是在DHCP客户端和DHCP服务端之间运行的，客户端请求IP地址，服务端分配IP地址</p>
-<h2 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h2><h3 id="1-发现阶段"><a href="#1-发现阶段" class="headerlink" title="1. 发现阶段"></a>1. 发现阶段</h3><p>即DHCP客户端寻找DHCP服务端的过程。首先，客户端广播DHCP Discover消息来寻找DHCP服务器，也就是向地址255.255.255.255发送特定的广播消息。网络中所有安装了TCP/IP协议的主机都会收到这个消息，但是只有DHCP服务器会响应</p>
-<h3 id="2-提供阶段"><a href="#2-提供阶段" class="headerlink" title="2. 提供阶段"></a>2. 提供阶段</h3><p>即DHCP服务端提供IP地址的阶段。DHCP服务端收到DHCP discover消息后，它会从尚未出租的IP地址中挑选一个分配给客户端，它会发送一个包含分配的IP地址信息和其他配置信息的DHCP offer消息给客户端。</p>
-<h3 id="3-选择阶段"><a href="#3-选择阶段" class="headerlink" title="3. 选择阶段"></a>3. 选择阶段</h3><p>即DHCP客户端选择某台DHCP服务端提供的IP地址阶段。如果有多台DHCP服务端向客户端发送offer消息，客户端只接受第一个收到的DHCP offer消息，同时DHCP客户端会广播发送DHCP Request请求信息，信息中包含了它选择的DHCP服务端的IP地址。</p>
-<h3 id="4-确认阶段"><a href="#4-确认阶段" class="headerlink" title="4. 确认阶段"></a>4. 确认阶段</h3><p>即DHCP服务端确认IP地址的阶段。当DHCP服务端收到DHCP Request消息时，它就向客户端发送一个DHCP ack消息，告诉客户端他可以使用这个IP地址，然后客户端会将TCP/IP协议与网卡绑定。</p>
-<h3 id="5-重新登录"><a href="#5-重新登录" class="headerlink" title="5. 重新登录"></a>5. 重新登录</h3><p>DHCP客户端每次重新登录网络之后，不需要再次发送discover消息，而是直接发送包含上次所分配的IP地址的Request消息，当DHCP服务端收到这个消息，如果这个IP地址可以继续被使用，则向客户端发送ack消息，如果不可用(可能已经分配给其他主机了)，此时DHCP服务端则发送一个NACK的消息给客户端。客户端收到NACK消息，则必须重新发起discover流程，来重新申请IP</p>
-<h3 id="6-更新租约"><a href="#6-更新租约" class="headerlink" title="6. 更新租约"></a>6. 更新租约</h3><p>DHCP服务器向DHCP客户端分配的IP地址一般都有一个租借期限，超过期限之后，服务端将回收这个IP地址。如果DHCP客户端要延长其IP租约，则在租约过半时，DHCP客户端会自动向DHCP服务端发送更新租约的消息。</p>
-<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20190713224619.png" alt=""></p>
-<p>##总结<br>|消息|作用|<br>|—|—|<br>|DHCP DISCOVER|客户端广播寻找DHCP服务端<br>|DHCP OFFER|DHCP服务端为客户端分配IP地址<br>|DHCP REQUEST|DHCP客户端向服务端确认IP地址<br>|DHCP ACK|服务端告知客户端可以使用分配的IP地址<br>|DHCP NAK|服务端告知客户端不可以使用该IP地址<br>|DHCP RELEASE|客户端向服务端更新租约</p>
-<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ol>
-<li><a href="https://tools.ietf.org/html/rfc2131" target="_blank" rel="noopener">DHCP</a></li>
-<li><a href="https://blog.csdn.net/wuruixn/article/details/8282554" target="_blank" rel="noopener">DHCP协议原理及其实现流程</a></li>
-<li><a href="https://jiayu0x.com/2015/03/22/DHCP-protocol-and-offensive-and-defensive/" target="_blank" rel="noopener">DHCP 协议原理与攻防简介</a></li>
+                <h1 id="UDP-User-Data-Protocol"><a href="#UDP-User-Data-Protocol" class="headerlink" title="UDP(User Data Protocol)"></a>UDP(User Data Protocol)</h1><ol>
+<li>UDP是位于<strong>传输层</strong>中的协议</li>
+<li>UDP是一个<strong>无连接</strong>的协议，也就意味着UDP是<strong>不可靠的</strong></li>
+<li>UDP不考虑错误控制，流控制</li>
+</ol>
+<h2 id="UDP-Header"><a href="#UDP-Header" class="headerlink" title="UDP Header"></a>UDP Header</h2><p><strong>UDP的头部固定只有8字节</strong></p>
+<p><img src="https://media.geeksforgeeks.org/wp-content/uploads/UDP-header.png" alt=""></p>
+<ol>
+<li>源端口和目标端口都是2字节的长度</li>
+<li>length表示了UDP报文的长度，包括<strong>头部以及数据部分</strong></li>
+<li>checksum是可选的，如果不计算的话，则在该位存放0</li>
+</ol>
+<h2 id="UDP的应用"><a href="#UDP的应用" class="headerlink" title="UDP的应用"></a>UDP的应用</h2><ul>
+<li>当数据较小，并且不关心流控制以及错误控制时，适合使用UDP协议，例如一些简单的响应</li>
+<li>UDP用于一些路由更新协议例如RIP(Routing Information Protocol)</li>
+<li>UDP被广泛应用于实时多媒体应用，例如RTP(Real-time transport protocol)协议</li>
+<li>RPC(Remote Procedure Call)也是基于UDP协议</li>
+<li>下面这些协议都是基于UDP协议<ul>
+<li>NTP (Network Time Protocol)</li>
+<li>DNS (Domain Name Service)</li>
+<li>BOOTP, DHCP.</li>
+<li>NNP (Network News Protocol)</li>
+</ul>
+</li>
+</ul>
+<h1 id="TCP-Transmission-Control-Protocol"><a href="#TCP-Transmission-Control-Protocol" class="headerlink" title="TCP(Transmission Control Protocol)"></a>TCP(Transmission Control Protocol)</h1><ol>
+<li>TCP是位于<strong>传输层</strong>中的协议    </li>
+<li>TCP提供了一种<strong>面向连接的、可靠的字节流</strong>服务</li>
+<li>TCP提供重传，流控制以及错误控制等功能</li>
+<li>TCP连接是全双工的，并且是点到点的，<strong>因此TCP不支持多播以及广播</strong></li>
+</ol>
+<h2 id="TCP-Header"><a href="#TCP-Header" class="headerlink" title="TCP Header"></a>TCP Header</h2><p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20190723001007.png" alt=""></p>
+<table>
+<thead>
+<tr>
+<th>name</th>
+<th>length</th>
+<th>explain</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>source port</td>
+<td>16 bits</td>
+<td>源端口</td>
+</tr>
+<tr>
+<td>destination port</td>
+<td>16 bits</td>
+<td>目标端口</td>
+</tr>
+<tr>
+<td>sequence number</td>
+<td>32 bits</td>
+<td>序列号，用来标识每个数据字节</td>
+</tr>
+<tr>
+<td>acknowledgement number</td>
+<td>32 bits</td>
+<td>确认号，用来表示下一个期望收到的字节</td>
+</tr>
+<tr>
+<td>data offset</td>
+<td>4 bits</td>
+<td>表示TCP头部的长度，单位为32bits，也就是4字节。data offset也就是TCP数据(除去头部)的起始位置</td>
+</tr>
+<tr>
+<td>Reserved</td>
+<td>6 bits</td>
+<td>暂未使用，必须设置为0</td>
+</tr>
+<tr>
+<td>URG</td>
+<td>1 bit</td>
+<td>若urgent pointer被使用，则标识为1</td>
+</tr>
+<tr>
+<td>ACK</td>
+<td>1 bit</td>
+<td>若acknowledgement number有效，则标识为1</td>
+</tr>
+<tr>
+<td>PSH</td>
+<td>1 bit</td>
+<td>若标识为1，则接收方在收到数据后应立即将数据提交给应用层，而不是缓存起来</td>
+</tr>
+<tr>
+<td>RST</td>
+<td>1 bit</td>
+<td>若标识为1，则重置连接</td>
+</tr>
+<tr>
+<td>SYN</td>
+<td>1 bit</td>
+<td>若标识为1，则表示这是一个连接请求(connect request)或者连接接受(connect accept). SYN=1,ACK=0 表示连接请求，SYN=1，ACK=1，表示连接接受</td>
+</tr>
+<tr>
+<td>Window</td>
+<td>16 bits</td>
+<td>从被确认的字节算起还可以发送多少个字节，若为0，表示接收方已经达到瓶颈，发送方可以暂缓发送数据</td>
+</tr>
+<tr>
+<td>checksum</td>
+<td>16 bits</td>
+<td>校验和</td>
+</tr>
+<tr>
+<td>urgent pointer</td>
+<td>16 bits</td>
+<td>用来标识紧急数据在当前数据段中的位置，它是相对于当前序列号的字节偏移值</td>
+</tr>
+</tbody>
+</table>
+<h2 id="TCP的应用"><a href="#TCP的应用" class="headerlink" title="TCP的应用"></a>TCP的应用</h2><ul>
+<li>当要求可靠性时，使用TCP协议</li>
+<li>下列协议都是基于TCP<ul>
+<li>SMTP</li>
+<li>HTTP</li>
+<li>FTP</li>
+</ul>
+</li>
+</ul>
+<p>#TCP与UDP的区别</p>
+<ol>
+<li>TCP协议在传送数据段的时候要给段标号；UDP协议不</li>
+<li>TCP协议可靠；UDP协议不可靠</li>
+<li>TCP协议是面向连接；UDP协议采用无连接</li>
+<li>TCP协议负载较高，采用虚电路；UDP采用无连接</li>
+<li>TCP协议的发送方要确认接收方是否收到数据段（3次握手协议）</li>
+<li>TCP协议采用窗口技术和流控制</li>
+</ol>
+<p>##参考文献</p>
+<ol>
+<li><a href="https://www.geeksforgeeks.org/computer-network-user-datagram-protocol-udp/" target="_blank" rel="noopener">Computer Network | User Datagram Protocol (UDP)</a></li>
+<li><a href="https://tools.ietf.org/html/rfc793#section-3.1" target="_blank" rel="noopener">TCP Protocol</a></li>
 </ol>
 
             </div>
@@ -451,7 +581,7 @@
                     <span class="reprint-tip">Reprint please specify: </span>
                     <a href="http://yoursite.com" class="b-link-green">wbl</a>
                     <i class="fa fa-angle-right fa-lg fa-fw text-color"></i>
-                    <a href="/2019/07/13/dhcp-xie-yi-yuan-li-ji-shi-xian-liu-cheng/" class="b-link-green">DHCP协议原理及实现流程</a>
+                    <a href="/2019/07/22/tcp-yu-udp-xie-yi/" class="b-link-green">TCP与UDP协议</a>
                 </p>
             </div>
         </div>
@@ -473,7 +603,7 @@
         repo: 'blog-comments',
         owner: 'BloodHunter',
         admin: "BloodHunter",
-        id: '2019-07-13T21-55-41',
+        id: '2019-07-22T23-30-03',
         distractionFreeMode: false  // Facebook-like distraction free mode
     });
 
@@ -495,7 +625,7 @@
     <div class="row article-row">
         
         <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge left-badge text-color">Previous</div>
+            <div class="article-badge left-badge text-color">Current</div>
             <div class="card">
                 <a href="/2019/07/22/tcp-yu-udp-xie-yi/">
                     <div class="card-image">
@@ -517,9 +647,9 @@ UDP HeaderUDP的头部固定只有8字节
 
 源端口和目标端口都是2字节</div>
                     <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="fa fa-clock-o fa-fw icon-date"></i>2019-07-22
-                        </span>
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-07-22
+                            </span>
                         <span class="publish-author">
                             
                             <i class="fa fa-bookmark fa-fw icon-category"></i>
@@ -532,6 +662,7 @@ UDP HeaderUDP的头部固定只有8字节
                         </span>
                     </div>
                 </div>
+
                 
                 <div class="card-action article-tags">
                     
@@ -548,21 +679,20 @@ UDP HeaderUDP的头部固定只有8字节
         <div class="article col s12 m6" data-aos="fade-up">
             <div class="article-badge right-badge text-color">Next</div>
             <div class="card">
-                <a href="/2019/07/07/wang-lu-ceng-zhi-ip-xie-yi/">
+                <a href="/2019/07/13/dhcp-xie-yi-yuan-li-ji-shi-xian-liu-cheng/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/19.jpg" class="responsive-img" alt="网路层之IP协议">
+                        <img src="/medias/featureimages/9.jpg" class="responsive-img" alt="DHCP协议原理及实现流程">
                         
-                        <span class="card-title">网路层之IP协议</span>
+                        <span class="card-title">DHCP协议原理及实现流程</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
-                    <div class="summary">IP协议提供一种尽力投递(best-effors,即不提供任何保证)的方法将数据从源端传递到目标端，它不关心源机器和目标机器是否在同样的网路中，也不关心他们之间是否还有其他网路。下面来看下IPv4协议头部组成。
-IPv4协议头部IPv4的头</div>
+                    <div class="summary">简介DHCP(Dynamic Host Configuration Protocol) 动态主机配置协议，简单来说，DHCP主要功能是为自动为每一个Host分配IP协议。DHCP协议是在DHCP客户端和DHCP服务端之间运行的，客户端请求I</div>
                     <div class="publish-info">
                             <span class="publish-date">
-                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-07-07
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-07-13
                             </span>
                         <span class="publish-author">
                             
