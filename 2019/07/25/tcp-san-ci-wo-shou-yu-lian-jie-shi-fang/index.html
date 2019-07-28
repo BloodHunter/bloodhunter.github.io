@@ -5,16 +5,8 @@
 
 <head><meta name="generator" content="Hexo 3.8.0">
     <meta charset="utf-8">
-    <meta name="keywords" content="TCP与UDP协议, wbl">
-    <meta name="description" content="UDP(User Data Protocol)
-UDP是位于传输层中的协议
-UDP是一个无连接的协议，也就意味着UDP是不可靠的
-UDP不考虑错误控制，流控制
-
-UDP HeaderUDP的头部固定只有8字节
-
-
-源端口和目标端口都是2字节">
+    <meta name="keywords" content="TCP三次握手与连接释放, wbl">
+    <meta name="description" content="TCP连接为什么需要三次握手TCP是一个可靠的通信协议，所谓的可靠是指接收方收到的数据是完整的，有序的，无差错的。为了实现这个目标，TCP的通信双方需要判断自己的数据是否已经被对方接收，如果没有，那么需要重发。为了实现这个需求，TCP引入了">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -22,7 +14,7 @@ UDP HeaderUDP的头部固定只有8字节
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>TCP与UDP协议 | wbl</title>
+    <title>TCP三次握手与连接释放 | wbl</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/font-awesome.min.css">
@@ -255,13 +247,13 @@ UDP HeaderUDP的头部固定只有8字节
 
 
 
-<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/5.jpg')">
+<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/6.jpg')">
     <div class="container">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
                     <div class="description center-align post-title">
-                        TCP与UDP协议
+                        TCP三次握手与连接释放
                     </div>
                 </div>
             </div>
@@ -300,149 +292,39 @@ UDP HeaderUDP的头部固定只有8字节
                 
 
                 <span class="post-date">
-                    <i class="fa fa-clock-o fa-fw"></i>2019-07-22
+                    <i class="fa fa-clock-o fa-fw"></i>2019-07-25
                 </span>
             </div>
         </div>
         <hr>
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h1 id="UDP-User-Data-Protocol"><a href="#UDP-User-Data-Protocol" class="headerlink" title="UDP(User Data Protocol)"></a>UDP(User Data Protocol)</h1><ol>
-<li>UDP是位于<strong>传输层</strong>中的协议</li>
-<li>UDP是一个<strong>无连接</strong>的协议，也就意味着UDP是<strong>不可靠的</strong></li>
-<li>UDP不考虑错误控制，流控制</li>
+                <h2 id="TCP连接"><a href="#TCP连接" class="headerlink" title="TCP连接"></a>TCP连接</h2><h3 id="为什么需要三次握手"><a href="#为什么需要三次握手" class="headerlink" title="为什么需要三次握手"></a>为什么需要三次握手</h3><p>TCP是一个可靠的通信协议，所谓的可靠是指接收方收到的数据是完整的，有序的，无差错的。为了实现这个目标，TCP的通信双方需要判断自己的数据是否已经被对方接收，如果没有，那么需要重发。为了实现这个需求，TCP引入了序列号(Sequence number)和确认号(Acknowledgement number).</p>
+<p>序列号用来表明发送了哪些数据，确认号用来表明已经收到了哪些数据。因此序列号的唯一性和有效性就显得尤为重要。TCP的通信双方在初始时都需要告知对方自己随机选择的初始序列号(Initial Sequence Number, ISN).<strong>而TCP三次握手的本质就在于同步双方初始的序列号</strong></p>
+<h3 id="TCP连接过程"><a href="#TCP连接过程" class="headerlink" title="TCP连接过程"></a>TCP连接过程</h3><ol>
+<li>client发送SYN=1，SEQ=x，表示它想与服务端建立连接，它初始的的序列号为x</li>
+<li>server收到SEQ=x的数据，需要发送ACK=x+1给client，表示它已经收到了序列号为x的数据，它下一个希望收到数据的序列号是x+1</li>
+<li>同时server也需要告知client它的初始序列号，因此server端发送SYN=1，SEQ=y到client</li>
+<li>client收到ACK=x+1，就知道server收到了序列号为x的数据，所以它可以发送序列号为SEQ=x+1的数据。client收到SYN=1，SEQ=y，就知道server端的初始序列号为y，它需要发送ACK=y+1，告知服务端它已收到了数据</li>
 </ol>
-<h2 id="UDP-Header"><a href="#UDP-Header" class="headerlink" title="UDP Header"></a>UDP Header</h2><p><strong>UDP的头部固定只有8字节</strong></p>
-<p><img src="https://media.geeksforgeeks.org/wp-content/uploads/UDP-header.png" alt=""></p>
-<ol>
-<li>源端口和目标端口都是2字节的长度</li>
-<li>length表示了UDP报文的长度，包括<strong>头部以及数据部分</strong></li>
-<li>checksum是可选的，如果不计算的话，则在该位存放0</li>
+<p>上述2，3两步可以合并在一个包里发送，因此可以称为三次握手</p>
+<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20190726000902.png" alt=""></p>
+<h2 id="TCP连接释放"><a href="#TCP连接释放" class="headerlink" title="TCP连接释放"></a>TCP连接释放</h2><h3 id="TCP连接释放过程"><a href="#TCP连接释放过程" class="headerlink" title="TCP连接释放过程"></a>TCP连接释放过程</h3><ol>
+<li>client发送FYN=1，SEQ=u，表示client已经没有数据想要发送，想要关闭连接</li>
+<li>server收到数据之后，明白了client想要关闭连接，但是它还有数据需要发送给客户端，于是它发送ACK=u+1,SEQ=v到client，表示它已经收到了连接关闭的请求</li>
+<li>server端一直发送数据，直到它也没有数据发送了。于是它发送FYN=1,SEQ=w,ACK=u+1到client，表示它也要关闭连接了</li>
+<li>client收到这个数据，需要发送ACK=w+1给server，表示它收到了连接关闭的请求，server可以关闭连接</li>
+<li>client在等待2MSL(<strong>最大报文生存时间</strong>)时间后，两端连接全部释放</li>
 </ol>
-<h2 id="UDP的应用"><a href="#UDP的应用" class="headerlink" title="UDP的应用"></a>UDP的应用</h2><ul>
-<li>当数据较小，并且不关心流控制以及错误控制时，适合使用UDP协议，例如一些简单的响应</li>
-<li>UDP用于一些路由更新协议例如RIP(Routing Information Protocol)</li>
-<li>UDP被广泛应用于实时多媒体应用，例如RTP(Real-time transport protocol)协议</li>
-<li>RPC(Remote Procedure Call)也是基于UDP协议</li>
-<li>下面这些协议都是基于UDP协议<ul>
-<li>NTP (Network Time Protocol)</li>
-<li>DNS (Domain Name Service)</li>
-<li>BOOTP, DHCP.</li>
-<li>NNP (Network News Protocol)</li>
+<p><img src="https://img-blog.csdn.net/20160914101234549?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQv/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center" alt=""></p>
+<p>(1) TCP是<strong>全双工</strong>的，即数据可以同时在两个方向上传递，所以每个方向的连接需要单独释放</p>
+<p>(2) 等待2MSL的时间是为了保证client最后一个ACK能够到server端。若ACK丢失，则server会超时重传。如果不设置等待时间，client直接关闭连接，若ACK丢失，则server会一直重传。另外一个原因是，经过报文最长生存时间的等待之后，此次连接的所有报文要么到达对端，要么失效，不会对下次连接造成干扰</p>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a href="https://blog.csdn.net/lengxiao1993/article/details/82771768" target="_blank" rel="noopener">TCP 为什么三次握手而不是两次握手</a></li>
+<li><a href="https://www.zhihu.com/question/24853633" target="_blank" rel="noopener">TCP 为什么是三次握手，而不是两次或四次？</a></li>
+<li><a href="https://blog.csdn.net/guyuealian/article/details/52535294" target="_blank" rel="noopener">TCP建立连接三次握手和释放连接四次握手</a></li>
+<li><a href="https://www.geeksforgeeks.org/computer-network-tcp-3-way-handshake-process/" target="_blank" rel="noopener">Computer Network | TCP 3-Way Handshake Process</a></li>
 </ul>
-</li>
-</ul>
-<h1 id="TCP-Transmission-Control-Protocol"><a href="#TCP-Transmission-Control-Protocol" class="headerlink" title="TCP(Transmission Control Protocol)"></a>TCP(Transmission Control Protocol)</h1><ol>
-<li>TCP是位于<strong>传输层</strong>中的协议    </li>
-<li>TCP提供了一种<strong>面向连接的、可靠的字节流</strong>服务</li>
-<li>TCP提供重传，流控制以及错误控制等功能</li>
-<li>TCP连接是全双工的，并且是点到点的，<strong>因此TCP不支持多播以及广播</strong></li>
-</ol>
-<h2 id="TCP-Header"><a href="#TCP-Header" class="headerlink" title="TCP Header"></a>TCP Header</h2><p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20190723001007.png" alt=""></p>
-<table>
-<thead>
-<tr>
-<th>name</th>
-<th>length</th>
-<th>explain</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>source port</td>
-<td>16 bits</td>
-<td>源端口</td>
-</tr>
-<tr>
-<td>destination port</td>
-<td>16 bits</td>
-<td>目标端口</td>
-</tr>
-<tr>
-<td>sequence number</td>
-<td>32 bits</td>
-<td>序列号，用来标识每个数据字节</td>
-</tr>
-<tr>
-<td>acknowledgement number</td>
-<td>32 bits</td>
-<td>确认号，用来表示下一个期望收到的字节</td>
-</tr>
-<tr>
-<td>data offset</td>
-<td>4 bits</td>
-<td>表示TCP头部的长度，单位为32bits，也就是4字节。data offset也就是TCP数据(除去头部)的起始位置</td>
-</tr>
-<tr>
-<td>Reserved</td>
-<td>6 bits</td>
-<td>暂未使用，必须设置为0</td>
-</tr>
-<tr>
-<td>URG</td>
-<td>1 bit</td>
-<td>若urgent pointer被使用，则标识为1</td>
-</tr>
-<tr>
-<td>ACK</td>
-<td>1 bit</td>
-<td>若acknowledgement number有效，则标识为1</td>
-</tr>
-<tr>
-<td>PSH</td>
-<td>1 bit</td>
-<td>若标识为1，则接收方在收到数据后应立即将数据提交给应用层，而不是缓存起来</td>
-</tr>
-<tr>
-<td>RST</td>
-<td>1 bit</td>
-<td>若标识为1，则重置连接</td>
-</tr>
-<tr>
-<td>SYN</td>
-<td>1 bit</td>
-<td>若标识为1，则表示这是一个连接请求(connect request)或者连接接受(connect accept). SYN=1,ACK=0 表示连接请求，SYN=1，ACK=1，表示连接接受</td>
-</tr>
-<tr>
-<td>Window</td>
-<td>16 bits</td>
-<td>从被确认的字节算起还可以发送多少个字节，若为0，表示接收方已经达到瓶颈，发送方可以暂缓发送数据</td>
-</tr>
-<tr>
-<td>checksum</td>
-<td>16 bits</td>
-<td>校验和</td>
-</tr>
-<tr>
-<td>urgent pointer</td>
-<td>16 bits</td>
-<td>用来标识紧急数据在当前数据段中的位置，它是相对于当前序列号的字节偏移值</td>
-</tr>
-</tbody>
-</table>
-<h2 id="TCP的应用"><a href="#TCP的应用" class="headerlink" title="TCP的应用"></a>TCP的应用</h2><ul>
-<li>当要求可靠性时，使用TCP协议</li>
-<li>下列协议都是基于TCP<ul>
-<li>SMTP</li>
-<li>HTTP</li>
-<li>FTP</li>
-</ul>
-</li>
-</ul>
-<p>#TCP与UDP的区别</p>
-<ol>
-<li>TCP协议在传送数据段的时候要给段标号；UDP协议不</li>
-<li>TCP协议可靠；UDP协议不可靠</li>
-<li>TCP协议是面向连接；UDP协议采用无连接</li>
-<li>TCP协议负载较高，采用虚电路；UDP采用无连接</li>
-<li>TCP协议的发送方要确认接收方是否收到数据段（3次握手协议）</li>
-<li>TCP协议采用窗口技术和流控制</li>
-</ol>
-<p>##参考文献</p>
-<ol>
-<li><a href="https://www.geeksforgeeks.org/computer-network-user-datagram-protocol-udp/" target="_blank" rel="noopener">Computer Network | User Datagram Protocol (UDP)</a></li>
-<li><a href="https://tools.ietf.org/html/rfc793#section-3.1" target="_blank" rel="noopener">TCP Protocol</a></li>
-</ol>
 
             </div>
             <hr>
@@ -581,7 +463,7 @@ UDP HeaderUDP的头部固定只有8字节
                     <span class="reprint-tip">Reprint please specify: </span>
                     <a href="http://yoursite.com" class="b-link-green">wbl</a>
                     <i class="fa fa-angle-right fa-lg fa-fw text-color"></i>
-                    <a href="/2019/07/22/tcp-yu-udp-xie-yi/" class="b-link-green">TCP与UDP协议</a>
+                    <a href="/2019/07/25/tcp-san-ci-wo-shou-yu-lian-jie-shi-fang/" class="b-link-green">TCP三次握手与连接释放</a>
                 </p>
             </div>
         </div>
@@ -603,7 +485,7 @@ UDP HeaderUDP的头部固定只有8字节
         repo: 'blog-comments',
         owner: 'BloodHunter',
         admin: "BloodHunter",
-        id: '2019-07-22T23-30-03',
+        id: '2019-07-25T23-31-17',
         distractionFreeMode: false  // Facebook-like distraction free mode
     });
 
@@ -627,27 +509,29 @@ UDP HeaderUDP的头部固定只有8字节
         <div class="article col s12 m6" data-aos="fade-up">
             <div class="article-badge left-badge text-color">Previous</div>
             <div class="card">
-                <a href="/2019/07/25/tcp-san-ci-wo-shou-yu-lian-jie-shi-fang/">
+                <a href="/2019/07/27/mysql-explain-xiang-jie/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/6.jpg" class="responsive-img" alt="TCP三次握手与连接释放">
+                        <img src="/medias/featureimages/2.jpg" class="responsive-img" alt="MySQL Explain详解">
                         
-                        <span class="card-title">TCP三次握手与连接释放</span>
+                        <span class="card-title">MySQL Explain详解</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
-                    <div class="summary">TCP连接为什么需要三次握手TCP是一个可靠的通信协议，所谓的可靠是指接收方收到的数据是完整的，有序的，无差错的。为了实现这个目标，TCP的通信双方需要判断自己的数据是否已经被对方接收，如果没有，那么需要重发。为了实现这个需求，TCP引入了</div>
+                    <div class="summary">简介explain命令可以对Select语句进行分析，并输出 SELECT 执行的详细信息, 以供开发人员针对性优化.
+explain的用法，只需要在Select语句之前加入explain即可
+explain SELECT * from u</div>
                     <div class="publish-info">
                         <span class="publish-date">
-                            <i class="fa fa-clock-o fa-fw icon-date"></i>2019-07-25
+                            <i class="fa fa-clock-o fa-fw icon-date"></i>2019-07-27
                         </span>
                         <span class="publish-author">
                             
                             <i class="fa fa-bookmark fa-fw icon-category"></i>
                             
-                            <a href="/categories/计算机基础/" class="post-category" target="_blank">
-                                    计算机基础
+                            <a href="/categories/MySQL/" class="post-category" target="_blank">
+                                    MySQL
                                 </a>
                             
                             
@@ -657,8 +541,8 @@ UDP HeaderUDP的头部固定只有8字节
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/计算机网络/" target="_blank">
-                        <span class="chip bg-color">计算机网络</span>
+                    <a href="/tags/MySQL/" target="_blank">
+                        <span class="chip bg-color">MySQL</span>
                     </a>
                     
                 </div>
@@ -670,20 +554,28 @@ UDP HeaderUDP的头部固定只有8字节
         <div class="article col s12 m6" data-aos="fade-up">
             <div class="article-badge right-badge text-color">Next</div>
             <div class="card">
-                <a href="/2019/07/13/dhcp-xie-yi-yuan-li-ji-shi-xian-liu-cheng/">
+                <a href="/2019/07/22/tcp-yu-udp-xie-yi/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/9.jpg" class="responsive-img" alt="DHCP协议原理及实现流程">
+                        <img src="/medias/featureimages/5.jpg" class="responsive-img" alt="TCP与UDP协议">
                         
-                        <span class="card-title">DHCP协议原理及实现流程</span>
+                        <span class="card-title">TCP与UDP协议</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
-                    <div class="summary">简介DHCP(Dynamic Host Configuration Protocol) 动态主机配置协议，简单来说，DHCP主要功能是为自动为每一个Host分配IP协议。DHCP协议是在DHCP客户端和DHCP服务端之间运行的，客户端请求I</div>
+                    <div class="summary">UDP(User Data Protocol)
+UDP是位于传输层中的协议
+UDP是一个无连接的协议，也就意味着UDP是不可靠的
+UDP不考虑错误控制，流控制
+
+UDP HeaderUDP的头部固定只有8字节
+
+
+源端口和目标端口都是2字节</div>
                     <div class="publish-info">
                             <span class="publish-date">
-                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-07-13
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-07-22
                             </span>
                         <span class="publish-author">
                             
