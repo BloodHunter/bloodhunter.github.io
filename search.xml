@@ -3,6 +3,29 @@
   
     
     <entry>
+      <title>TCP之拥塞控制</title>
+      <link href="/2019/07/30/tcp-zhi-yong-sai-kong-zhi/"/>
+      <url>/2019/07/30/tcp-zhi-yong-sai-kong-zhi/</url>
+      
+        <content type="html"><![CDATA[<h2 id="流量控制"><a href="#流量控制" class="headerlink" title="流量控制"></a>流量控制</h2><p>如果发送方发送数据过快，那么接收方来不及接收，就会丢弃数据。为了避免分组丢失，需要进行流量控制，避免发送方的数据将接收方淹没。</p><h3 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h3><p>流量控制的实现是基于滑动窗口。接收方在发送给发送方的ACK中包含了自己的接收窗口大小，当接收窗口为0时，发送方将暂停发送数据。</p><p>例如下图中，在连接建立时，发送方B告知接收方A，它的接收窗口大小为400，那么发送方发送的数据不能超过这个大小。<br><img src="https://img-blog.csdn.net/20140509220855687?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveWVjaGFvZGVjaHVudGlhbg==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt=""></p><h3 id="Nagle算法"><a href="#Nagle算法" class="headerlink" title="Nagle算法"></a>Nagle算法</h3><p>此算法主要是为了避免发送方频繁地向接收方发送较小的数据。如果发送方发送1字节的数据，每次发送的IP包大小为20 + 20 + 1，分别是IP头部 + TCP头部 + 数据，这样会造成带宽的浪费。</p><p>Nagle算法流程</p><ol><li>发送方先发送1字节的数据</li><li>对于后面需要发送的数据，发送方会先缓存起来</li><li>当收到前一个发送数据的ACK时，才发送缓存的数据</li><li>若缓存的数据达到发送窗口的一半或者达到报文段的最大长度，也会发送数据</li></ol><h3 id="愚笨窗口综合症-silly-window-syndrome"><a href="#愚笨窗口综合症-silly-window-syndrome" class="headerlink" title="愚笨窗口综合症(silly window syndrome)"></a>愚笨窗口综合症(silly window syndrome)</h3><p>此算法主要是为了避免接收方频繁地向发送方发送ACK。当接收方的接收窗口满时，应用层每次从接收窗口读取1字节的数据，此时接口方立即向发送方发送ACK，告知发送方此时接收窗口为1，可以发送1字节的数据，那么发送方不得不发送1字节的数据，此时接收窗口又满了。如此反复使得传输效率低下</p><p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20190731001655.png" alt=""></p><p>为了避免上述情况，接收方需要等待一段时间，当接收窗口有一半空闲的大小或者可以容纳一个最长的报文，则发送ACK到发送方，告知其接收窗口大小。</p><h2 id="拥塞控制"><a href="#拥塞控制" class="headerlink" title="拥塞控制"></a>拥塞控制</h2><p>路由器有一个数据队列，用来保存接收到的数据，当路由器接收到太多的数据，导致队列满了，就会无条件地丢弃新到来的数据。此时上层的TCP认为数据在网络中丢失了，又会重传这些数据，而路由器又会丢弃这些重传的数据，如此反复，导致网络性能下降。因此TCP需要进行拥塞控制</p><h3 id="流量控制与拥塞控制的区别"><a href="#流量控制与拥塞控制的区别" class="headerlink" title="流量控制与拥塞控制的区别"></a>流量控制与拥塞控制的区别</h3><p>拥塞控制是防止过多的数据<strong>涌入到网络</strong>中，它是一个<strong>全局性的过程</strong>，它涉及到所有主机，所有的路由器。</p><p>流量控制针对的是<strong>点对点之间的通信</strong>，它主要是防止接收方被发送方的数据淹没，即控制发送方发送数据的速率，使得接收方来得及接收。</p><h2 id="拥塞算法"><a href="#拥塞算法" class="headerlink" title="拥塞算法"></a>拥塞算法</h2><p>TCP通过拥塞窗口(cwnd)来控制拥塞，发送方可以发送的数据大小为,其中rwnd表示接收窗口</p><pre><code>min(cwnd,rwnd)</code></pre><p>在不同的阶段，cwnd具有不同的计算方式    </p><h3 id="慢启动阶段-Slow-Start-Phase"><a href="#慢启动阶段-Slow-Start-Phase" class="headerlink" title="慢启动阶段(Slow Start Phase)"></a>慢启动阶段(Slow Start Phase)</h3><p>在慢启动阶段，初始时，cwnd被设置为1，但是每经过一个RTT，cwnd变成指数增长，直到cwnd&gt;=阈值(ssthresh)</p><pre><code>Initially cwnd = 1After 1 RTT, cwnd = 2^(1) = 22 RTT, cwnd = 2^(2) = 43 RTT, cwnd = 2^(3) = 8</code></pre><h3 id="拥塞避免阶段-Congestion-Avoidance-Phase"><a href="#拥塞避免阶段-Congestion-Avoidance-Phase" class="headerlink" title="拥塞避免阶段(Congestion Avoidance Phase)"></a>拥塞避免阶段(Congestion Avoidance Phase)</h3><p>当cwnd&gt;=ssthresh，进入拥塞避免阶段。因为此时网络拥塞的可能性变大，cwnd不在指数增长，而变成线性增长，每经过一个RTT，cwnd = cwnd + 1</p><pre><code>Initially cwnd = iAfter 1 RTT, cwnd = i+12 RTT, cwnd = i+23 RTT, cwnd = i+3</code></pre><h3 id="拥塞检测阶段-Congestion-Detection-Phase"><a href="#拥塞检测阶段-Congestion-Detection-Phase" class="headerlink" title="拥塞检测阶段(Congestion Detection Phase)"></a>拥塞检测阶段(Congestion Detection Phase)</h3><p>当网络出现拥塞时，TCP需要判断是什么情况导致了拥塞，对于不同的情况，cwnd的计算不同。</p><p>（1）由于超时而导致的重传</p><pre><code>1. ssthresh变成cwnd的一半，ssthresh=cwnd/22. cwnd重置为13. 进入到慢启动阶段</code></pre><p><img src="https://upload-images.jianshu.io/upload_images/6333705-07416e9042ecc158" alt=""></p><p>如上图所示，当cwnd=24时，发生超时，ssthresh被重置为cwnd的一半，即ssthresh=cwnd/2=12.同时cwnd被重置为1，再次进入慢启动阶段</p><p>(2) 连续收到3个重复的ACK(数据丢失了)</p><pre><code>1. ssthresh变成cwnd的一半，ssthresh=cwnd/22. cwnd重置为ssthresh3. 进入到拥塞避免阶段</code></pre><p><img src="https://pic4.zhimg.com/80/v2-5f4034bc11c3a48a1d1a115f9ee0259b_hd.jpg" alt=""></p><p>如上图，当收到3个重复的ACK，ssthresh被重置为cwnd的一半，即ssthresh=cwnd/2=12，同时cwnd被重置为ssthresh，即12，同时开始进入拥塞检测阶段，cwnd开始线性增长。    </p><h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul><li><a href="https://www.geeksforgeeks.org/computer-network-tcp-congestion-control/" target="_blank" rel="noopener">Computer Network | TCP Congestion Control</a></li><li><a href="https://www.jianshu.com/p/97e5d7e73ba0" target="_blank" rel="noopener">TCP/IP 拥塞控制</a></li><li><a href="https://zhuanlan.zhihu.com/p/37379780" target="_blank" rel="noopener">TCP流量控制、拥塞控制</a></li><li><a href="https://blog.csdn.net/wdscq1234/article/details/52517420" target="_blank" rel="noopener">TCP-IP详解: 慢启动和拥塞控制</a></li><li><a href="https://blog.csdn.net/yechaodechuntian/article/details/25429143" target="_blank" rel="noopener">TCP的流量控制和拥塞控制</a></li></ul>]]></content>
+      
+      
+      <categories>
+          
+          <category> 计算机基础 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 计算机网络 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
       <title>MySQL Explain详解</title>
       <link href="/2019/07/27/mysql-explain-xiang-jie/"/>
       <url>/2019/07/27/mysql-explain-xiang-jie/</url>
