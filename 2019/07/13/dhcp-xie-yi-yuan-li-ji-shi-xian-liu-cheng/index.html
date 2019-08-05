@@ -307,7 +307,41 @@
 <h3 id="5-重新登录"><a href="#5-重新登录" class="headerlink" title="5. 重新登录"></a>5. 重新登录</h3><p>DHCP客户端每次重新登录网络之后，不需要再次发送discover消息，而是直接发送包含上次所分配的IP地址的Request消息，当DHCP服务端收到这个消息，如果这个IP地址可以继续被使用，则向客户端发送ack消息，如果不可用(可能已经分配给其他主机了)，此时DHCP服务端则发送一个NACK的消息给客户端。客户端收到NACK消息，则必须重新发起discover流程，来重新申请IP</p>
 <h3 id="6-更新租约"><a href="#6-更新租约" class="headerlink" title="6. 更新租约"></a>6. 更新租约</h3><p>DHCP服务器向DHCP客户端分配的IP地址一般都有一个租借期限，超过期限之后，服务端将回收这个IP地址。如果DHCP客户端要延长其IP租约，则在租约过半时，DHCP客户端会自动向DHCP服务端发送更新租约的消息。</p>
 <p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20190713224619.png" alt=""></p>
-<p>##总结<br>|消息|作用|<br>|—|—|<br>|DHCP DISCOVER|客户端广播寻找DHCP服务端<br>|DHCP OFFER|DHCP服务端为客户端分配IP地址<br>|DHCP REQUEST|DHCP客户端向服务端确认IP地址<br>|DHCP ACK|服务端告知客户端可以使用分配的IP地址<br>|DHCP NAK|服务端告知客户端不可以使用该IP地址<br>|DHCP RELEASE|客户端向服务端更新租约</p>
+<p>##总结</p>
+<table>
+<thead>
+<tr>
+<th>消息</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DHCP DISCOVER</td>
+<td>客户端广播寻找DHCP服务端</td>
+</tr>
+<tr>
+<td>DHCP OFFER</td>
+<td>DHCP服务端为客户端分配IP地址</td>
+</tr>
+<tr>
+<td>DHCP REQUEST</td>
+<td>DHCP客户端向服务端确认IP地址</td>
+</tr>
+<tr>
+<td>DHCP ACK</td>
+<td>服务端告知客户端可以使用分配的IP地址</td>
+</tr>
+<tr>
+<td>DHCP NAK</td>
+<td>服务端告知客户端不可以使用该IP地址</td>
+</tr>
+<tr>
+<td>DHCP RELEASE</td>
+<td>客户端向服务端更新租约</td>
+</tr>
+</tbody>
+</table>
 <h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ol>
 <li><a href="https://tools.ietf.org/html/rfc2131" target="_blank" rel="noopener">DHCP</a></li>
 <li><a href="https://blog.csdn.net/wuruixn/article/details/8282554" target="_blank" rel="noopener">DHCP协议原理及其实现流程</a></li>

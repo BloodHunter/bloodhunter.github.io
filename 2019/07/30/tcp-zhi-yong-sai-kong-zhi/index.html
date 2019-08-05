@@ -335,13 +335,13 @@ After 1 RTT, cwnd = i+1
 <pre><code>1. ssthresh变成cwnd的一半，ssthresh=cwnd/2
 2. cwnd重置为1
 3. 进入到慢启动阶段
-</code></pre><p><img src="https://upload-images.jianshu.io/upload_images/6333705-07416e9042ecc158" alt=""></p>
+</code></pre><p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20190805231926.png" alt=""></p>
 <p>如上图所示，当cwnd=24时，发生超时，ssthresh被重置为cwnd的一半，即ssthresh=cwnd/2=12.同时cwnd被重置为1，再次进入慢启动阶段</p>
 <p>(2) 连续收到3个重复的ACK(数据丢失了)</p>
 <pre><code>1. ssthresh变成cwnd的一半，ssthresh=cwnd/2
 2. cwnd重置为ssthresh
 3. 进入到拥塞避免阶段
-</code></pre><p><img src="https://pic4.zhimg.com/80/v2-5f4034bc11c3a48a1d1a115f9ee0259b_hd.jpg" alt=""></p>
+</code></pre><p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20190805231849.png" alt=""></p>
 <p>如上图，当收到3个重复的ACK，ssthresh被重置为cwnd的一半，即ssthresh=cwnd/2=12，同时cwnd被重置为ssthresh，即12，同时开始进入拥塞检测阶段，cwnd开始线性增长。    </p>
 <h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
 <li><a href="https://www.geeksforgeeks.org/computer-network-tcp-congestion-control/" target="_blank" rel="noopener">Computer Network | TCP Congestion Control</a></li>

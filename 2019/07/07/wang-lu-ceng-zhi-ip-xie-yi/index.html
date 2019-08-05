@@ -377,12 +377,10 @@ IPv4协议头部IPv4的头">
 <p>194.24.17.4与B的子网掩码进行与操作</p>
 <p>11000010.00011000.00010001.00000100 and 11111111.11111111.11111000.00000000</p>
 <p>得到194.24.16.0，与B首地址符合，所以属于B</p>
-<h2 id="NAT-Network-Address-Translation-网络地址转换"><a href="#NAT-Network-Address-Translation-网络地址转换" class="headerlink" title="NAT(Network Address Translation)-网络地址转换"></a>NAT(Network Address Translation)-网络地址转换</h2><p>###解决问题</p>
-<blockquote>
+<h2 id="NAT-Network-Address-Translation-网络地址转换"><a href="#NAT-Network-Address-Translation-网络地址转换" class="headerlink" title="NAT(Network Address Translation)-网络地址转换"></a>NAT(Network Address Translation)-网络地址转换</h2><h3 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h3><blockquote>
 <p>IP地址短缺</p>
 </blockquote>
-<p>###基本思想</p>
-<blockquote>
+<h3 id="基本思想"><a href="#基本思想" class="headerlink" title="基本思想"></a>基本思想</h3><blockquote>
 <p>公司或者机构以一个公用IP出现在公网上，内部则使用私有的IP。NAT把私有IP转换为公有IP，以便私有IP可以访问外部资源</p>
 </blockquote>
 <h3 id="实现原理"><a href="#实现原理" class="headerlink" title="实现原理"></a>实现原理</h3><p>NAT的基本工作原理是，当私有网主机和公共网主机通信的IP包经过NAT网关时，将IP包中的源IP或目的IP在私有IP和NAT的公共IP之间进行转换</p>
