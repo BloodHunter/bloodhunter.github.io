@@ -1,0 +1,751 @@
+<!DOCTYPE HTML>
+<html lang="">
+<head>
+    
+
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="utf-8">
+    <meta name="keywords" content="Prometheus Counter, wbl">
+    <meta name="description" content="我曾经以为Counter是prometheus中最简单的一种metric，直到我在Grafana中配置counter相关的dashboard之后，才发现自己对于counter的理解有一些偏差。因此这篇博客将会详细的介绍counter的用法。">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Prometheus Counter | wbl</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/css/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+
+    <script src="/libs/jquery/jquery-2.2.0.min.js"></script>
+<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+
+</head>
+
+<body>
+
+<header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="container">
+            <div class="nav-wrapper">
+                <div class="brand-logo">
+                    <a href="/" class="waves-effect waves-light">
+                        
+                        <img src="/medias/logo.jpeg" class="logo-img hide-on-small-only circle">
+                        
+                        <span class="logo-span">wbl</span>
+                    </a>
+                </div>
+                <a href="#" data-activates="mobile-nav" class="button-collapse"><i class="fa fa-navicon"></i></a>
+<ul class="right">
+    
+    <li class="hide-on-med-and-down">
+        <a href="/" class="waves-effect waves-light">
+            
+            <i class="fa fa-home"></i>
+            
+            <span>首页</span>
+        </a>
+    </li>
+    
+    <li class="hide-on-med-and-down">
+        <a href="/tags" class="waves-effect waves-light">
+            
+            <i class="fa fa-tags"></i>
+            
+            <span>标签</span>
+        </a>
+    </li>
+    
+    <li class="hide-on-med-and-down">
+        <a href="/categories" class="waves-effect waves-light">
+            
+            <i class="fa fa-bookmark"></i>
+            
+            <span>分类</span>
+        </a>
+    </li>
+    
+    <li class="hide-on-med-and-down">
+        <a href="/archives" class="waves-effect waves-light">
+            
+            <i class="fa fa-archive"></i>
+            
+            <span>归档</span>
+        </a>
+    </li>
+    
+    <li class="hide-on-med-and-down">
+        <a href="/about" class="waves-effect waves-light">
+            
+            <i class="fa fa-user-circle-o"></i>
+            
+            <span>关于</span>
+        </a>
+    </li>
+    
+    <li>
+        <a id="toggleSearch" class="waves-effect waves-light">
+            <i id="searchIcon" class="mdi-action-search"></i>
+        </a>
+    </li>
+
+</ul>
+
+<div class="side-nav" id="mobile-nav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.jpeg" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">wbl</div>
+        <div class="logo-desc">
+            
+            每天进步一点点
+            
+        </div>
+    </div>
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li>
+            <a href="/" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-home"></i>
+                
+                首页
+            </a>
+        </li>
+        
+        <li>
+            <a href="/tags" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-tags"></i>
+                
+                标签
+            </a>
+        </li>
+        
+        <li>
+            <a href="/categories" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-bookmark"></i>
+                
+                分类
+            </a>
+        </li>
+        
+        <li>
+            <a href="/archives" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-archive"></i>
+                
+                归档
+            </a>
+        </li>
+        
+        <li>
+            <a href="/about" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-user-circle-o"></i>
+                
+                关于
+            </a>
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/BloodHunter" class="waves-effect waves-light" target="_blank">
+                <i class="fa fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+
+    <div class="social-link"><a href="https://github.com/BloodHunter" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+    <i class="fa fa-github"></i>
+</a>
+<a href="mailto:15201414128@163.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+    <i class="fa fa-envelope-open"></i>
+</a>
+<a href="#!" class="tooltipped" data-tooltip="QQ联系我: 765759638" data-position="top" data-delay="50">
+    <i class="fa fa-qq"></i>
+</a>
+</div>
+</div>
+
+            </div>
+        </div>
+
+        
+        <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/BloodHunter" class="github-corner tooltipped hide-on-med-and-down" target="_blank" data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewbox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/>
+    </svg>
+</a>
+        
+    </nav>
+</header>
+
+
+
+
+
+<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/22.jpg')">
+    <div class="container">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <div class="description center-align post-title">
+                        Prometheus Counter
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<main class="container content">
+
+    
+    <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            
+            <div class="article-tag">
+                
+                <a href="/tags/Prometheus/" target="_blank">
+                    <span class="chip bg-color">Prometheus</span>
+                </a>
+                
+            </div>
+            
+            <div class="post-info">
+                
+                <span class="post-cate">
+                    <i class="fa fa-bookmark fa-fw icon-category"></i>
+                    
+                    <a href="/categories/监控/" class="post-category" target="_blank">
+                        监控
+                    </a>
+                    
+                </span>
+                
+
+                <span class="post-date">
+                    <i class="fa fa-clock-o fa-fw"></i>2019-10-11
+                </span>
+            </div>
+        </div>
+        <hr>
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <p>我曾经以为Counter是prometheus中最简单的一种metric，直到我在Grafana中配置counter相关的dashboard之后，才发现自己对于counter的理解有一些偏差。因此这篇博客将会详细的介绍counter的用法。</p>
+<h2 id="创建Demo"><a href="#创建Demo" class="headerlink" title="创建Demo"></a>创建Demo</h2><p>为了更好的说明，我们需要创建一个简单的demo，用来构建一个简单可控的counter以便prometheus采集。在我之前的一篇博客<a href="https://bloodhunter.github.io/2019/09/27/spring-boot-zheng-he-prometheus/" target="_blank" rel="noopener">Spring Boot整合Prometheus</a>中，详细介绍了SpringBoot如何整合prometheus，在这里就不做详细的说明</p>
+<p>首先，在pom文件引入Micrometer Prometheus的依赖</p>
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;io.micrometer&lt;/groupId&gt;
+    &lt;artifactId&gt;micrometer-registry-prometheus&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre><p>然后，在application.properties中进行prometheus的相关配置</p>
+<pre><code>management.endpoint.prometheus.enabled=true
+management.metrics.export.prometheus.enabled=true
+</code></pre><p>之后，在prometheus.yml配置采集路径以及采集间隔</p>
+<pre><code>scrape_configs:
+ - job_name: prometheus-test
+   scrape_interval: 10s
+   metrics_path: /actuator/prometheus
+   static_configs:
+   - targets: [&#39;172.16.22.50:8080&#39;]
+</code></pre><h2 id="Counter定义"><a href="#Counter定义" class="headerlink" title="Counter定义"></a>Counter定义</h2><p>在<a href="https://prometheus.io/docs/concepts/metric_types/#counter" target="_blank" rel="noopener">prometheus文档</a>中counter的定义如下</p>
+<blockquote>
+<p>A counter is a cumulative metric that represents a single monotonically increasing counter whose value can only increase or be reset to zero on restart</p>
+</blockquote>
+<p>monotonically increasing表示counter的值是单调递增的，cumulative metric表示counter表示的是当前整体的值。</p>
+<p>根据上述定义，我们定义一个counter用来记录http请求数</p>
+<pre><code>@Component
+public class HttpCounterJob {
+
+    private final Counter httpCounter;
+
+    public HttpCounterJob(MeterRegistry meterRegistry){
+        httpCounter = meterRegistry.counter(&quot;http.processed&quot;);
+    }
+
+}
+</code></pre><p>Micrometer会将metric转化为prometheus的metric，我们可以在prometheus中看到一个名为http_processed_total的metric.其中_total是Micrometer 将Counter metric转为prometheus Counter metric的后缀</p>
+<p>重启项目之后，我们可以在prometheus graph中看到刚刚定义的counter</p>
+<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20191022175939.png" alt=""></p>
+<p>为了更好的观察counter的逻辑，我们让counter每隔5秒加1</p>
+<pre><code>@Scheduled(fixedDelay = 5000)
+public void increase(){
+    httpCounter.increment();
+}
+</code></pre><p>随着时间counter的值逐渐递增，我们可以看到counter包含从创建之初到当前时刻所有的值。但是在实际应用中，我们可能并不关心这个整体的值，而是增长趋势</p>
+<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20191024235750.png" alt=""></p>
+<blockquote>
+<p>counter当前的值并不重要，重要的在一段时间内counter增长的量以及速率，也可以理解为增长趋势</p>
+</blockquote>
+<h2 id="increase"><a href="#increase" class="headerlink" title="increase"></a>increase</h2><p>我们已经知道counter来说，更关注的是在一段时间中增长的量，那么如何获得这个量呢？其实很简单，例如我们想获得最近5分钟增长的量，只需要用counter当前的值减去5分钟前counter的值即可。</p>
+<p>在prometheus中有专门的函数来计算这个值，也就是<strong>increase</strong></p>
+<pre><code>increate(http_processed_total[5m])
+</code></pre><p>increase的具体用法可以参考<a href="https://prometheus.io/docs/prometheus/latest/querying/functions/#increase" target="_blank" rel="noopener">prometheus 文档</a></p>
+<p>执行上述的语句，我们得到的结果应该为60，因为我们是每隔5s对counter加1，5m内增长的量为5 * 60 /5 = 60, 但是实际上得到的并不是60。这是为什么呢？</p>
+<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20191024235828.png" alt=""></p>
+<p>根据之前prometheus.yml中配置可知，prometheus每隔10s采集一次，而demon中，counter每隔5s加1，所以对于prometheus采集的值来说是每次加2。假设prometheus从10:30:00开始抓取数据，此时counter的值假设为18，那么可以得到如下的数据</p>
+<pre><code>10:30:00   http_processed_total 18
+10:30:10   http_processed_total 20
+10:30:20   http_processed_total 22
+...
+10:34:50   http_processed_total 76
+10:35:00   http_processed_total 78
+10:35:10   http_processed_total 80
+10:35:20   http_processed_total 82
+</code></pre><p>如果我们在10:35:13查询最近5m的数据，可以得到</p>
+<pre><code>10:30:20   http_processed_total 22
+...
+10:34:50   http_processed_total 76
+10:35:00   http_processed_total 78
+10:35:10   http_processed_total 80
+</code></pre><p>10:30:10的数据已经超过了5m中，所以取不到，因此value=(80-22)=58，但是实际上prometheus并不会返回这个值。因为<a href="https://prometheus.io/docs/prometheus/latest/querying/functions/#increase" target="_blank" rel="noopener">increase函数</a>会推缺失值并估计边界点的值，<strong>所以prometheus返回的值比我们预想的要更精确，但是却不是最终正确的值</strong>。</p>
+<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20191025002115.png" alt=""></p>
+<h2 id="rate"><a href="#rate" class="headerlink" title="rate"></a>rate</h2><p>Counter另一个值得关注的值是平均每秒增长的个数，例如在10:30:00 counter的值为10，在10:30:10 counter的值为20，那么平均每秒增长的值为(20 - 10)/10 = 1</p>
+<p>prometheus提供了rate函数来计算这个值</p>
+<pre><code>rate(http_processed_total[5m])
+</code></pre><p>上述表达式计算的过去5m中平均每秒处理的http请求，如果想知道每分钟处理的http请求数，只要乘以60即可</p>
+<pre><code>rate(http_processed_total[5m]) * 60
+</code></pre><p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20191027222458.png" alt=""></p>
+<p>上图乍一看比较奇怪，因为数值在上下波动，其实是因为Y轴的粒度较细，如果我们将时间区间有5m调整到15m，则可以看到一条直线</p>
+<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20191027222839.png" alt="">    </p>
+<p>对于rate来说，如果当前时间为t，若计算过去5m的值，那么时间范围就为t - 5m。在上面曲线图中14:17分的值表示[14:16,14:17]这一段时间增长的值，因为range为1m</p>
+<h2 id="aggregation"><a href="#aggregation" class="headerlink" title="aggregation"></a>aggregation</h2><p>上述示例的指标较为简单，但是在实际应用中，一个指标可能存在多个属性。在Micrometer称为tag，而在prometheus中则称为label。以http request为例，一个request我们会关注它的返回code,它的method。我们创建一个名为http.request的metric，它有code和method两个tag</p>
+<pre><code>@Autowired
+private MeterRegistry meterRegistry;
+
+private List&lt;String&gt; methods = Arrays.asList(&quot;GET&quot;,&quot;POST&quot;);
+private List&lt;Integer&gt; codes = Arrays.asList(200,204,404,500);
+
+@Scheduled(fixedDelay = 5000)
+public void httpRequest(){
+    meterRegistry.counter(&quot;http.request&quot;,
+            &quot;method&quot;,getMethod(),
+            &quot;code&quot;,String.valueOf(getCode())).increment();
+
+}
+
+private String getMethod(){
+    return methods.get(ThreadLocalRandom.current().nextInt(methods.size()));
+}
+
+private int getCode(){
+    return codes.get(ThreadLocalRandom.current().nextInt(codes.size()));
+}
+</code></pre><p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20191027223807.png" alt=""></p>
+<p>我们之所以可以看到多条查询结果，是因为prometheus为每一个label之间的组合都创建了一个vector，在结合时间，就成了一个时间序列(time series)，在Graph中我们可以看到多条曲线</p>
+<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20191027224142.png" alt=""></p>
+<p>prometheus允许我们根据label来过滤不同的metric，例如</p>
+<pre><code>http_request_total{code=&quot;200&quot;}
+</code></pre><p>同时prometheus提供了相应的聚合函数，帮助我们对相同label的metric进行聚合操作，例如</p>
+<pre><code>sum(increase(http_request_total{method=&quot;GET&quot;})) by (code)
+</code></pre><p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20191027224805.png" alt=""></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>在第一印象中，我们总是认为Counter是prometheus最简单的一个metric，但实际上它使用起来比想象中要来的复杂。关于Counter我们要记住以下几点</p>
+<ol>
+<li>Counter的当前值意义不大，我们更关注的是Counter在一段时间内增长的数量以及速率</li>
+<li>increase函数可以计算一段时间内增长的值，但是它会对时间边界的值进行估计，因此得到的是一个近似值</li>
+<li>rate函数可以计算一段时间内增长的平均速率</li>
+</ol>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a href="https://www.innoq.com/en/blog/prometheus-counters/" target="_blank" rel="noopener">Prometheus Counters and how to deal with them</a></li>
+<li><a href="https://www.innoq.com/en/blog/prometheus-counters/" target="_blank" rel="noopener">Prometheus 官方文档</a></li>
+</ul>
+
+            </div>
+            <hr>
+
+            
+            <style>
+    #reward {
+        margin: 40px 0;
+        text-align: center;
+    }
+
+    #reward .reward-link {
+        font-size: 1.88rem;
+    }
+
+    #reward .btn-floating:hover {
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    #rewardModal {
+        width: 320px;
+        height: 350px;
+    }
+
+    #rewardModal .reward-title {
+        margin: 15px auto;
+        padding-bottom: 5px;
+    }
+
+    #rewardModal .modal-content {
+        padding: 10px;
+    }
+
+    #rewardModal .close {
+        position: absolute;
+        right: 15px;
+        top: 15px;
+        color: rgba(0, 0, 0, 0.5);
+        font-size: 1.3rem;
+        line-height: 20px;
+        cursor: pointer;
+    }
+
+    #rewardModal .reward-tabs {
+        margin: 0 auto;
+        width: 210px;
+    }
+
+    .reward-tabs .tabs {
+        height: 38px;
+        margin: 10px auto;
+        padding-left: 0;
+    }
+
+    .reward-tabs .tabs .tab {
+        height: 38px;
+        line-height: 38px;
+    }
+
+    .reward-tabs .tab a {
+        color: #fff;
+        background-color: #ccc;
+    }
+
+    .reward-tabs .tab a:hover {
+        color: #fff;
+    }
+
+    .reward-tabs .wechat-tab .active {
+        color: #fff;
+        background-color: #22AB38;
+    }
+
+    .reward-tabs .alipay-tab .active {
+        color: #fff;
+        background-color: #019FE8;
+    }
+
+    .reward-tabs .reward-img {
+        width: 210px;
+        height: 210px;
+    }
+</style>
+
+<div id="reward">
+    <a class="reward-link btn-floating btn-large waves-effect waves-light red">赏</a>
+
+    <!-- Modal Structure -->
+    <div id="rewardModal" class="modal">
+        <div class="modal-content">
+            <a class="close"><i class="fa fa-close"></i></a>
+            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <div class="reward-content">
+                <div class="reward-tabs">
+                    <ul class="tabs">
+                        <li class="tab wechat-tab waves-effect waves-light"><a class="active" href="#wechat">微信</a></li>
+                        <li class="tab alipay-tab waves-effect waves-light"><a href="#alipay">支付宝</a></li>
+                    </ul>
+                    <div id="wechat">
+                        <img src="/medias/reward/wechat.jpeg" class="reward-img" alt="微信打赏二维码">
+                    </div>
+                    <div id="alipay">
+                        <img src="/medias/reward/alipay.jpeg" class="reward-img" alt="支付宝打赏二维码">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('#reward .reward-link').on('click', function () {
+            $('#rewardModal').openModal();
+        });
+
+        $('#rewardModal .close').on('click', function () {
+            $('#rewardModal').closeModal();
+        });
+    });
+</script>
+            
+
+            <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+
+<div id="article-share">
+    
+    <div class="social-share" data-disabled="qzone, qq, weibo, douban"></div>
+    
+</div>
+
+<script src="/libs/share/js/social-share.min.js"></script>
+
+            <div class="reprint">
+                <p>
+                    <span class="reprint-tip">Reprint please specify: </span>
+                    <a href="http://yoursite.com" class="b-link-green">wbl</a>
+                    <i class="fa fa-angle-right fa-lg fa-fw text-color"></i>
+                    <a href="/2019/10/11/prometheus-counter/" class="b-link-green">Prometheus Counter</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    
+        <link rel="stylesheet" href="/libs/gitalk/gitalk.css">
+<link rel="stylesheet" href="/css/my-gitalk.css">
+
+<div class="card gitalk-card" data-aos="fade-up">
+    <div id="gitalk-container" class="card-content"></div>
+</div>
+
+<script src="/libs/gitalk/gitalk.min.js"></script>
+<script>
+    let gitalk = new Gitalk({
+        clientID: '2ce6d5b3bf1afe6d63e1',
+        clientSecret: '1adb94042a9ac66b08a7a774c10dfc1deb0cb0bd',
+        repo: 'blog-comments',
+        owner: 'BloodHunter',
+        admin: "BloodHunter",
+        id: '2019-10-11T23-05-16',
+        distractionFreeMode: false  // Facebook-like distraction free mode
+    });
+
+    gitalk.render('gitalk-container');
+</script>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">Current</div>
+            <div class="card">
+                <a href="/2019/10/11/prometheus-counter/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/22.jpg" class="responsive-img" alt="Prometheus Counter">
+                        
+                        <span class="card-title">Prometheus Counter</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary">我曾经以为Counter是prometheus中最简单的一种metric，直到我在Grafana中配置counter相关的dashboard之后，才发现自己对于counter的理解有一些偏差。因此这篇博客将会详细的介绍counter的用法。</div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-10-11
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fa fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/监控/" class="post-category" target="_blank">
+                                    监控
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Prometheus/" target="_blank">
+                        <span class="chip bg-color">Prometheus</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">Next</div>
+            <div class="card">
+                <a href="/2019/09/27/spring-boot-zheng-he-prometheus/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/3.jpg" class="responsive-img" alt="Spring Boot整合Prometheus">
+                        
+                        <span class="card-title">Spring Boot整合Prometheus</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary">Micrometer简介Micrometer 为 Java 平台上的性能数据收集提供了一个通用的 API，应用程序只需要使用 Micrometer 的通用 API 来收集性能指标即可。Micrometer 会负责完成与不同监控系统的适配工作</div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-09-27
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fa fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Spring-Boot/" class="post-category" target="_blank">
+                                    Spring Boot
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Spring-Boot/" target="_blank">
+                        <span class="chip bg-color">Spring Boot</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+</div>
+    
+
+</main>
+
+
+<footer class="page-footer bg-color">
+    <div class="container row center-align">
+        <div class="col s12 m8 l8 copy-right">
+            本站基于
+            <a href="https://hexo.io/" target="_blank">Hexo</a> 采用
+            <a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">hexo-theme-matery</a>的主题搭建.
+        </div>
+        <div class="col s12 m4 l4 social-link"><a href="https://github.com/BloodHunter" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+    <i class="fa fa-github"></i>
+</a>
+<a href="mailto:15201414128@163.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+    <i class="fa fa-envelope-open"></i>
+</a>
+<a href="#!" class="tooltipped" data-tooltip="QQ联系我: 765759638" data-position="top" data-delay="50">
+    <i class="fa fa-qq"></i>
+</a>
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+<!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title">Search</span>
+            <input type="search" id="searchInput" name="s" placeholder="Please enter a search keyword" class="search-input" autofocus>
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script src="/js/search.js"></script>
+<script type="text/javascript">
+    searchFunc("/" + "search.xml", 'searchInput', 'searchResult');
+</script>
+<!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fa fa-angle-up"></i>
+    </a>
+</div>
+
+
+<script src="/libs/materialize/js/materialize.min.js"></script>
+<script src="/libs/masonry/masonry.pkgd.min.js"></script>
+<script src="/libs/aos/aos.js"></script>
+<script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+<script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+<script src="/js/matery.js"></script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+</body>
+</html>
