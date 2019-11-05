@@ -3,6 +3,29 @@
   
     
     <entry>
+      <title>JVM Garbage Collector——Parallel Collector</title>
+      <link href="/2019/10/27/jvm-garbage-collector-parallel-collector/"/>
+      <url>/2019/10/27/jvm-garbage-collector-parallel-collector/</url>
+      
+        <content type="html"><![CDATA[<h2 id="内存模型"><a href="#内存模型" class="headerlink" title="内存模型"></a>内存模型</h2><p><img src="https://docs.oracle.com/en/java/javase/12/gctuning/img/jsgct_dt_002_armgnt_gn_pl_new.png" alt=""></p><p>Java中的内存模型如上图所示，分为两大块old(老年代)和young(新生代)，新生代又分为三个区，分别是Eden(伊甸园)，from Survivor(幸存者)，to Survivor。为什么要这么设计呢，其实和垃圾回收算法有关。</p><h2 id="回收算法"><a href="#回收算法" class="headerlink" title="回收算法"></a>回收算法</h2><h3 id="标记-清除算法-Mark-Sweep"><a href="#标记-清除算法-Mark-Sweep" class="headerlink" title="标记-清除算法(Mark-Sweep)"></a>标记-清除算法(Mark-Sweep)</h3><p>标记清除算法将垃圾收集分为两个步骤，第一步是标记，标记的对象也就是即将要回收的垃圾对象。那么如何判定一个对象是垃圾对象呢。一个对象如果不存在任何引用就可以认为它是一个垃圾对象。第二步是清除，将第一步中找出的垃圾对象进行清除。</p><p>从上述的描述可知，标记-清除算法容易导致大量的空间碎片，因为回收后的空间是不连续的。</p><h3 id="复制算法-Copying"><a href="#复制算法-Copying" class="headerlink" title="复制算法(Copying)"></a>复制算法(Copying)</h3><p>针对标记清除算法的缺点，有人提出了复制算法。复制算法的核心在于将内存分为两块，在进行对象分配时，只使用其中一块内存(from)，当这块内存满了就进行垃圾回收：将存活的对象复制到另一块内存(to)中，此时可以清除from中的所有对象，完成此次垃圾收集。若to满了，便将对象复制到from，清除to中的对象，如此反复。</p><p>复制算法保证了空间的连续性，避免出现大量的空间碎片，但是它的空间利用率却不高，相当于只利用了50%的空间。</p><h3 id="标记-压缩算法-Mark-Compact"><a href="#标记-压缩算法-Mark-Compact" class="headerlink" title="标记-压缩算法 (Mark-Compact)"></a>标记-压缩算法 (Mark-Compact)</h3><p>在存活对象少，垃圾对象多的情况下，复制算法的效率很高，但是如果存活对象多并且对象较大，此时在使用复制算法，复制成本高，效率很低。</p><p>标记-压缩算法可以解决上述的问题，它是基于标记-清除算法进行改进的一种算法。在完成标记之后，标记-压缩算法并不会马上进入清除阶段，而是将存活对象压缩到内存的另一端，之后再将边界外的对象进行清除。</p><p>这种方法既避免了碎片的产生，又不需要两块相同的内存空间，因此，其性价比比较高。</p><h2 id="并行收集线程数"><a href="#并行收集线程数" class="headerlink" title="并行收集线程数"></a>并行收集线程数</h2><p>并行垃圾收集器的垃圾收集线程数与机器的CPU相关。当CPU小于8时，线程数与CPU的数量相等，当CPU大于8时，线程数等于5/8的CPU数</p><pre><code>thread = N (N &lt;= 8)thread = 5/8 * N (N &gt; 8)</code></pre><p>可以使用<strong>-XX:ParallelGCThreads</strong>参数来指定线程数。</p><h2 id="设置参数"><a href="#设置参数" class="headerlink" title="设置参数"></a>设置参数</h2><p>并行垃圾收集器可以设置的参数有三点</p><ol><li>最大停顿时间</li><li>吞吐量</li><li>堆大小</li></ol><h3 id="最大停顿时间"><a href="#最大停顿时间" class="headerlink" title="最大停顿时间"></a>最大停顿时间</h3><p>-XX:+MaxGCPauseMills:\<n> 设置最大垃圾收集停顿时间，单位是毫秒。N是一个大于0的整数，收集器在工作时会调整堆大小或者其他参数，尽可能的把停顿时间控制在N毫秒以内。如果希望减少停顿时间，而把这个值设置的很小，JVM为了实现这个目标，可能会设置一个较小的堆(一个小堆比一个大堆回收的快)，而这会导致垃圾收集变得频繁，从而增加了垃圾回收的总时间，降低了吞吐量。</n></p><h3 id="吞吐量"><a href="#吞吐量" class="headerlink" title="吞吐量"></a>吞吐量</h3><p>-XX:+GCTimeRatio:\<n> 设置吞吐量大小。N是一个0-100的整数，收集器将不会花费超过1/(N+1)的时间来用于垃圾收集。例如，假设N=19，那么系统用于收集垃圾的时间将不超过1/(19+1) =5%。默认情况下，N=99，表示不超过1%的时间用于垃圾收集</n></p><h3 id="堆大小"><a href="#堆大小" class="headerlink" title="堆大小"></a>堆大小</h3><p>-Xmx表示最大的堆内存，堆的大小也会影响垃圾收集。并行收集器会通过调整堆的大小来实现最大停顿时间以及吞吐量这两个目标。</p><h2 id="heap调整"><a href="#heap调整" class="headerlink" title="heap调整"></a>heap调整</h2><p>并行收集器会通过调整堆的大小来实现最大停顿时间以及吞吐量这两个目前。收集器通过一定的比例来扩大或缩小堆的大小，默认情况扩大的比例是20%，缩小的比例是5%。这两个比例可以通过参数来调整。</p><p>XX:YoungGenerationSizeIncrement=\<y> 表示的新生代扩大的比例</y></p><p>XX:TenuredGenerationSizeIncrement=\<t> 表示的老年代扩大的比例</t></p><p>XX:AdaptiveSizeDecrementScaleFactor=\<d> 用来控制缩小的比例，假设扩大的比例为X，那么缩小的比例就为X/D</d></p><h2 id="OutOfMemoryError"><a href="#OutOfMemoryError" class="headerlink" title="OutOfMemoryError"></a>OutOfMemoryError</h2><p>当花费在垃圾收集的时间过多时，收集器将抛出OutOfMemoryError的异常。默认情况下，如果超过98%的时间用于垃圾收集，而回收的堆大小小于2%，那么系统将抛出OutOfMemoryError。</p><p>之所以这样设置是为了避免系统花费了大量的时间用于垃圾收集，但是得到的收益却很小。可以用-XX:-UseGCOverheadLimit这个参数来关闭这个特性。</p><h2 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h2><p>停顿时间越短就越适合需要与用户交互的程序，良好的响应速度能提升用户体验，而高吞吐量则可以高效率地利用CPU时间，尽快完成程序的运算任务，主要适合在后台运算而不需要太多交互的任务。</p><p>并行收集器可以通过设置参数来设置对应的目标。</p><h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul><li><a href="https://docs.oracle.com/en/java/javase/12/gctuning/parallel-collector1.html#GUID-ECF0EE1D-C39E-453D-9B3D-603E25ADB9AD" target="_blank" rel="noopener">The Parallel Collector</a></li><li><a href="https://www.ibm.com/developerworks/cn/java/j-lo-JVMGarbageCollection/index.html" target="_blank" rel="noopener">JVM 垃圾回收器工作原理及使用实例介绍</a></li></ul>]]></content>
+      
+      
+      <categories>
+          
+          <category> Java </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Java </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
       <title>Prometheus Counter</title>
       <link href="/2019/10/11/prometheus-counter/"/>
       <url>/2019/10/11/prometheus-counter/</url>

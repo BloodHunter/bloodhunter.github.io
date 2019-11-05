@@ -5,8 +5,9 @@
 
 <head><meta name="generator" content="Hexo 3.8.0">
     <meta charset="utf-8">
-    <meta name="keywords" content="Prometheus Counter, wbl">
-    <meta name="description" content="我曾经以为Counter是prometheus中最简单的一种metric，直到我在Grafana中配置counter相关的dashboard之后，才发现自己对于counter的理解有一些偏差。因此这篇博客将会详细的介绍counter的用法。">
+    <meta name="keywords" content="JVM Garbage Collector——Parallel Collector, wbl">
+    <meta name="description" content="内存模型
+Java中的内存模型如上图所示，分为两大块old(老年代)和young(新生代)，新生代又分为三个区，分别是Eden(伊甸园)，from Survivor(幸存者)，to Survivor。为什么要这么设计呢，其实和垃圾回收算法有">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -14,7 +15,7 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Prometheus Counter | wbl</title>
+    <title>JVM Garbage Collector——Parallel Collector | wbl</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/font-awesome.min.css">
@@ -247,13 +248,13 @@
 
 
 
-<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/22.jpg')">
+<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/9.jpg')">
     <div class="container">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
                     <div class="description center-align post-title">
-                        Prometheus Counter
+                        JVM Garbage Collector——Parallel Collector
                     </div>
                 </div>
             </div>
@@ -273,8 +274,8 @@
             
             <div class="article-tag">
                 
-                <a href="/tags/Prometheus/" target="_blank">
-                    <span class="chip bg-color">Prometheus</span>
+                <a href="/tags/Java/" target="_blank">
+                    <span class="chip bg-color">Java</span>
                 </a>
                 
             </div>
@@ -284,138 +285,54 @@
                 <span class="post-cate">
                     <i class="fa fa-bookmark fa-fw icon-category"></i>
                     
-                    <a href="/categories/监控/" class="post-category" target="_blank">
-                        监控
+                    <a href="/categories/Java/" class="post-category" target="_blank">
+                        Java
                     </a>
                     
                 </span>
                 
 
                 <span class="post-date">
-                    <i class="fa fa-clock-o fa-fw"></i>2019-10-11
+                    <i class="fa fa-clock-o fa-fw"></i>2019-10-27
                 </span>
             </div>
         </div>
         <hr>
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <p>我曾经以为Counter是prometheus中最简单的一种metric，直到我在Grafana中配置counter相关的dashboard之后，才发现自己对于counter的理解有一些偏差。因此这篇博客将会详细的介绍counter的用法。</p>
-<h2 id="创建Demo"><a href="#创建Demo" class="headerlink" title="创建Demo"></a>创建Demo</h2><p>为了更好的说明，我们需要创建一个简单的demo，用来构建一个简单可控的counter以便prometheus采集。在我之前的一篇博客<a href="https://bloodhunter.github.io/2019/09/27/spring-boot-zheng-he-prometheus/" target="_blank" rel="noopener">Spring Boot整合Prometheus</a>中，详细介绍了SpringBoot如何整合prometheus，在这里就不做详细的说明</p>
-<p>首先，在pom文件引入Micrometer Prometheus的依赖</p>
-<pre><code>&lt;dependency&gt;
-    &lt;groupId&gt;io.micrometer&lt;/groupId&gt;
-    &lt;artifactId&gt;micrometer-registry-prometheus&lt;/artifactId&gt;
-&lt;/dependency&gt;
-</code></pre><p>然后，在application.properties中进行prometheus的相关配置</p>
-<pre><code>management.endpoint.prometheus.enabled=true
-management.metrics.export.prometheus.enabled=true
-</code></pre><p>之后，在prometheus.yml配置采集路径以及采集间隔</p>
-<pre><code>scrape_configs:
- - job_name: prometheus-test
-   scrape_interval: 10s
-   metrics_path: /actuator/prometheus
-   static_configs:
-   - targets: [&#39;172.16.22.50:8080&#39;]
-</code></pre><h2 id="Counter定义"><a href="#Counter定义" class="headerlink" title="Counter定义"></a>Counter定义</h2><p>在<a href="https://prometheus.io/docs/concepts/metric_types/#counter" target="_blank" rel="noopener">prometheus文档</a>中counter的定义如下</p>
-<blockquote>
-<p>A counter is a cumulative metric that represents a single monotonically increasing counter whose value can only increase or be reset to zero on restart</p>
-</blockquote>
-<p>monotonically increasing表示counter的值是单调递增的，cumulative metric表示counter表示的是当前整体的值。</p>
-<p>根据上述定义，我们定义一个counter用来记录http请求数</p>
-<pre><code>@Component
-public class HttpCounterJob {
-
-    private final Counter httpCounter;
-
-    public HttpCounterJob(MeterRegistry meterRegistry){
-        httpCounter = meterRegistry.counter(&quot;http.processed&quot;);
-    }
-
-}
-</code></pre><p>Micrometer会将metric转化为prometheus的metric，我们可以在prometheus中看到一个名为http_processed_total的metric.其中_total是Micrometer 将Counter metric转为prometheus Counter metric的后缀</p>
-<p>重启项目之后，我们可以在prometheus graph中看到刚刚定义的counter</p>
-<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20191022175939.png" alt=""></p>
-<p>为了更好的观察counter的逻辑，我们让counter每隔5秒加1</p>
-<pre><code>@Scheduled(fixedDelay = 5000)
-public void increase(){
-    httpCounter.increment();
-}
-</code></pre><p>随着时间counter的值逐渐递增，我们可以看到counter包含从创建之初到当前时刻所有的值。但是在实际应用中，我们可能并不关心这个整体的值，而是增长趋势</p>
-<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20191024235750.png" alt=""></p>
-<blockquote>
-<p>counter当前的值并不重要，重要的在一段时间内counter增长的量以及速率，也可以理解为增长趋势</p>
-</blockquote>
-<h2 id="increase"><a href="#increase" class="headerlink" title="increase"></a>increase</h2><p>我们已经知道counter来说，更关注的是在一段时间中增长的量，那么如何获得这个量呢？其实很简单，例如我们想获得最近5分钟增长的量，只需要用counter当前的值减去5分钟前counter的值即可。</p>
-<p>在prometheus中有专门的函数来计算这个值，也就是<strong>increase</strong></p>
-<pre><code>increate(http_processed_total[5m])
-</code></pre><p>increase的具体用法可以参考<a href="https://prometheus.io/docs/prometheus/latest/querying/functions/#increase" target="_blank" rel="noopener">prometheus 文档</a></p>
-<p>执行上述的语句，我们得到的结果应该为60，因为我们是每隔5s对counter加1，5m内增长的量为5 * 60 /5 = 60, 但是实际上得到的并不是60。这是为什么呢？</p>
-<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20191024235828.png" alt=""></p>
-<p>根据之前prometheus.yml中配置可知，prometheus每隔10s采集一次，而demon中，counter每隔5s加1，所以对于prometheus采集的值来说是每次加2。假设prometheus从10:30:00开始抓取数据，此时counter的值假设为18，那么可以得到如下的数据</p>
-<pre><code>10:30:00   http_processed_total 18
-10:30:10   http_processed_total 20
-10:30:20   http_processed_total 22
-...
-10:34:50   http_processed_total 76
-10:35:00   http_processed_total 78
-10:35:10   http_processed_total 80
-10:35:20   http_processed_total 82
-</code></pre><p>如果我们在10:35:13查询最近5m的数据，可以得到</p>
-<pre><code>10:30:20   http_processed_total 22
-...
-10:34:50   http_processed_total 76
-10:35:00   http_processed_total 78
-10:35:10   http_processed_total 80
-</code></pre><p>10:30:10的数据已经超过了5m中，所以取不到，因此value=(80-22)=58，但是实际上prometheus并不会返回这个值。因为<a href="https://prometheus.io/docs/prometheus/latest/querying/functions/#increase" target="_blank" rel="noopener">increase函数</a>会推缺失值并估计边界点的值，<strong>所以prometheus返回的值比我们预想的要更精确，但是却不是最终正确的值</strong>。</p>
-<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20191025002115.png" alt=""></p>
-<h2 id="rate"><a href="#rate" class="headerlink" title="rate"></a>rate</h2><p>Counter另一个值得关注的值是平均每秒增长的个数，例如在10:30:00 counter的值为10，在10:30:10 counter的值为20，那么平均每秒增长的值为(20 - 10)/10 = 1</p>
-<p>prometheus提供了rate函数来计算这个值</p>
-<pre><code>rate(http_processed_total[5m])
-</code></pre><p>上述表达式计算的过去5m中平均每秒处理的http请求，如果想知道每分钟处理的http请求数，只要乘以60即可</p>
-<pre><code>rate(http_processed_total[5m]) * 60
-</code></pre><p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20191027222458.png" alt=""></p>
-<p>上图乍一看比较奇怪，因为数值在上下波动，其实是因为Y轴的粒度较细，如果我们将时间区间有5m调整到15m，则可以看到一条直线</p>
-<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20191027222839.png" alt="">    </p>
-<p>对于rate来说，如果当前时间为t，若计算过去5m的值，那么时间范围就为t - 5m。在上面曲线图中14:17分的值表示[14:16,14:17]这一段时间增长的值，因为range为1m</p>
-<h2 id="aggregation"><a href="#aggregation" class="headerlink" title="aggregation"></a>aggregation</h2><p>上述示例的指标较为简单，但是在实际应用中，一个指标可能存在多个属性。在Micrometer称为tag，而在prometheus中则称为label。以http request为例，一个request我们会关注它的返回code,它的method。我们创建一个名为http.request的metric，它有code和method两个tag</p>
-<pre><code>@Autowired
-private MeterRegistry meterRegistry;
-
-private List&lt;String&gt; methods = Arrays.asList(&quot;GET&quot;,&quot;POST&quot;);
-private List&lt;Integer&gt; codes = Arrays.asList(200,204,404,500);
-
-@Scheduled(fixedDelay = 5000)
-public void httpRequest(){
-    meterRegistry.counter(&quot;http.request&quot;,
-            &quot;method&quot;,getMethod(),
-            &quot;code&quot;,String.valueOf(getCode())).increment();
-
-}
-
-private String getMethod(){
-    return methods.get(ThreadLocalRandom.current().nextInt(methods.size()));
-}
-
-private int getCode(){
-    return codes.get(ThreadLocalRandom.current().nextInt(codes.size()));
-}
-</code></pre><p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20191027223807.png" alt=""></p>
-<p>我们之所以可以看到多条查询结果，是因为prometheus为每一个label之间的组合都创建了一个vector，在结合时间，就成了一个时间序列(time series)，在Graph中我们可以看到多条曲线</p>
-<p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20191027224142.png" alt=""></p>
-<p>prometheus允许我们根据label来过滤不同的metric，例如</p>
-<pre><code>http_request_total{code=&quot;200&quot;}
-</code></pre><p>同时prometheus提供了相应的聚合函数，帮助我们对相同label的metric进行聚合操作，例如</p>
-<pre><code>sum(increase(http_request_total{method=&quot;GET&quot;})) by (code)
-</code></pre><p><img src="https://raw.githubusercontent.com/BloodHunter/blog-comments/master/20191027224805.png" alt=""></p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>在第一印象中，我们总是认为Counter是prometheus最简单的一个metric，但实际上它使用起来比想象中要来的复杂。关于Counter我们要记住以下几点</p>
+                <h2 id="内存模型"><a href="#内存模型" class="headerlink" title="内存模型"></a>内存模型</h2><p><img src="https://docs.oracle.com/en/java/javase/12/gctuning/img/jsgct_dt_002_armgnt_gn_pl_new.png" alt=""></p>
+<p>Java中的内存模型如上图所示，分为两大块old(老年代)和young(新生代)，新生代又分为三个区，分别是Eden(伊甸园)，from Survivor(幸存者)，to Survivor。为什么要这么设计呢，其实和垃圾回收算法有关。</p>
+<h2 id="回收算法"><a href="#回收算法" class="headerlink" title="回收算法"></a>回收算法</h2><h3 id="标记-清除算法-Mark-Sweep"><a href="#标记-清除算法-Mark-Sweep" class="headerlink" title="标记-清除算法(Mark-Sweep)"></a>标记-清除算法(Mark-Sweep)</h3><p>标记清除算法将垃圾收集分为两个步骤，第一步是标记，标记的对象也就是即将要回收的垃圾对象。那么如何判定一个对象是垃圾对象呢。一个对象如果不存在任何引用就可以认为它是一个垃圾对象。第二步是清除，将第一步中找出的垃圾对象进行清除。</p>
+<p>从上述的描述可知，标记-清除算法容易导致大量的空间碎片，因为回收后的空间是不连续的。</p>
+<h3 id="复制算法-Copying"><a href="#复制算法-Copying" class="headerlink" title="复制算法(Copying)"></a>复制算法(Copying)</h3><p>针对标记清除算法的缺点，有人提出了复制算法。复制算法的核心在于将内存分为两块，在进行对象分配时，只使用其中一块内存(from)，当这块内存满了就进行垃圾回收：将存活的对象复制到另一块内存(to)中，此时可以清除from中的所有对象，完成此次垃圾收集。若to满了，便将对象复制到from，清除to中的对象，如此反复。</p>
+<p>复制算法保证了空间的连续性，避免出现大量的空间碎片，但是它的空间利用率却不高，相当于只利用了50%的空间。</p>
+<h3 id="标记-压缩算法-Mark-Compact"><a href="#标记-压缩算法-Mark-Compact" class="headerlink" title="标记-压缩算法 (Mark-Compact)"></a>标记-压缩算法 (Mark-Compact)</h3><p>在存活对象少，垃圾对象多的情况下，复制算法的效率很高，但是如果存活对象多并且对象较大，此时在使用复制算法，复制成本高，效率很低。</p>
+<p>标记-压缩算法可以解决上述的问题，它是基于标记-清除算法进行改进的一种算法。在完成标记之后，标记-压缩算法并不会马上进入清除阶段，而是将存活对象压缩到内存的另一端，之后再将边界外的对象进行清除。</p>
+<p>这种方法既避免了碎片的产生，又不需要两块相同的内存空间，因此，其性价比比较高。</p>
+<h2 id="并行收集线程数"><a href="#并行收集线程数" class="headerlink" title="并行收集线程数"></a>并行收集线程数</h2><p>并行垃圾收集器的垃圾收集线程数与机器的CPU相关。当CPU小于8时，线程数与CPU的数量相等，当CPU大于8时，线程数等于5/8的CPU数</p>
+<pre><code>thread = N (N &lt;= 8)
+thread = 5/8 * N (N &gt; 8)
+</code></pre><p>可以使用<strong>-XX:ParallelGCThreads</strong>参数来指定线程数。</p>
+<h2 id="设置参数"><a href="#设置参数" class="headerlink" title="设置参数"></a>设置参数</h2><p>并行垃圾收集器可以设置的参数有三点</p>
 <ol>
-<li>Counter的当前值意义不大，我们更关注的是Counter在一段时间内增长的数量以及速率</li>
-<li>increase函数可以计算一段时间内增长的值，但是它会对时间边界的值进行估计，因此得到的是一个近似值</li>
-<li>rate函数可以计算一段时间内增长的平均速率</li>
+<li>最大停顿时间</li>
+<li>吞吐量</li>
+<li>堆大小</li>
 </ol>
+<h3 id="最大停顿时间"><a href="#最大停顿时间" class="headerlink" title="最大停顿时间"></a>最大停顿时间</h3><p>-XX:+MaxGCPauseMills:\<n> 设置最大垃圾收集停顿时间，单位是毫秒。N是一个大于0的整数，收集器在工作时会调整堆大小或者其他参数，尽可能的把停顿时间控制在N毫秒以内。如果希望减少停顿时间，而把这个值设置的很小，JVM为了实现这个目标，可能会设置一个较小的堆(一个小堆比一个大堆回收的快)，而这会导致垃圾收集变得频繁，从而增加了垃圾回收的总时间，降低了吞吐量。</n></p>
+<h3 id="吞吐量"><a href="#吞吐量" class="headerlink" title="吞吐量"></a>吞吐量</h3><p>-XX:+GCTimeRatio:\<n> 设置吞吐量大小。N是一个0-100的整数，收集器将不会花费超过1/(N+1)的时间来用于垃圾收集。例如，假设N=19，那么系统用于收集垃圾的时间将不超过1/(19+1) =5%。默认情况下，N=99，表示不超过1%的时间用于垃圾收集</n></p>
+<h3 id="堆大小"><a href="#堆大小" class="headerlink" title="堆大小"></a>堆大小</h3><p>-Xmx表示最大的堆内存，堆的大小也会影响垃圾收集。并行收集器会通过调整堆的大小来实现最大停顿时间以及吞吐量这两个目标。</p>
+<h2 id="heap调整"><a href="#heap调整" class="headerlink" title="heap调整"></a>heap调整</h2><p>并行收集器会通过调整堆的大小来实现最大停顿时间以及吞吐量这两个目前。收集器通过一定的比例来扩大或缩小堆的大小，默认情况扩大的比例是20%，缩小的比例是5%。这两个比例可以通过参数来调整。</p>
+<p>XX:YoungGenerationSizeIncrement=\<y> 表示的新生代扩大的比例</y></p>
+<p>XX:TenuredGenerationSizeIncrement=\<t> 表示的老年代扩大的比例</t></p>
+<p>XX:AdaptiveSizeDecrementScaleFactor=\<d> 用来控制缩小的比例，假设扩大的比例为X，那么缩小的比例就为X/D</d></p>
+<h2 id="OutOfMemoryError"><a href="#OutOfMemoryError" class="headerlink" title="OutOfMemoryError"></a>OutOfMemoryError</h2><p>当花费在垃圾收集的时间过多时，收集器将抛出OutOfMemoryError的异常。默认情况下，如果超过98%的时间用于垃圾收集，而回收的堆大小小于2%，那么系统将抛出OutOfMemoryError。</p>
+<p>之所以这样设置是为了避免系统花费了大量的时间用于垃圾收集，但是得到的收益却很小。可以用-XX:-UseGCOverheadLimit这个参数来关闭这个特性。</p>
+<h2 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h2><p>停顿时间越短就越适合需要与用户交互的程序，良好的响应速度能提升用户体验，而高吞吐量则可以高效率地利用CPU时间，尽快完成程序的运算任务，主要适合在后台运算而不需要太多交互的任务。</p>
+<p>并行收集器可以通过设置参数来设置对应的目标。</p>
 <h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
-<li><a href="https://www.innoq.com/en/blog/prometheus-counters/" target="_blank" rel="noopener">Prometheus Counters and how to deal with them</a></li>
-<li><a href="https://www.innoq.com/en/blog/prometheus-counters/" target="_blank" rel="noopener">Prometheus 官方文档</a></li>
+<li><a href="https://docs.oracle.com/en/java/javase/12/gctuning/parallel-collector1.html#GUID-ECF0EE1D-C39E-453D-9B3D-603E25ADB9AD" target="_blank" rel="noopener">The Parallel Collector</a></li>
+<li><a href="https://www.ibm.com/developerworks/cn/java/j-lo-JVMGarbageCollection/index.html" target="_blank" rel="noopener">JVM 垃圾回收器工作原理及使用实例介绍</a></li>
 </ul>
 
             </div>
@@ -555,7 +472,7 @@ private int getCode(){
                     <span class="reprint-tip">Reprint please specify: </span>
                     <a href="http://yoursite.com" class="b-link-green">wbl</a>
                     <i class="fa fa-angle-right fa-lg fa-fw text-color"></i>
-                    <a href="/2019/10/11/prometheus-counter/" class="b-link-green">Prometheus Counter</a>
+                    <a href="/2019/10/27/jvm-garbage-collector-parallel-collector/" class="b-link-green">JVM Garbage Collector——Parallel Collector</a>
                 </p>
             </div>
         </div>
@@ -577,7 +494,7 @@ private int getCode(){
         repo: 'blog-comments',
         owner: 'BloodHunter',
         admin: "BloodHunter",
-        id: '2019-10-11T23-05-16',
+        id: '2019-10-27T23-27-26',
         distractionFreeMode: false  // Facebook-like distraction free mode
     });
 
@@ -599,7 +516,7 @@ private int getCode(){
     <div class="row article-row">
         
         <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge left-badge text-color">Previous</div>
+            <div class="article-badge left-badge text-color">Current</div>
             <div class="card">
                 <a href="/2019/10/27/jvm-garbage-collector-parallel-collector/">
                     <div class="card-image">
@@ -614,9 +531,9 @@ private int getCode(){
                     <div class="summary">内存模型
 Java中的内存模型如上图所示，分为两大块old(老年代)和young(新生代)，新生代又分为三个区，分别是Eden(伊甸园)，from Survivor(幸存者)，to Survivor。为什么要这么设计呢，其实和垃圾回收算法有</div>
                     <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="fa fa-clock-o fa-fw icon-date"></i>2019-10-27
-                        </span>
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-10-27
+                            </span>
                         <span class="publish-author">
                             
                             <i class="fa fa-bookmark fa-fw icon-category"></i>
@@ -629,6 +546,7 @@ Java中的内存模型如上图所示，分为两大块old(老年代)和young(�
                         </span>
                     </div>
                 </div>
+
                 
                 <div class="card-action article-tags">
                     
@@ -645,27 +563,27 @@ Java中的内存模型如上图所示，分为两大块old(老年代)和young(�
         <div class="article col s12 m6" data-aos="fade-up">
             <div class="article-badge right-badge text-color">Next</div>
             <div class="card">
-                <a href="/2019/09/27/spring-boot-zheng-he-prometheus/">
+                <a href="/2019/10/11/prometheus-counter/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/3.jpg" class="responsive-img" alt="Spring Boot整合Prometheus">
+                        <img src="/medias/featureimages/22.jpg" class="responsive-img" alt="Prometheus Counter">
                         
-                        <span class="card-title">Spring Boot整合Prometheus</span>
+                        <span class="card-title">Prometheus Counter</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
-                    <div class="summary">Micrometer简介Micrometer 为 Java 平台上的性能数据收集提供了一个通用的 API，应用程序只需要使用 Micrometer 的通用 API 来收集性能指标即可。Micrometer 会负责完成与不同监控系统的适配工作</div>
+                    <div class="summary">我曾经以为Counter是prometheus中最简单的一种metric，直到我在Grafana中配置counter相关的dashboard之后，才发现自己对于counter的理解有一些偏差。因此这篇博客将会详细的介绍counter的用法。</div>
                     <div class="publish-info">
                             <span class="publish-date">
-                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-09-27
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-10-11
                             </span>
                         <span class="publish-author">
                             
                             <i class="fa fa-bookmark fa-fw icon-category"></i>
                             
-                            <a href="/categories/Spring-Boot/" class="post-category" target="_blank">
-                                    Spring Boot
+                            <a href="/categories/监控/" class="post-category" target="_blank">
+                                    监控
                                 </a>
                             
                             
@@ -675,8 +593,8 @@ Java中的内存模型如上图所示，分为两大块old(老年代)和young(�
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/Spring-Boot/" target="_blank">
-                        <span class="chip bg-color">Spring Boot</span>
+                    <a href="/tags/Prometheus/" target="_blank">
+                        <span class="chip bg-color">Prometheus</span>
                     </a>
                     
                 </div>
