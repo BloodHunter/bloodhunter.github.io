@@ -5,9 +5,25 @@
 
 <head><meta name="generator" content="Hexo 3.8.0">
     <meta charset="utf-8">
-    <meta name="keywords" content="JVM Garbage Collector——Parallel Collector, wbl">
-    <meta name="description" content="内存模型
-Java中的内存模型如上图所示，分为两大块old(老年代)和young(新生代)，新生代又分为三个区，分别是Eden(伊甸园)，from Survivor(幸存者)，to Survivor。为什么要这么设计呢，其实和垃圾回收算法有">
+    <meta name="keywords" content="wbl">
+    <meta name="description" content="
+ APM管理后台域名切换
+ APM processor华为云正式环境部署
+ flink 配置更新
+ 告警平台告警启动
+ Grafana报表数据源修改
+
+chaos-monitor
+
+
+job
+IDC datasource
+HW
+
+
+
+
+c">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -15,7 +31,7 @@ Java中的内存模型如上图所示，分为两大块old(老年代)和young(�
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>JVM Garbage Collector——Parallel Collector | wbl</title>
+    <title>wbl</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/font-awesome.min.css">
@@ -248,13 +264,13 @@ Java中的内存模型如上图所示，分为两大块old(老年代)和young(�
 
 
 
-<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/9.jpg')">
+<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/0.jpg')">
     <div class="container">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
                     <div class="description center-align post-title">
-                        JVM Garbage Collector——Parallel Collector
+                        
                     </div>
                 </div>
             </div>
@@ -272,68 +288,113 @@ Java中的内存模型如上图所示，分为两大块old(老年代)和young(�
     <div class="card">
         <div class="card-content article-info">
             
-            <div class="article-tag">
-                
-                <a href="/tags/Java/" target="_blank">
-                    <span class="chip bg-color">Java</span>
-                </a>
-                
-            </div>
-            
             <div class="post-info">
-                
-                <span class="post-cate">
-                    <i class="fa fa-bookmark fa-fw icon-category"></i>
-                    
-                    <a href="/categories/Java/" class="post-category" target="_blank">
-                        Java
-                    </a>
-                    
-                </span>
                 
 
                 <span class="post-date">
-                    <i class="fa fa-clock-o fa-fw"></i>2019-10-27
+                    <i class="fa fa-clock-o fa-fw"></i>2019-11-07
                 </span>
             </div>
         </div>
         <hr>
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h2 id="内存模型"><a href="#内存模型" class="headerlink" title="内存模型"></a>内存模型</h2><p><img src="https://docs.oracle.com/en/java/javase/12/gctuning/img/jsgct_dt_002_armgnt_gn_pl_new.png" alt=""></p>
-<p>Java中的内存模型如上图所示，分为两大块old(老年代)和young(新生代)，新生代又分为三个区，分别是Eden(伊甸园)，from Survivor(幸存者)，to Survivor。为什么要这么设计呢，其实和垃圾回收算法有关。</p>
-<h2 id="回收算法"><a href="#回收算法" class="headerlink" title="回收算法"></a>回收算法</h2><h3 id="标记-清除算法-Mark-Sweep"><a href="#标记-清除算法-Mark-Sweep" class="headerlink" title="标记-清除算法(Mark-Sweep)"></a>标记-清除算法(Mark-Sweep)</h3><p>标记清除算法将垃圾收集分为两个步骤，第一步是标记，标记的对象也就是即将要回收的垃圾对象。那么如何判定一个对象是垃圾对象呢。一个对象如果不存在任何引用就可以认为它是一个垃圾对象。第二步是清除，将第一步中找出的垃圾对象进行清除。</p>
-<p>从上述的描述可知，标记-清除算法容易导致大量的空间碎片，因为回收后的空间是不连续的。</p>
-<h3 id="复制算法-Copying"><a href="#复制算法-Copying" class="headerlink" title="复制算法(Copying)"></a>复制算法(Copying)</h3><p>针对标记清除算法的缺点，有人提出了复制算法。复制算法的核心在于将内存分为两块，在进行对象分配时，只使用其中一块内存(from)，当这块内存满了就进行垃圾回收：将存活的对象复制到另一块内存(to)中，此时可以清除from中的所有对象，完成此次垃圾收集。若to满了，便将对象复制到from，清除to中的对象，如此反复。</p>
-<p>复制算法保证了空间的连续性，避免出现大量的空间碎片，但是它的空间利用率却不高，相当于只利用了50%的空间。</p>
-<h3 id="标记-压缩算法-Mark-Compact"><a href="#标记-压缩算法-Mark-Compact" class="headerlink" title="标记-压缩算法 (Mark-Compact)"></a>标记-压缩算法 (Mark-Compact)</h3><p>在存活对象少，垃圾对象多的情况下，复制算法的效率很高，但是如果存活对象多并且对象较大，此时在使用复制算法，复制成本高，效率很低。</p>
-<p>标记-压缩算法可以解决上述的问题，它是基于标记-清除算法进行改进的一种算法。在完成标记之后，标记-压缩算法并不会马上进入清除阶段，而是将存活对象压缩到内存的另一端，之后再将边界外的对象进行清除。</p>
-<p>这种方法既避免了碎片的产生，又不需要两块相同的内存空间，因此，其性价比比较高。</p>
-<h2 id="并行收集线程数"><a href="#并行收集线程数" class="headerlink" title="并行收集线程数"></a>并行收集线程数</h2><p>并行垃圾收集器的垃圾收集线程数与机器的CPU相关。当CPU小于8时，线程数与CPU的数量相等，当CPU大于8时，线程数等于5/8的CPU数</p>
-<pre><code>thread = N (N &lt;= 8)
-thread = 5/8 * N (N &gt; 8)
-</code></pre><p>可以使用<strong>-XX:ParallelGCThreads</strong>参数来指定线程数。</p>
-<h2 id="设置参数"><a href="#设置参数" class="headerlink" title="设置参数"></a>设置参数</h2><p>并行垃圾收集器可以设置的参数有三点</p>
-<ol>
-<li>最大停顿时间</li>
-<li>吞吐量</li>
-<li>堆大小</li>
-</ol>
-<h3 id="最大停顿时间"><a href="#最大停顿时间" class="headerlink" title="最大停顿时间"></a>最大停顿时间</h3><p>-XX:+MaxGCPauseMills:\<n> 设置最大垃圾收集停顿时间，单位是毫秒。N是一个大于0的整数，收集器在工作时会调整堆大小或者其他参数，尽可能的把停顿时间控制在N毫秒以内。如果希望减少停顿时间，而把这个值设置的很小，JVM为了实现这个目标，可能会设置一个较小的堆(一个小堆比一个大堆回收的快)，而这会导致垃圾收集变得频繁，从而增加了垃圾回收的总时间，降低了吞吐量。</n></p>
-<h3 id="吞吐量"><a href="#吞吐量" class="headerlink" title="吞吐量"></a>吞吐量</h3><p>-XX:+GCTimeRatio:\<n> 设置吞吐量大小。N是一个0-100的整数，收集器将不会花费超过1/(N+1)的时间来用于垃圾收集。例如，假设N=19，那么系统用于收集垃圾的时间将不超过1/(19+1) =5%。默认情况下，N=99，表示不超过1%的时间用于垃圾收集</n></p>
-<h3 id="堆大小"><a href="#堆大小" class="headerlink" title="堆大小"></a>堆大小</h3><p>-Xmx表示最大的堆内存，堆的大小也会影响垃圾收集。并行收集器会通过调整堆的大小来实现最大停顿时间以及吞吐量这两个目标。</p>
-<h2 id="heap调整"><a href="#heap调整" class="headerlink" title="heap调整"></a>heap调整</h2><p>并行收集器会通过调整堆的大小来实现最大停顿时间以及吞吐量这两个目前。收集器通过一定的比例来扩大或缩小堆的大小，默认情况扩大的比例是20%，缩小的比例是5%。这两个比例可以通过参数来调整。</p>
-<p>XX:YoungGenerationSizeIncrement=\<y> 表示的新生代扩大的比例</y></p>
-<p>XX:TenuredGenerationSizeIncrement=\<t> 表示的老年代扩大的比例</t></p>
-<p>XX:AdaptiveSizeDecrementScaleFactor=\<d> 用来控制缩小的比例，假设扩大的比例为X，那么缩小的比例就为X/D</d></p>
-<h2 id="OutOfMemoryError"><a href="#OutOfMemoryError" class="headerlink" title="OutOfMemoryError"></a>OutOfMemoryError</h2><p>当花费在垃圾收集的时间过多时，收集器将抛出OutOfMemoryError的异常。默认情况下，如果超过98%的时间用于垃圾收集，而回收的堆大小小于2%，那么系统将抛出OutOfMemoryError。</p>
-<p>之所以这样设置是为了避免系统花费了大量的时间用于垃圾收集，但是得到的收益却很小。可以用-XX:-UseGCOverheadLimit这个参数来关闭这个特性。</p>
-<h2 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h2><p>停顿时间越短就越适合需要与用户交互的程序，良好的响应速度能提升用户体验，而高吞吐量则可以高效率地利用CPU时间，尽快完成程序的运算任务，主要适合在后台运算而不需要太多交互的任务。</p>
-<p>并行收集器可以通过设置参数来设置对应的目标。</p>
-<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
-<li><a href="https://docs.oracle.com/en/java/javase/12/gctuning/parallel-collector1.html#GUID-ECF0EE1D-C39E-453D-9B3D-603E25ADB9AD" target="_blank" rel="noopener">The Parallel Collector</a></li>
-<li><a href="https://www.ibm.com/developerworks/cn/java/j-lo-JVMGarbageCollection/index.html" target="_blank" rel="noopener">JVM 垃圾回收器工作原理及使用实例介绍</a></li>
+                <ul>
+<li style="list-style: none"><input type="checkbox" checked> APM管理后台域名切换</li>
+<li style="list-style: none"><input type="checkbox" checked> APM processor华为云正式环境部署</li>
+<li style="list-style: none"><input type="checkbox"> flink 配置更新</li>
+<li style="list-style: none"><input type="checkbox"> 告警平台告警启动</li>
+<li style="list-style: none"><input type="checkbox"> Grafana报表数据源修改</li>
 </ul>
+<h2 id="chaos-monitor"><a href="#chaos-monitor" class="headerlink" title="chaos-monitor"></a>chaos-monitor</h2><table>
+<thead>
+<tr>
+<th>job</th>
+<th>IDC datasource</th>
+<th>HW</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>chaos_domain_monitor</td>
+<td><a href="http://192.168.135.186:8086" target="_blank" rel="noopener">http://192.168.135.186:8086</a></td>
+<td>m8086.influxdb.m.com:8086</td>
+</tr>
+<tr>
+<td>chaos-monitor</td>
+<td><a href="http://192.168.135.186:8086" target="_blank" rel="noopener">http://192.168.135.186:8086</a></td>
+<td>m8086.influxdb.m.com:8086</td>
+</tr>
+<tr>
+<td>chaos_gid_buffer_error</td>
+<td><a href="http://192.168.135.186:8086" target="_blank" rel="noopener">http://192.168.135.186:8086</a></td>
+<td>m8086.influxdb.m.com:8086</td>
+</tr>
+<tr>
+<td>chaos-monitor-transcode</td>
+<td><a href="http://192.168.135.186:8086" target="_blank" rel="noopener">http://192.168.135.186:8086</a></td>
+<td>m8086.influxdb.m.com:8086</td>
+</tr>
+<tr>
+<td>chaos-monitor-file</td>
+<td><a href="http://10.12.128.158:8116" target="_blank" rel="noopener">http://10.12.128.158:8116</a></td>
+<td>m8116.influxdb.m.com</td>
+</tr>
+</tbody>
+</table>
+<h2 id="upload-sdk"><a href="#upload-sdk" class="headerlink" title="upload_sdk"></a>upload_sdk</h2><table>
+<thead>
+<tr>
+<th>job</th>
+<th>IDC datasource</th>
+<th>HW</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>upload_file_monitor</td>
+<td><a href="http://m8886.bx.influxdb.m.com:8886" target="_blank" rel="noopener">http://m8886.bx.influxdb.m.com:8886</a></td>
+<td>m8886.influxdb.m.com:8886</td>
+</tr>
+</tbody>
+</table>
+<h2 id="pic-cloud"><a href="#pic-cloud" class="headerlink" title="pic_cloud"></a>pic_cloud</h2><table>
+<thead>
+<tr>
+<th>job</th>
+<th>IDC datasource</th>
+<th>HW</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>pic_cloud_flink</td>
+<td><a href="http://10.12.128.112:8076" target="_blank" rel="noopener">http://10.12.128.112:8076</a></td>
+<td>m8076.influxdb.m.com:8076</td>
+</tr>
+</tbody>
+</table>
+<h2 id="hubble"><a href="#hubble" class="headerlink" title="hubble"></a>hubble</h2><table>
+<thead>
+<tr>
+<th>job</th>
+<th>IDC datasource</th>
+<th>HW</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>hubble_h5</td>
+<td><a href="http://192.168.21.7:8106" target="_blank" rel="noopener">http://192.168.21.7:8106</a></td>
+<td>m8206.influxdb.m.com:8206</td>
+</tr>
+<tr>
+<td>hubble</td>
+<td><a href="http://10.12.128.158:8096,http://10.12.128.158:8106,http://m8586.bx.influxdb.m.com:8586" target="_blank" rel="noopener">http://10.12.128.158:8096,http://10.12.128.158:8106,http://m8586.bx.influxdb.m.com:8586</a></td>
+<td>m8096.influxdb.m.com:8096,m8106.influxdb.m.com:8106,m8586.influxdb.m.com:8586    </td>
+</tr>
+</tbody>
+</table>
 
             </div>
             <hr>
@@ -472,7 +533,7 @@ thread = 5/8 * N (N &gt; 8)
                     <span class="reprint-tip">Reprint please specify: </span>
                     <a href="http://yoursite.com" class="b-link-green">wbl</a>
                     <i class="fa fa-angle-right fa-lg fa-fw text-color"></i>
-                    <a href="/2019/10/27/jvm-garbage-collector-parallel-collector/" class="b-link-green">JVM Garbage Collector——Parallel Collector</a>
+                    <a href="/2019/11/07/log-stat-admin/" class="b-link-green"></a>
                 </p>
             </div>
         </div>
@@ -494,7 +555,7 @@ thread = 5/8 * N (N &gt; 8)
         repo: 'blog-comments',
         owner: 'BloodHunter',
         admin: "BloodHunter",
-        id: '2019-10-27T23-27-26',
+        id: '2019-11-07T19-43-21',
         distractionFreeMode: false  // Facebook-like distraction free mode
     });
 
@@ -518,75 +579,29 @@ thread = 5/8 * N (N &gt; 8)
         <div class="article col s12 m6" data-aos="fade-up">
             <div class="article-badge left-badge text-color">Previous</div>
             <div class="card">
-                <a href="/2019/11/07/log-stat-admin/">
+                <a href="/2020/01/04/jvm-garbage-collector-cms/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/0.jpg" class="responsive-img" alt="">
+                        <img src="/medias/featureimages/22.jpg" class="responsive-img" alt="JVM Garbage Collector——CMS">
                         
-                        <span class="card-title"></span>
+                        <span class="card-title">JVM Garbage Collector——CMS</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
-                    <div class="summary">
- APM管理后台域名切换
- APM processor华为云正式环境部署
- flink 配置更新
- 告警平台告警启动
- Grafana报表数据源修改
-
-chaos-monitor
-
-
-job
-IDC datasource
-HW
-
-
-
-
-c</div>
+                    <div class="summary">CMS定义CMS的全称是Concurrent Mark Sweep。
+从名称上可以看出CMS的特点，可并发，使用标记-清除算法。CMS是针对老年代垃圾回收的收集器
+CMS目标CMS设计时的目标就是获取最小的停顿时间，也就是低延迟。对于响应时</div>
                     <div class="publish-info">
                         <span class="publish-date">
-                            <i class="fa fa-clock-o fa-fw icon-date"></i>2019-11-07
+                            <i class="fa fa-clock-o fa-fw icon-date"></i>2020-01-04
                         </span>
-                        <span class="publish-author">
-                            
-                            <i class="fa fa-user fa-fw"></i>
-                            wbl
-                            
-                        </span>
-                    </div>
-                </div>
-                
-            </div>
-        </div>
-        
-        
-        <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge right-badge text-color">Next</div>
-            <div class="card">
-                <a href="/2019/10/11/prometheus-counter/">
-                    <div class="card-image">
-                        
-                        
-                        <img src="/medias/featureimages/22.jpg" class="responsive-img" alt="Prometheus Counter">
-                        
-                        <span class="card-title">Prometheus Counter</span>
-                    </div>
-                </a>
-                <div class="card-content article-content">
-                    <div class="summary">我曾经以为Counter是prometheus中最简单的一种metric，直到我在Grafana中配置counter相关的dashboard之后，才发现自己对于counter的理解有一些偏差。因此这篇博客将会详细的介绍counter的用法。</div>
-                    <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-10-11
-                            </span>
                         <span class="publish-author">
                             
                             <i class="fa fa-bookmark fa-fw icon-category"></i>
                             
-                            <a href="/categories/监控/" class="post-category" target="_blank">
-                                    监控
+                            <a href="/categories/Java/" class="post-category" target="_blank">
+                                    Java
                                 </a>
                             
                             
@@ -596,8 +611,52 @@ c</div>
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/Prometheus/" target="_blank">
-                        <span class="chip bg-color">Prometheus</span>
+                    <a href="/tags/Java/" target="_blank">
+                        <span class="chip bg-color">Java</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">Next</div>
+            <div class="card">
+                <a href="/2019/10/27/jvm-garbage-collector-parallel-collector/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/9.jpg" class="responsive-img" alt="JVM Garbage Collector——Parallel Collector">
+                        
+                        <span class="card-title">JVM Garbage Collector——Parallel Collector</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary">内存模型
+Java中的内存模型如上图所示，分为两大块old(老年代)和young(新生代)，新生代又分为三个区，分别是Eden(伊甸园)，from Survivor(幸存者)，to Survivor。为什么要这么设计呢，其实和垃圾回收算法有</div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2019-10-27
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fa fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Java/" class="post-category" target="_blank">
+                                    Java
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Java/" target="_blank">
+                        <span class="chip bg-color">Java</span>
                     </a>
                     
                 </div>
