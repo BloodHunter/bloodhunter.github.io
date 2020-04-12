@@ -1,0 +1,850 @@
+<!DOCTYPE HTML>
+<html lang="">
+<head>
+    
+
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="utf-8">
+    <meta name="keywords" content="Java线程池-2, wbl">
+    <meta name="description" content="上一篇Java线程池-1中，我们了解了线程池的相关参数以及内置的几种线程池，现在我们来研究下如何自己实现一个线程池。
+在实现之前，我们先思考下，一个线程池有哪些要素呢？
+
+线程复用
+线程管理
+拒绝策略
+
+线程复用如何实现线程的复用呢？还记得">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Java线程池-2 | wbl</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/css/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+
+    <script src="/libs/jquery/jquery-2.2.0.min.js"></script>
+<link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+
+</head>
+
+<body>
+
+<header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="container">
+            <div class="nav-wrapper">
+                <div class="brand-logo">
+                    <a href="/" class="waves-effect waves-light">
+                        
+                        <img src="/medias/logo.jpeg" class="logo-img hide-on-small-only circle">
+                        
+                        <span class="logo-span">wbl</span>
+                    </a>
+                </div>
+                <a href="#" data-activates="mobile-nav" class="button-collapse"><i class="fa fa-navicon"></i></a>
+<ul class="right">
+    
+    <li class="hide-on-med-and-down">
+        <a href="/" class="waves-effect waves-light">
+            
+            <i class="fa fa-home"></i>
+            
+            <span>首页</span>
+        </a>
+    </li>
+    
+    <li class="hide-on-med-and-down">
+        <a href="/tags" class="waves-effect waves-light">
+            
+            <i class="fa fa-tags"></i>
+            
+            <span>标签</span>
+        </a>
+    </li>
+    
+    <li class="hide-on-med-and-down">
+        <a href="/categories" class="waves-effect waves-light">
+            
+            <i class="fa fa-bookmark"></i>
+            
+            <span>分类</span>
+        </a>
+    </li>
+    
+    <li class="hide-on-med-and-down">
+        <a href="/archives" class="waves-effect waves-light">
+            
+            <i class="fa fa-archive"></i>
+            
+            <span>归档</span>
+        </a>
+    </li>
+    
+    <li class="hide-on-med-and-down">
+        <a href="/about" class="waves-effect waves-light">
+            
+            <i class="fa fa-user-circle-o"></i>
+            
+            <span>关于</span>
+        </a>
+    </li>
+    
+    <li>
+        <a id="toggleSearch" class="waves-effect waves-light">
+            <i id="searchIcon" class="mdi-action-search"></i>
+        </a>
+    </li>
+
+</ul>
+
+<div class="side-nav" id="mobile-nav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.jpeg" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">wbl</div>
+        <div class="logo-desc">
+            
+            每天进步一点点
+            
+        </div>
+    </div>
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li>
+            <a href="/" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-home"></i>
+                
+                首页
+            </a>
+        </li>
+        
+        <li>
+            <a href="/tags" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-tags"></i>
+                
+                标签
+            </a>
+        </li>
+        
+        <li>
+            <a href="/categories" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-bookmark"></i>
+                
+                分类
+            </a>
+        </li>
+        
+        <li>
+            <a href="/archives" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-archive"></i>
+                
+                归档
+            </a>
+        </li>
+        
+        <li>
+            <a href="/about" class="waves-effect waves-light">
+                
+                <i class="fa fa-fw fa-user-circle-o"></i>
+                
+                关于
+            </a>
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/BloodHunter" class="waves-effect waves-light" target="_blank">
+                <i class="fa fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+
+    <div class="social-link"><a href="https://github.com/BloodHunter" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+    <i class="fa fa-github"></i>
+</a>
+<a href="mailto:15201414128@163.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+    <i class="fa fa-envelope-open"></i>
+</a>
+<a href="#!" class="tooltipped" data-tooltip="QQ联系我: 765759638" data-position="top" data-delay="50">
+    <i class="fa fa-qq"></i>
+</a>
+</div>
+</div>
+
+            </div>
+        </div>
+
+        
+        <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/BloodHunter" class="github-corner tooltipped hide-on-med-and-down" target="_blank" data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewbox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/>
+    </svg>
+</a>
+        
+    </nav>
+</header>
+
+
+
+
+
+<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/7.jpg')">
+    <div class="container">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <div class="description center-align post-title">
+                        Java线程池-2
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<main class="container content">
+
+    
+    <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            
+            <div class="post-info">
+                
+
+                <span class="post-date">
+                    <i class="fa fa-clock-o fa-fw"></i>2020-02-06
+                </span>
+            </div>
+        </div>
+        <hr>
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <p>上一篇<a href="">Java线程池-1</a>中，我们了解了线程池的相关参数以及内置的几种线程池，现在我们来研究下如何自己实现一个线程池。</p>
+<p>在实现之前，我们先思考下，一个线程池有哪些要素呢？</p>
+<ol>
+<li>线程复用</li>
+<li>线程管理</li>
+<li>拒绝策略</li>
+</ol>
+<h2 id="线程复用"><a href="#线程复用" class="headerlink" title="线程复用"></a>线程复用</h2><p>如何实现线程的复用呢？还记得SingleThreadExecutor吗，这个线程池只有一个工作线程，这其实就是线程复用最简单的实现方式：只用一个线程来处理所有的任务。</p>
+<pre><code>public class MyThreadPoolExecutor {
+    /**
+     * 保存提交的任务
+     */
+    private LinkedBlockingQueue&lt;Runnable&gt; taskQueue = new LinkedBlockingQueue&lt;&gt;();
+
+    public MyThreadPoolExecutor() {
+        // 启动一个线程不断拉取队列中的任务，并执行任务
+        new Thread(()-&gt;{
+            while (true){
+                try {
+                    Runnable take = taskQueue.take();
+                    take.run();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    /**
+     * 提交一个任务至线程池中
+     * @param task 任务
+     */
+    public void execute(Runnable task){
+        taskQueue.offer(task);
+    }
+}
+</code></pre><p>在线程池创建时，就启动一个线程，不断从队列中拉取任务，并执行任务。上述线程池虽然实现了线程的复用，但是我们无法对线程进行控制，既不能创建也不能销毁。</p>
+<h2 id="线程管理-woker创建与销毁，线程池maximumPoolSize"><a href="#线程管理-woker创建与销毁，线程池maximumPoolSize" class="headerlink" title="线程管理(woker创建与销毁，线程池maximumPoolSize)"></a>线程管理(woker创建与销毁，线程池maximumPoolSize)</h2><p>为了方便对线程进行管理，我们可以把其封装成一个worker对象，通过管理对象来管理线程。</p>
+<pre><code>/**
+ * @author wbl
+ * @date 2020-02-06
+ */
+public class MyThreadPoolExecutor2 {
+
+    /**
+     * 等待任务队列
+     */
+    private LinkedBlockingQueue&lt;Runnable&gt; taskQueue = new LinkedBlockingQueue&lt;&gt;();
+
+    /**
+     * 管理工作线程
+     */
+    private HashSet&lt;Worker&gt; workers = new HashSet&lt;&gt;();
+
+    /**
+     * 线程池最大线程数
+     */
+    private int maximumPoolSize;
+    /**
+     * 定制工作线程的创建
+     */
+    ThreadFactory threadFactory;
+
+
+    public MyThreadPoolExecutor2(int maximumPoolSize, ThreadFactory threadFactory) {
+        this.maximumPoolSize = maximumPoolSize;
+        this.threadFactory = threadFactory;
+    }
+
+    /**
+     * 若新增worker成功，则直接返回，若worker达到上限，则将任务放入等待队列
+     * @param task
+     */
+    public void execute(Runnable task){
+        if (addWorker(task)){
+            return;
+        }
+        taskQueue.offer(task);
+    }
+
+    /**
+     * 新增一个工作线程worker
+     * @param firstTask 提交的任务
+     * @return true 新增成功， false 线程池线程数量达到上限，不在创建新的worker
+     */
+    private boolean addWorker(Runnable firstTask){
+        if (workers.size() &gt;= maximumPoolSize){
+            return false;
+        }
+        Worker worker = new Worker(firstTask);
+        Thread t = worker.thread;
+        if (t != null){
+            workers.add(worker);
+            t.start();
+        }
+        return true;
+    }
+
+    /**
+     * 启动worker
+     * @param worker
+     */
+    private void runWorker(Worker worker){
+        Runnable task = worker.firstTask;
+        // 不断从等待队列来取任务
+        while (task != null || (task = getTask()) != null){
+            task.run();
+        }
+
+        // 若没有任务，则销毁worker
+        processWorkerExit(worker);
+    }
+
+    /**
+     * 销毁空闲worker
+     * @param worker 待销毁worker
+     */
+    private void processWorkerExit(Worker worker){
+        workers.remove(worker);
+    }
+
+    /**
+     * 从等待队列拉取任务
+     * @return
+     */
+    private Runnable getTask(){
+        return taskQueue.poll();
+    }
+
+    class Worker implements Runnable{
+
+        Thread thread;
+
+        Runnable firstTask;
+
+        Worker(Runnable firstTask) {
+            this.firstTask = firstTask;
+            this.thread = threadFactory.newThread(this);
+        }
+
+        @Override
+        public void run() {
+            runWorker(this);
+        }
+    }
+}
+</code></pre><p>在这个版本中，我们新增了一个散列集<strong>workers</strong>用来保存创建的worker，同时新增了一个<strong>threadFactory</strong>，以便用户定制化worker的创建</p>
+<p>线程的启动是通过<strong>runWorker</strong>方法来实现，worker在创建时会提交第一个任务(firstTask)，之后worker不断从等待队列中来取任务</p>
+<p>线程的创建是通过<strong>addWorker</strong>方法来实现，在创建新的worker时，我们先判断worker的数量是否达到线程池的上限(maximumPoolSize)，若达到上限，则不再创建worker，并把提交的task放入等待队列中。</p>
+<p>线程的销毁是通过<strong>processWorkerExit</strong>，当worker从等待队列中获取不到任务时，便删除该worker。</p>
+<h2 id="线程管理-核心线程数，线程存活时间"><a href="#线程管理-核心线程数，线程存活时间" class="headerlink" title="线程管理(核心线程数，线程存活时间)"></a>线程管理(核心线程数，线程存活时间)</h2><p>细心的读者可能会发现上述版本的线程池其实存在一个问题，我们再来看下<strong>runWorker</strong>的实现。当任务提交不频繁时，等待队列不会有堆积的任务，这样新提交一个任务，线程池创建一个worker来执行任务，任务执行完毕后，该worker立马就被销毁。再次提交任务，线程池又会重新创建一个worker，这样线程就没有被复用。</p>
+<pre><code>/**
+ * 启动worker
+ * @param worker
+ */
+private void runWorker(Worker worker){
+    Runnable task = worker.firstTask;
+    // 不断从等待队列来取任务
+    while (task != null || (task = getTask()) != null){
+        task.run();
+    }
+
+    // 若没有任务，则销毁worker
+    processWorkerExit(worker);
+}
+</code></pre><p>针对上述问题，我们需要新增两个变量，corePoolSize(核心线程数)以及keepAliveTime(线程存活时间)。</p>
+<p>首先我们修改<strong>getTask</strong>方法，若等待队列没有新增任务，则等待一段时间，超过时间还没有任务，则销毁worker</p>
+<pre><code>private Runnable getTask(){
+    Runnable task = null;
+    try {
+        task = taskQueue.poll(keepAliveTime, timeUnit);
+    }catch (InterruptedException e) {
+
+    }
+    return task;
+}
+</code></pre><p>其次需要修改<strong>addWorker</strong>方法，增加参数core，表示创建的是否是核心线程</p>
+<pre><code>private boolean addWorker(Runnable firstTask, boolean core){
+    int ws = workers.size();
+    if (ws &gt;= (core ? corePoolSize : maximumPoolSize)){
+        return false;
+    }
+    Worker worker = new Worker(firstTask);
+    Thread t = worker.thread;
+    if (t != null){
+        workers.add(worker);
+        t.start();
+    }
+    return true;
+}
+</code></pre><p>最后修改<strong>execute</strong>方法，新增任务，首先创建核心线程，若核心线程达到上限，则判断线程池的线程数是否达到上限，若达到上限，则把任务放入等待队列</p>
+<pre><code>public void execute(Runnable task){
+        // 若新增核心线程成功，则直接返回
+        if (addWorker(task, true)){
+            return;
+        }
+
+        // 若新增worker失败，则把任务放入等待队列
+        if (!addWorker(task, false)){
+            taskQueue.offer(task);
+        }
+    }
+</code></pre><h2 id="拒绝策略"><a href="#拒绝策略" class="headerlink" title="拒绝策略"></a>拒绝策略</h2><p>上述线程池还有需要完善的地方，对于处理失败的任务，需要提供一个切口供用户处理。我们提供一个接口<strong>AbortPolicy</strong>，用户可以实现该接口来处理这些任务</p>
+<pre><code>/**
+ * @author wbl
+ * @date 2020-02-06
+ */
+public interface AbortPolicy {
+    void reject(Runnable task, ThreadPoolExecutor poolExecutor);
+}
+</code></pre><p>接下来我们修改<strong>execute</strong>方法，对于提交失败的任务调用reject方法</p>
+<pre><code>public void execute(Runnable task){
+    // 若新增核心线程成功，则直接返回
+    if (addWorker(task, true)){
+        return;
+    }
+
+    // 若新增worker失败，则把任务放入等待队列
+    if (!addWorker(task, false)){
+        // 等待队列满了，则拒绝处理这个任务
+        if (!taskQueue.offer(task)){
+            abortPolicy.reject(task,this);
+        }
+    }
+}
+</code></pre><h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>大家可以在思考下，上述线程池是否还有需要完善的地方呢？答案是肯定的，上述线程池实际上简化了JDK线程池相关的逻辑。真正的线程池在管理worker时，还需要处理并发的问题以保证创建worker被正确，另外还需要管理线程池状态(shutdown,terminated)</p>
+
+            </div>
+            <hr>
+
+            
+            <style>
+    #reward {
+        margin: 40px 0;
+        text-align: center;
+    }
+
+    #reward .reward-link {
+        font-size: 1.88rem;
+    }
+
+    #reward .btn-floating:hover {
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    #rewardModal {
+        width: 320px;
+        height: 350px;
+    }
+
+    #rewardModal .reward-title {
+        margin: 15px auto;
+        padding-bottom: 5px;
+    }
+
+    #rewardModal .modal-content {
+        padding: 10px;
+    }
+
+    #rewardModal .close {
+        position: absolute;
+        right: 15px;
+        top: 15px;
+        color: rgba(0, 0, 0, 0.5);
+        font-size: 1.3rem;
+        line-height: 20px;
+        cursor: pointer;
+    }
+
+    #rewardModal .reward-tabs {
+        margin: 0 auto;
+        width: 210px;
+    }
+
+    .reward-tabs .tabs {
+        height: 38px;
+        margin: 10px auto;
+        padding-left: 0;
+    }
+
+    .reward-tabs .tabs .tab {
+        height: 38px;
+        line-height: 38px;
+    }
+
+    .reward-tabs .tab a {
+        color: #fff;
+        background-color: #ccc;
+    }
+
+    .reward-tabs .tab a:hover {
+        color: #fff;
+    }
+
+    .reward-tabs .wechat-tab .active {
+        color: #fff;
+        background-color: #22AB38;
+    }
+
+    .reward-tabs .alipay-tab .active {
+        color: #fff;
+        background-color: #019FE8;
+    }
+
+    .reward-tabs .reward-img {
+        width: 210px;
+        height: 210px;
+    }
+</style>
+
+<div id="reward">
+    <a class="reward-link btn-floating btn-large waves-effect waves-light red">赏</a>
+
+    <!-- Modal Structure -->
+    <div id="rewardModal" class="modal">
+        <div class="modal-content">
+            <a class="close"><i class="fa fa-close"></i></a>
+            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <div class="reward-content">
+                <div class="reward-tabs">
+                    <ul class="tabs">
+                        <li class="tab wechat-tab waves-effect waves-light"><a class="active" href="#wechat">微信</a></li>
+                        <li class="tab alipay-tab waves-effect waves-light"><a href="#alipay">支付宝</a></li>
+                    </ul>
+                    <div id="wechat">
+                        <img src="/medias/reward/wechat.jpeg" class="reward-img" alt="微信打赏二维码">
+                    </div>
+                    <div id="alipay">
+                        <img src="/medias/reward/alipay.jpeg" class="reward-img" alt="支付宝打赏二维码">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('#reward .reward-link').on('click', function () {
+            $('#rewardModal').openModal();
+        });
+
+        $('#rewardModal .close').on('click', function () {
+            $('#rewardModal').closeModal();
+        });
+    });
+</script>
+            
+
+            <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+
+<div id="article-share">
+    
+    <div class="social-share" data-disabled="qzone, qq, weibo, douban"></div>
+    
+</div>
+
+<script src="/libs/share/js/social-share.min.js"></script>
+
+            <div class="reprint">
+                <p>
+                    <span class="reprint-tip">Reprint please specify: </span>
+                    <a href="http://yoursite.com" class="b-link-green">wbl</a>
+                    <i class="fa fa-angle-right fa-lg fa-fw text-color"></i>
+                    <a href="/2020/02/06/java-xian-cheng-chi-2/" class="b-link-green">Java线程池-2</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    
+        <link rel="stylesheet" href="/libs/gitalk/gitalk.css">
+<link rel="stylesheet" href="/css/my-gitalk.css">
+
+<div class="card gitalk-card" data-aos="fade-up">
+    <div id="gitalk-container" class="card-content"></div>
+</div>
+
+<script src="/libs/gitalk/gitalk.min.js"></script>
+<script>
+    let gitalk = new Gitalk({
+        clientID: '2ce6d5b3bf1afe6d63e1',
+        clientSecret: '1adb94042a9ac66b08a7a774c10dfc1deb0cb0bd',
+        repo: 'blog-comments',
+        owner: 'BloodHunter',
+        admin: "BloodHunter",
+        id: '2020-02-06T12-58-49',
+        distractionFreeMode: false  // Facebook-like distraction free mode
+    });
+
+    gitalk.render('gitalk-container');
+</script>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">Previous</div>
+            <div class="card">
+                <a href="/2020/02/15/kafka-xiao-xi-cun-chu-yu-chu-li-3/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/23.jpg" class="responsive-img" alt="Kafka——消息存储与处理-3">
+                        
+                        <span class="card-title">Kafka——消息存储与处理-3</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary">消息存储存储路径kakfa的消息都会持久化到磁盘，并以日志文件的方式存储。日志文件的保存路径配置在config/server.properties中
+# A comma seperated list of directories under</div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="fa fa-clock-o fa-fw icon-date"></i>2020-02-15
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fa fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/后端/" class="post-category" target="_blank">
+                                    后端
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Kafka/" target="_blank">
+                        <span class="chip bg-color">Kafka</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">Next</div>
+            <div class="card">
+                <a href="/2020/02/05/java-xian-cheng-chi-1/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/6.jpg" class="responsive-img" alt="Java线程池-1">
+                        
+                        <span class="card-title">Java线程池-1</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary">总所周知，创建线程比较损耗资源，频繁创建线程容易造成性能降低。因此需要使用线程池，主要原因是可以复用线程，另外使用线程池也可以比较方便的对线程进行管理。下面，让我们一起来看下在Java中如何使用线程池。
+ThreadPoolExecutor</div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2020-02-05
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fa fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Java/" class="post-category" target="_blank">
+                                    Java
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Java/" target="_blank">
+                        <span class="chip bg-color">Java</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+</div>
+    
+
+</main>
+
+
+<footer class="page-footer bg-color">
+    <div class="container row center-align">
+        <div class="col s12 m8 l8 copy-right">
+            本站基于
+            <a href="https://hexo.io/" target="_blank">Hexo</a> 采用
+            <a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">hexo-theme-matery</a>的主题搭建.
+        </div>
+        <div class="col s12 m4 l4 social-link"><a href="https://github.com/BloodHunter" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+    <i class="fa fa-github"></i>
+</a>
+<a href="mailto:15201414128@163.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+    <i class="fa fa-envelope-open"></i>
+</a>
+<a href="#!" class="tooltipped" data-tooltip="QQ联系我: 765759638" data-position="top" data-delay="50">
+    <i class="fa fa-qq"></i>
+</a>
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+<!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title">Search</span>
+            <input type="search" id="searchInput" name="s" placeholder="Please enter a search keyword" class="search-input" autofocus>
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script src="/js/search.js"></script>
+<script type="text/javascript">
+    searchFunc("/" + "search.xml", 'searchInput', 'searchResult');
+</script>
+<!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fa fa-angle-up"></i>
+    </a>
+</div>
+
+
+<script src="/libs/materialize/js/materialize.min.js"></script>
+<script src="/libs/masonry/masonry.pkgd.min.js"></script>
+<script src="/libs/aos/aos.js"></script>
+<script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+<script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+<script src="/js/matery.js"></script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+</body>
+</html>
