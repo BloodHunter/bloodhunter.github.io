@@ -5,14 +5,8 @@
 
 <head><meta name="generator" content="Hexo 3.8.0">
     <meta charset="utf-8">
-    <meta name="keywords" content="Spring Boot JPA--命名策略, wbl">
-    <meta name="description" content="废话不多说，先来看下例子，首先定义一个Entity
-@Entity
-@Getter
-@Setter
-public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationT">
+    <meta name="keywords" content="BlockingQueue介绍, wbl">
+    <meta name="description" content="简介BlockingQueue是java.util.concurrent中的类。通过包名也知道它与并发有关。在学习并发的过程中，我相信大家都听过生产者消费者模型。BlockingQueue可以帮助我们来实现这样一个模型。从数据结构的角度来说">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -20,7 +14,7 @@ public class User {
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Spring Boot JPA--命名策略 | wbl</title>
+    <title>BlockingQueue介绍 | wbl</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/font-awesome.min.css">
@@ -253,13 +247,13 @@ public class User {
 
 
 
-<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/15.jpg')">
+<div class="bg-cover post-cover" style="background-image: url('/medias/featureimages/22.jpg')">
     <div class="container">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
                     <div class="description center-align post-title">
-                        Spring Boot JPA--命名策略
+                        BlockingQueue介绍
                     </div>
                 </div>
             </div>
@@ -279,8 +273,8 @@ public class User {
             
             <div class="article-tag">
                 
-                <a href="/tags/JPA/" target="_blank">
-                    <span class="chip bg-color">JPA</span>
+                <a href="/tags/Concurrent/" target="_blank">
+                    <span class="chip bg-color">Concurrent</span>
                 </a>
                 
             </div>
@@ -290,228 +284,165 @@ public class User {
                 <span class="post-cate">
                     <i class="fa fa-bookmark fa-fw icon-category"></i>
                     
-                    <a href="/categories/Spring-Boot/" class="post-category" target="_blank">
-                        Spring Boot
+                    <a href="/categories/Java/" class="post-category" target="_blank">
+                        Java
                     </a>
                     
                 </span>
                 
 
                 <span class="post-date">
-                    <i class="fa fa-clock-o fa-fw"></i>2020-04-11
+                    <i class="fa fa-clock-o fa-fw"></i>2020-05-10
                 </span>
             </div>
         </div>
         <hr>
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <p>废话不多说，先来看下例子，首先定义一个Entity</p>
-<pre><code>@Entity
-@Getter
-@Setter
-public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-    private String firstName;
-    private String lastName;
-    private String address;
-    private LocalDate birthday;
-}
-</code></pre><p>然后定义一个repository</p>
-<pre><code>@Repository
-public interface UserDao extends JpaRepository&lt;User, Integer&gt;{
-}
-</code></pre><p>最后增加相关DataSource配置，并启动项目</p>
-<pre><code>spring.datasource.url=jdbc:mysql://localhost:3306/test?serverTimezone=Asia/Shanghai
-spring.datasource.password=root
-spring.datasource.username=root
-spring.datasource.driver-class-name=com.mysql.jdbc.Driver
-spring.jpa.properties.hibernate.jdbc.time_zone=Asia/Shanghai
-spring.jpa.show-sql = true
-spring.jpa.hibernate.ddl-auto=update
-</code></pre><p>由于我们设置spring.jpa.show-sql为true，我们可以在控制台看到如下的输出</p>
-<pre><code>Hibernate: create table user (id integer not null auto_increment, address varchar(255), birthday date, first_name varchar(255), last_name varchar(255), primary key (id)) engine=MyISAM
-</code></pre><p>可以看到程序自动帮我们创建了table，但是有没有发现字段的名称发生了变化</p>
-<pre><code>firstName ---&gt;  first_name
-lastName ---&gt; last_name
-</code></pre><p>今天我们就来探究下SpringBoot中Hibernate字段名称的命名策略，以下示例都是采用2.1.4版本的SpringBoot</p>
-<h2 id="spring-jpa-hibernate"><a href="#spring-jpa-hibernate" class="headerlink" title="spring.jpa.hibernate"></a>spring.jpa.hibernate</h2><p>在SpringBoot中，Hibernate的相关配置都保存在HibernateProperties，它配置了ConfigurationProperties注解，会自动装载前缀为spring.jpa.hibernate的配置。</p>
-<p><img src="https://pic.downk.cc/item/5e917ae6504f4bcb04907109.jpg" alt=""></p>
-<p>其中Naming是一个内部类，Hibernate字段映射策略就是在这里配置的。</p>
-<p><img src="https://pic.downk.cc/item/5e917c80504f4bcb0491f21b.jpg" alt=""></p>
-<p><img src="https://pic.downk.cc/item/5e917cf1504f4bcb04925930.jpg" alt=""></p>
-<p>可以看到Hibernate有两种策略，分别是<strong>implicitStrategy</strong>和<strong>physicalStrategy</strong>，并且默认使用<strong>SpringImplicitNamingStrategy</strong>和<strong>SpringPhysicalNamingStrategy</strong></p>
-<p>Hibernate将对象模型映射到关系数据库分为两个步骤</p>
-<ol>
-<li>从对象模型中确定逻辑名称。逻辑名可以由用户显式指定(使用@Column或@Table),也可以隐式指定。</li>
-<li>将逻辑名称映射到物理名称，也就是数据库中使用的名称。</li>
-</ol>
-<p>implicitStrategy用于第一步隐式指定逻辑名称，而physicalStrategy则用于第二步中逻辑名称到物理名称的映射。</p>
-<p>例如Entity中有个字段名为phoneNumber，我们期望它的逻辑名称为phone_numer，而在数据库中实际的物理名称为p_num。</p>
-<p>两种策略的作用范围如下</p>
-<pre><code>phoneNumber ----implicitStrategy---&gt; phone_number
-phone_number ----physicalStrategy---&gt; p_num
-</code></pre><p>SpringBoot中可以通过下面的配置来设置策略</p>
-<pre><code>spring.jpa.hibernate.naming.implicit-strategy
-
-spring.jpa.hibernate.naming.physical-strategy
-</code></pre><h2 id="PhysicalNamingStrategy"><a href="#PhysicalNamingStrategy" class="headerlink" title="PhysicalNamingStrategy"></a>PhysicalNamingStrategy</h2><p>Hibernate定义了PhysicalNamingStrategy接口，并提供了一个默认实现，SpringBoot也提供了一种实现SpringPhysicalNamingStrategy<br><img src="https://pic.downk.cc/item/5e91c570504f4bcb04da8bec.jpg" alt=""></p>
-<h3 id="PhysicalNamingStrategyStandardImpl"><a href="#PhysicalNamingStrategyStandardImpl" class="headerlink" title="PhysicalNamingStrategyStandardImpl"></a>PhysicalNamingStrategyStandardImpl</h3><p>PhysicalNamingStrategyStandardImpl的实现很简单，就是将逻辑名称原封不动的映射为物理名称<br><img src="https://pic.downk.cc/item/5e91ca04504f4bcb04df7104.jpg" alt=""></p>
-<h3 id="SpringPhysicalNamingStrategy"><a href="#SpringPhysicalNamingStrategy" class="headerlink" title="SpringPhysicalNamingStrategy"></a>SpringPhysicalNamingStrategy</h3><p><img src="https://pic.downk.cc/item/5e91cb76504f4bcb04e0db35.jpg" alt=""><br>主要逻辑都在apply方法中，我们看下apply的实现</p>
-<p><img src="https://pic.downk.cc/item/5e91cc92504f4bcb04e20554.jpg" alt=""></p>
-<p>其中isUnderscoreRequired的实现如下<br><img src="https://pic.downk.cc/item/5e91ccde504f4bcb04e25001.jpg" alt=""></p>
-<p>getIdentifier的实现如下<br><img src="https://pic.downk.cc/item/5e91cf72504f4bcb04e514b4.jpg" alt=""></p>
-<p>看到这是不是就明白了，<strong>apply方法其实就是将驼峰法改成用下划线来连接，同时将名称转化为小写</strong></p>
-<h2 id="ImplicitNamingStrategy"><a href="#ImplicitNamingStrategy" class="headerlink" title="ImplicitNamingStrategy"></a>ImplicitNamingStrategy</h2><p>Hibernate定义了ImplicitNamingStrategy接口，并且提供了4种实现。而SpringBoot也提供了一种实现，也就是上文提到的SpringImplicitNamingStrategy<br><img src="https://pic.downk.cc/item/5e91857f504f4bcb049ac5a3.jpg" alt=""></p>
-<p>为了更好的了解各种策略之间的区别，我们可以先声明几种Entity，在通过设置不同的策略来查看最终的结果。</p>
-<pre><code>//集合类
-@Embeddable
-@Data
-public class EmbeddableElement {
-
-    @Column(name = &quot;quoted_field&quot;)
-    private String quotedField;
-
-    private String regularField;
-}
-</code></pre><pre><code>@Entity
-@Data
-public class OwnedEntity {
-    @Id
-    private Long id;
-
-    @ElementCollection
-    @CollectionTable
-    Set&lt;EmbeddableElement&gt; ownedElements;
-}
-</code></pre><pre><code>@Entity
-@Table(name = &quot;dependentTable&quot;)
-@Data
-public class DependentEntity {
-    @Id
-    private long id;
-
-    @ManyToOne
-    MainEntity mainEntity;
-
-    @ElementCollection
-    @CollectionTable(name = &quot;dependentElements&quot;)
-    Set&lt;EmbeddableElement&gt; dependentElements;
-}
-</code></pre><pre><code>@Entity
-@Table(name = &quot;mainTable&quot;)
-@Data
-public class MainEntity {
-    @Id
-    private long id;
-
-    @ElementCollection
-    private Set&lt;EmbeddableElement&gt; mainElements;
-
-    @OneToMany(targetEntity = DependentEntity.class)
-    Set&lt;DependentEntity&gt; dependentEntities;
-
-    @OneToOne(targetEntity = OwnedEntity.class)
-    OwnedEntity ownedEntity;
-}
-</code></pre><h3 id="ImplicitNamingStrategyJpaCompliantImpl"><a href="#ImplicitNamingStrategyJpaCompliantImpl" class="headerlink" title="ImplicitNamingStrategyJpaCompliantImpl"></a>ImplicitNamingStrategyJpaCompliantImpl</h3><p>我们首先来看ImplicitNamingStrategyJpaCompliantImpl，因为它是上述几种实现的基类。我们在配置文件中设置该策略，并设置PhysicalNamingStrategyStandardImpl，以便更好的查看逻辑名称的映射</p>
-<pre><code>spring.jpa.hibernate.naming.implicit-strategy=org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl
-pring.jpa.hibernate.naming.physical-strategy=org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-</code></pre><p>启动项目，我们可以得到如下生成表的语句</p>
-<pre><code>create table dependentElements (DependentEntity_id bigint not null, quoted_field varchar(255), regularField varchar(255)) 
-create table dependentTable (id bigint not null, mainEntity_id bigint, primary key (id)) 
-create table MainEntity_mainElements (MainEntity_id bigint not null, quoted_field varchar(255), regularField varchar(255)) 
-create table mainTable (id bigint not null, ownedEntity_id bigint, primary key (id)) 
-create table mainTable_dependentTable (MainEntity_id bigint not null, dependentEntities_id bigint not null, primary key (MainEntity_id, dependentEntities_id)) 
-create table OwnedEntity (id bigint not null, primary key (id)) 
-create table OwnedEntity_ownedElements (OwnedEntity_id bigint not null, quoted_field varchar(255), regularField varchar(255)) 
-</code></pre><p>是不是有点混乱，没关系，我们一个个来看。首先来看table的逻辑名称，table可以分为几类</p>
-<ol>
-<li>primaryTable(主表)</li>
-<li>joinTable(关联表)</li>
-<li>collectionTable(集合表)</li>
-</ol>
-<p>我们先来看主表逻辑名称的生成策略<br><img src="https://pic.downk.cc/item/5e92ca56c2a9a83be51929a9.jpg" alt=""></p>
-<pre><code>create table mainTable (id bigint not null, ownedEntity_id bigint, primary key (id))
-
-create table dependentTable (id bigint not null, mainEntity_id bigint, primary key (id))
-
-create table OwnedEntity (id bigint not null, primary key (id)) 
-</code></pre><p>由于MainEntity，DependentEntity都使用了@Table注解，所以逻辑名称是显式定义的，由注解中的name属性决定，而OwendEntity没有使用@Table注解，所以它的逻辑名称由ImplicitNamingStrategy决定。</p>
-<p><strong>我们可以看到ImplicitNamingStrategyJpaCompliantImpl直接将JpaEntityName,也即是Entity的类名(OwnedEntity)作为逻辑名称</strong></p>
-<p>再来看下关联表逻辑名称的生成策略<br><img src="https://pic.downk.cc/item/5e92cc2ac2a9a83be51a7a04.jpg" alt=""></p>
-<pre><code>create table mainTable_dependentTable (MainEntity_id bigint not null, dependentEntities_id bigint not null, primary key (MainEntity_id, dependentEntities_id))
-</code></pre><p><strong>可以看到对于关联表的逻辑名称，是由Entity的物理名称 + ‘_’ + 引用Entity的物理名称组成</strong></p>
-<p>最后来看下集合表逻辑名称的生成策略<br><img src="https://pic.downk.cc/item/5e92cfeec2a9a83be51cd84d.jpg" alt=""></p>
-<pre><code>create table dependentElements (DependentEntity_id bigint not null, quoted_field varchar(255), regularField varchar(255)) 
-
-create table MainEntity_mainElements (MainEntity_id bigint not null, quoted_field varchar(255), regularField varchar(255))
-
-create table OwnedEntity_ownedElements (OwnedEntity_id bigint not null, quoted_field varchar(255), regularField varchar(255))
-</code></pre><p>在DependentEntity中使用<strong>@CollectionTable(name = “dependentElements”)</strong>显式的指定了集合表的逻辑名称。而在MainEntity和OwnedEntity中没有显式指定，<strong>集合表的生成策略为Entity的类名称 + ‘_’ + 属性名称</strong></p>
-<p><strong>ImplicitNamingStrategyJpaCompliantImpl符合JPA2.0命名规范</strong></p>
-<h3 id="ImplicitNamingStrategyLegacyHbmImpl"><a href="#ImplicitNamingStrategyLegacyHbmImpl" class="headerlink" title="ImplicitNamingStrategyLegacyHbmImpl"></a>ImplicitNamingStrategyLegacyHbmImpl</h3><p><strong>它是Hibernate原始的命名策略</strong>，它与ImplicitNamingStrategyJpaCompliantImpl的差异在于关联表逻辑名称的生成策略</p>
-<pre><code>create table mainTable_dependentEntities (MainEntity_id bigint not null, dependentEntities bigint not null, primary key (MainEntity_id, dependentEntities))
-</code></pre><p><strong>可以看到它的策略是Entity的物理名称 + ‘_’ + 引用Entity的属性名称</strong></p>
-<h3 id="ImplicitNamingStrategyLegacyJpaImpl"><a href="#ImplicitNamingStrategyLegacyJpaImpl" class="headerlink" title="ImplicitNamingStrategyLegacyJpaImpl"></a>ImplicitNamingStrategyLegacyJpaImpl</h3><p>ImplicitNamingStrategyLegacyJpaImpl符合JPA1.0的命名规范，它与JPA2.0的规范差异主要在集合表和关联表上</p>
-<p>对于集合表，<strong>它的策略是Entity的物理名称 + ‘_’ + 属性名称</strong></p>
-<pre><code>create table mainTable_mainElements (mainTable_id bigint not null, quoted_field varchar(255), regularField varchar(255))
-</code></pre><p>对于关联表，它的策略是如果引用Entity没有物理名称，则使用属性名称<br><img src="https://pic.downk.cc/item/5e92d948c2a9a83be523276c.jpg" alt=""></p>
-<h3 id="ImplicitNamingStrategyComponentPathImpl"><a href="#ImplicitNamingStrategyComponentPathImpl" class="headerlink" title="ImplicitNamingStrategyComponentPathImpl"></a>ImplicitNamingStrategyComponentPathImpl</h3><p><strong>它与JAP2.0的命名规范基本相同，除了它属性(列名)的逻辑名称包含复合名称</strong><br><img src="https://pic.downk.cc/item/5e92dba7c2a9a83be525465b.jpg" alt=""></p>
-<pre><code>create table MainEntity_mainElements (MainEntity_id bigint not null, quoted_field varchar(255), mainElements_regularField varchar(255))
-</code></pre><p>我们可以看到属性regularField加上了前缀mainElements</p>
-<h3 id="SpringImplicitNamingStrategy"><a href="#SpringImplicitNamingStrategy" class="headerlink" title="SpringImplicitNamingStrategy"></a>SpringImplicitNamingStrategy</h3><p>它是Spring规定的命名策略，它与JAP2.0命名规范的差异在于关联表，<strong>它的策略是Entity的物理名称 + ‘_’ + 属性名称</strong><br><img src="https://pic.downk.cc/item/5e92dcd7c2a9a83be52660f3.jpg" alt=""></p>
-<pre><code>create table mainTable_dependentEntities (MainEntity_id bigint not null, dependentEntities_id bigint not null, primary key (MainEntity_id, dependentEntities_id))
-</code></pre><p>用一张表格来说明下各个策略的差异</p>
+                <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>BlockingQueue是java.util.concurrent中的类。通过包名也知道它与并发有关。在学习并发的过程中，我相信大家都听过生产者消费者模型。BlockingQueue可以帮助我们来实现这样一个模型。从数据结构的角度来说，BlockingQueue是一个队列；从并发的角度来说，BlockingQueue带有阻塞的功能。</p>
+<p>当队列为空时，若此时有线程来获取队列中的数据，那么这个线程将会被阻塞，直到其他线程往队列中插入数据。当队列满时，若此时有线程继续往队列插入数据，该线程也会被阻塞，直到有其他线程取走了数据。BlockingQueue的模型如下<br><img src="https://pic.downk.cc/item/5eb82178c2a9a83be542866d.jpg" alt=""></p>
+<p>BlockingQueue的类结构图如下<br><img src="https://pic.downk.cc/item/5eb8228ac2a9a83be5451387.jpg" alt=""></p>
+<h2 id="操作"><a href="#操作" class="headerlink" title="操作"></a>操作</h2><p>BlockingQueue提供许多操作，具体如下表所示</p>
 <table>
 <thead>
 <tr>
-<th>strategy</th>
-<th>primaryTable</th>
-<th>joinTable</th>
-<th>collectTable</th>
+<th>Type</th>
+<th>Throws exception</th>
+<th>Special value</th>
+<th>Blocks</th>
+<th>Times out</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>ImplicitNamingStrategyJpaCompliantImpl</td>
-<td>Entity类名</td>
-<td>Entity物理名称 + 引用Entity的物理名称</td>
-<td>Entity类名 + 属性名称</td>
+<td>Insert</td>
+<td>add(e)</td>
+<td>offer(e)</td>
+<td>put(e)</td>
+<td>offer(e,time,unit)</td>
 </tr>
 <tr>
-<td>ImplicitNamingStrategyLegacyHbmImpl</td>
-<td>-</td>
-<td>Entity物理名称 + 属性名称</td>
-<td>-</td>
+<td>Remove</td>
+<td>remove()</td>
+<td>poll()</td>
+<td>take()</td>
+<td>poll(time,unit)</td>
 </tr>
 <tr>
-<td>ImplicitNamingStrategyLegacyJpaImpl</td>
-<td>-</td>
-<td>-</td>
-<td>Entity物理名称 + 属性名称</td>
-</tr>
-<tr>
-<td>SpringImplicitNamingStrategy</td>
-<td>-</td>
-<td>Entity的物理名称 + 属性名称</td>
-<td>-</td>
+<td>Examine</td>
+<td>element()</td>
+<td>peek()</td>
 </tr>
 </tbody>
 </table>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ol>
-<li>Hibernate将对象映射到数据库分为两个步骤，一是entity映射到逻辑名称，而是逻辑名称映射到物理名称</li>
-<li>ImplicitNamingStrategy负责逻辑名称的映射，PhysicalNamingStrategy负责逻辑名称到物理名称的映射</li>
-<li>可以通过实现ImplicitNamingStrategy和PhysicalNamingStrategy接口来定义命名策略</li>
-<li>SpringBoot中默认使用SpringImplicitNamingStrategy和SpringPhysicalNamingStrategy</li>
+<p>怎么理解上面的图呢？横轴来看，表示的是操作影响</p>
+<ol>
+<li>Throws exception：表示该操作可能会抛出异常，例如队列为空时，继续删除数据</li>
+<li>Special value：表示该操作会返回特殊的值，例如队列为空时，返回null</li>
+<li>Blocks：表示该操作会引起阻塞</li>
+<li>Times out：表示该操作可以指定超时时间，例如插入数据</li>
 </ol>
-<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
-<li><a href="https://www.baeldung.com/hibernate-naming-strategy" target="_blank" rel="noopener">Hibernate 5 Naming Strategy Configuration</a></li>
-<li><a href="https://www.cnblogs.com/CreateMyself/p/12373664.html" target="_blank" rel="noopener">Hibernate入门之命名策略（naming strategy）详解</a></li>
-<li><a href="https://blog.csdn.net/j080624/article/details/84790421" target="_blank" rel="noopener">Hibernate5中实体映射命名策略</a></li>
+<p>阻塞和超时有啥区别呢。对于阻塞操作来说，线程会一直阻塞直到某些操作唤醒线程，而超时的话，线程可以被操作唤醒，也可以在一段时间后自动被唤醒。</p>
+<p>纵轴来看，表示的是操作类型，这里重点看下Remove和Examine的区别，</p>
+<ul>
+<li>相同点：两者都会返回队头的数据</li>
+<li>不同点：remove会删除数据，而Examine不会删除数据</li>
 </ul>
+<h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h2><p>首先建立一个BlockingQueue的测试类,并且定义一个长度为3的队列</p>
+<pre><code>public class BlockingQueueTestTest { 
 
+    // 定义队列长度3
+    private BlockingQueue&lt;Integer&gt; blockingQueue = new ArrayBlockingQueue&lt;&gt;(3);
+
+    // 定义预期异常
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+}
+</code></pre><h3 id="1-add与offer"><a href="#1-add与offer" class="headerlink" title="1. add与offer"></a>1. add与offer</h3><pre><code>@Test
+public void testAdd(){
+    Assert.assertTrue(blockingQueue.add(1));
+    Assert.assertTrue(blockingQueue.add(2));
+    Assert.assertTrue(blockingQueue.add(3));
+    thrown.expect(IllegalStateException.class);
+    blockingQueue.add(4);
+}
+
+@Test
+public void testOffer(){
+    Assert.assertTrue(blockingQueue.offer(1));
+    Assert.assertTrue(blockingQueue.offer(2));
+    Assert.assertTrue(blockingQueue.offer(3));
+    Assert.assertFalse(blockingQueue.offer(4));
+}
+</code></pre><p>可以看到，当队列满时，继续add会抛出<strong>IllegalStateException</strong>的异常；而继续offer时会返回false</p>
+<h3 id="2-put与offer"><a href="#2-put与offer" class="headerlink" title="2. put与offer"></a>2. put与offer</h3><p>先来测试put方法</p>
+<pre><code>@Test
+public void testPut() throws InterruptedException {
+    for (int i = 0; i &lt; 4; i++){
+        Thread thread = new Thread(() -&gt; {
+            try {
+                int value = ThreadLocalRandom.current().nextInt(100);
+                blockingQueue.put(value);
+                System.out.println(String.format(&quot;put %d into queue,result:%s&quot;, value,blockingQueue.put(value,1,TimeUnit.SECONDS)));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        // 设置线程名称，以便jstack查看
+        thread.setName(&quot;BlockingQueue-put-&quot; + i);
+        thread.start();
+    }
+    // 防止主函数退出
+    Thread.sleep(600 * 1000);
+}
+</code></pre><p>运行程序后，我们通过jps命令找到pid，在通过jstack命令来看下线程的情况。可以看到当队列满时，若继续put数据到队列，会导致线程阻塞。<br><img src="https://pic.downk.cc/item/5eb8302ac2a9a83be56fbc64.jpg" alt=""></p>
+<p>再来看下offer(e,time,unit)方法</p>
+<pre><code>@Test
+public void testOfferTimeout() throws InterruptedException {
+    for (int i = 0; i &lt; 4; i++){
+        Thread thread = new Thread(() -&gt; {
+            try {
+                int value = ThreadLocalRandom.current().nextInt(100);
+                System.out.println(String.format(&quot;put %d into queue,result:%s&quot;, value,blockingQueue.offer(value,1,TimeUnit.SECONDS)));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        thread.setName(&quot;BlockingQueue-offer-&quot; + i);
+        thread.start();
+    }
+    // 防止主函数退出
+    Thread.sleep(600 * 1000);
+}
+</code></pre><p>我们设置offer的超时时间为1s，当程序运行超过1s后，使用jstack命令查看线程状态时，发现只要main函数处于阻塞状态(因为在sleep)，而offer线程已经全部执行完毕了。</p>
+<h3 id="remove与poll"><a href="#remove与poll" class="headerlink" title="remove与poll"></a>remove与poll</h3><pre><code>@Test
+public void testRemove(){
+    thrown.expect(NoSuchElementException.class);
+    blockingQueue.remove();
+}
+
+@Test
+public void testPoll(){
+    Assert.assertNull(blockingQueue.poll());
+}
+</code></pre><h3 id="element，peek，remove"><a href="#element，peek，remove" class="headerlink" title="element，peek，remove"></a>element，peek，remove</h3><pre><code>@Test
+public void testElementAndPeekAndRemove(){
+    blockingQueue.add(1);
+    // element操作只返回数据并不删除数据
+    Assert.assertEquals(1, (int) blockingQueue.element());
+    Assert.assertEquals(1, blockingQueue.size());
+
+    // remove删除并返回数据
+    Assert.assertEquals(1,(int) blockingQueue.remove());
+    Assert.assertEquals(0,blockingQueue.size());
+
+    // 当队列为空时，element会抛出异常
+    thrown.expect(NoSuchElementException.class);
+    blockingQueue.element();
+    // 当队列为空时，peek返回null
+    Assert.assertNull(blockingQueue.peek());
+}
+</code></pre>
             </div>
             <hr>
 
@@ -649,7 +580,7 @@ create table OwnedEntity_ownedElements (OwnedEntity_id bigint not null, quoted_f
                     <span class="reprint-tip">Reprint please specify: </span>
                     <a href="http://yoursite.com" class="b-link-green">wbl</a>
                     <i class="fa fa-angle-right fa-lg fa-fw text-color"></i>
-                    <a href="/2020/04/11/spring-boot-jpa-ming-ming-ce-lue/" class="b-link-green">Spring Boot JPA--命名策略</a>
+                    <a href="/2020/05/10/blockqueue-jie-shao/" class="b-link-green">BlockingQueue介绍</a>
                 </p>
             </div>
         </div>
@@ -671,7 +602,7 @@ create table OwnedEntity_ownedElements (OwnedEntity_id bigint not null, quoted_f
         repo: 'blog-comments',
         owner: 'BloodHunter',
         admin: "BloodHunter",
-        id: '2020-04-11T15-18-42',
+        id: '2020-05-10T23-29-53',
         distractionFreeMode: false  // Facebook-like distraction free mode
     });
 
@@ -693,7 +624,51 @@ create table OwnedEntity_ownedElements (OwnedEntity_id bigint not null, quoted_f
     <div class="row article-row">
         
         <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge left-badge text-color">Previous</div>
+            <div class="article-badge left-badge text-color">Current</div>
+            <div class="card">
+                <a href="/2020/05/10/blockqueue-jie-shao/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/22.jpg" class="responsive-img" alt="BlockingQueue介绍">
+                        
+                        <span class="card-title">BlockingQueue介绍</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary">简介BlockingQueue是java.util.concurrent中的类。通过包名也知道它与并发有关。在学习并发的过程中，我相信大家都听过生产者消费者模型。BlockingQueue可以帮助我们来实现这样一个模型。从数据结构的角度来说</div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2020-05-10
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fa fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Java/" class="post-category" target="_blank">
+                                    Java
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Concurrent/" target="_blank">
+                        <span class="chip bg-color">Concurrent</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">Next</div>
             <div class="card">
                 <a href="/2020/04/13/spring-boot-jpa-jparepository-shi-xian-yuan-li/">
                     <div class="card-image">
@@ -709,55 +684,8 @@ create table OwnedEntity_ownedElements (OwnedEntity_id bigint not null, quoted_f
 @Repository
 public interface UserDao extends</div>
                     <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="fa fa-clock-o fa-fw icon-date"></i>2020-04-13
-                        </span>
-                        <span class="publish-author">
-                            
-                            <i class="fa fa-bookmark fa-fw icon-category"></i>
-                            
-                            <a href="/categories/Spring-Boot/" class="post-category" target="_blank">
-                                    Spring Boot
-                                </a>
-                            
-                            
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="card-action article-tags">
-                    
-                    <a href="/tags/JPA/" target="_blank">
-                        <span class="chip bg-color">JPA</span>
-                    </a>
-                    
-                </div>
-                
-            </div>
-        </div>
-        
-        
-        <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge right-badge text-color">Next</div>
-            <div class="card">
-                <a href="/2020/04/02/spring-boot-jpa-query/">
-                    <div class="card-image">
-                        
-                        
-                        <img src="/medias/featureimages/16.jpg" class="responsive-img" alt="Spring Boot JPA--Query">
-                        
-                        <span class="card-title">Spring Boot JPA--Query</span>
-                    </div>
-                </a>
-                <div class="card-content article-content">
-                    <div class="summary">在SpringBoot中，当我们实现JpaRepository接口，就可以对实例进行基本的CRUD操作。同时SpringBoot也提供了以下几种方式来满足一些复杂的查询需求。
-
-@Query注解
-Named Queries
-Specific</div>
-                    <div class="publish-info">
                             <span class="publish-date">
-                                <i class="fa fa-clock-o fa-fw icon-date"></i>2020-04-02
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2020-04-13
                             </span>
                         <span class="publish-author">
                             
